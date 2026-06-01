@@ -1,0 +1,122 @@
+
+@import "tailwindcss";
+ 
+/* =========================
+   FONT FAMILIES
+========================= */
+
+
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+  --font-heading: "Geist Mono", monospace;
+  --font-body: "Inter", sans-serif;
+
+  /* =========================
+     DISPLAY
+  ========================= */
+
+  --display-lg-size: 48px;
+  --display-lg-weight: 600;
+  --display-lg-line-height: 1.1;
+  --display-lg-letter-spacing: -0.02em;
+
+  --display-lg-mobile-size: 32px;
+  --display-lg-mobile-weight: 600;
+  --display-lg-mobile-line-height: 1.2;
+  --display-lg-mobile-letter-spacing: -0.02em;
+
+  /* =========================
+     HEADINGS
+  ========================= */
+
+  --headline-md-size: 24px;
+  --headline-md-weight: 500;
+  --headline-md-line-height: 1.3;
+  --headline-md-letter-spacing: -0.01em;
+
+  /* =========================
+     BODY TEXT
+  ========================= */
+
+  --body-lg-size: 18px;
+  --body-lg-weight: 400;
+  --body-lg-line-height: 1.6;
+  --body-lg-letter-spacing: 0;
+
+  --body-md-size: 16px;
+  --body-md-weight: 400;
+  --body-md-line-height: 1.5;
+  --body-md-letter-spacing: 0;
+
+  /* =========================
+     LABELS
+  ========================= */
+
+  --label-sm-size: 12px;
+  --label-sm-weight: 600;
+  --label-sm-line-height: 1;
+  --label-sm-letter-spacing: 0.05em;
+
+  /* =========================
+     COLORS
+  ========================= */
+
+  --color-primary: #091426;
+  --color-secondary: #745a38;
+
+  --color-bronze: #a88a64;
+  --color-slate: #1e293b;
+  --color-ivory: #f8f5f0;
+
+  --color-bg: #f8f9ff;
+  --color-text: #0b1c30;
+  --color-text-muted: #45474c;
+
+  --color-border: #c5c6cd;
+
+  /* =========================
+     BORDER RADIUS
+  ========================= */
+
+  --radius-soft: 4px;
+  --radius-card: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* =========================
+     SPACING
+  ========================= */
+
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 48px;
+  --space-xl: 64px;
+
+  /* =========================
+     LAYOUT
+  ========================= */
+
+  --container-width: 1200px;
+
+  /* =========================
+     SHADOWS
+  ========================= */
+
+  --shadow-card: 0 4px 20px rgba(30, 41, 59, 0.12);
+  --shadow-modal: 0 12px 40px rgba(30, 41, 59, 0.2);
+
+  /* =========================
+     TRANSITIONS
+  ========================= */
+
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', sans-serif;
+}
+
