@@ -1,0 +1,220 @@
+import React, { useState } from "react";
+import { FaArrowLeft, FaShieldAlt } from "react-icons/fa";
+import { IoChevronDown } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
+
+const VendorProfileStep1 = () => {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    fullName: "",
+    businessName: "",
+    category: "",
+  });
+
+  const categories = [
+    "Electrician",
+    "Plumber",
+    "Carpenter",
+    "Painter",
+    "AC Repair",
+    "Home Cleaning",
+    "Interior Designer",
+    "Appliance Repair",
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // API Call Here
+
+    navigate("/register/vendor/verification");
+  };
+
+  return (
+    <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
+      {/* Header */}
+      <header className="border-b border-[#d3e4fe] bg-white">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+          <button
+            onClick={() => navigate("/join")}
+            className="w-10 h-10 border border-[#d3e4fe] flex items-center justify-center rounded"
+          >
+            <FaArrowLeft />
+          </button>
+
+          <h1 className="tracking-[0.25em] text-sm font-medium">
+            KAAMSETU
+          </h1>
+
+          <button className="text-sm font-medium">
+            Support
+          </button>
+        </div>
+      </header>
+
+      {/* Content */}
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-8 md:py-12">
+
+        {/* Progress */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <div className="flex justify-between text-xs font-semibold mb-2">
+            <span>Step 1 of 3</span>
+            <span className="text-[#45474c]">
+              Professional Profile
+            </span>
+          </div>
+
+          <div className="h-[3px] bg-[#d3e4fe] rounded-full overflow-hidden">
+            <div className="h-full w-1/3 bg-[#091426]"></div>
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="max-w-3xl mx-auto text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-semibold text-[#091426]">
+            Join the Network
+          </h2>
+
+          <p className="mt-3 text-[#45474c]">
+            Provide your professional details to begin the
+            verification process.
+          </p>
+        </div>
+
+        {/* Form Card */}
+        <div className="max-w-3xl mx-auto bg-white border border-[#d3e4fe] rounded-lg p-6 md:p-10 shadow-sm">
+
+          <form onSubmit={handleSubmit}>
+            <div className="grid md:grid-cols-2 gap-8">
+
+              {/* Full Name */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
+                  Full Legal Name
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="As it appears on your government ID"
+                  className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
+                  value={formData.fullName}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      fullName: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              {/* Business Name */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
+                  Business Name (Optional)
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="e.g. Acme Plumbing Solutions"
+                  className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
+                  value={formData.businessName}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      businessName: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              {/* Category */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
+                  Primary Service Category
+                </label>
+
+                <div className="relative">
+                  <select
+                    className="w-full border-b border-[#c5c6cd] pb-3 appearance-none bg-transparent focus:outline-none focus:border-[#745a38]"
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        category: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">
+                      Select your specialty...
+                    </option>
+
+                    {categories.map((item) => (
+                      <option
+                        key={item}
+                        value={item}
+                      >
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+
+                  <IoChevronDown className="absolute right-0 top-1 text-lg" />
+                </div>
+              </div>
+            </div>
+
+            {/* Info Box */}
+            <div className="mt-8 bg-[#e5eeff] border border-[#d3e4fe] p-4 flex gap-3 items-start">
+              <FaShieldAlt className="text-[#745a38] mt-1" />
+
+              <p className="text-sm text-[#091426]">
+                Your information is securely encrypted and
+                used solely for verification purposes.
+              </p>
+            </div>
+
+            {/* Button */}
+            <div className="mt-10 flex justify-end">
+              <button
+                type="submit"
+                className="
+                  bg-[#091426]
+                  text-white
+                  px-10
+                  py-4
+                  uppercase
+                  tracking-[0.15em]
+                  text-sm
+                  font-semibold
+                  rounded
+                  hover:opacity-95
+                  transition
+                "
+              >
+                Continue →
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-[#d3e4fe] bg-white py-6">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+          <p>
+            © 2024 Kaamsetu. Excellence in Craftsmanship.
+          </p>
+
+          <div className="flex gap-6">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Help Center</a>
+          </div>
+        </div>
+      </footer>
+    </section>
+  );
+};
+
+export default VendorProfileStep1;

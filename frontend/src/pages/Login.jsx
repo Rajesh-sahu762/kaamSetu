@@ -1,4 +1,6 @@
 import React from "react";
+import { FaGoogle } from "react-icons/fa";
+import { FaApple } from "react-icons/fa";
 
 const Login = () => {
   return (
@@ -73,19 +75,21 @@ const Login = () => {
 
         {/* Social */}
         <div className="grid grid-cols-2 gap-4">
-          <button
-            type="button"
-            className="border border-[#c5c6cd] h-12 rounded-md text-sm font-medium hover:bg-[#eff4ff] transition"
-          >
-            Google
-          </button>
+         <button
+  type="button"
+  className="flex items-center justify-center gap-3 border border-[#c5c6cd] h-12 rounded-md text-sm font-medium hover:bg-[#eff4ff] transition"
+>
+  <FaGoogle className="text-[16px]" />
+  <span>Google</span>
+</button>
 
-          <button
-            type="button"
-            className="border border-[#c5c6cd] h-12 rounded-md text-sm font-medium hover:bg-[#eff4ff] transition"
-          >
-            Apple
-          </button>
+<button
+  type="button"
+  className="flex items-center justify-center gap-3 border border-[#c5c6cd] h-12 rounded-md text-sm font-medium hover:bg-[#eff4ff] transition"
+>
+  <FaApple className="text-[18px]" />
+  <span>Apple</span>
+</button>
         </div>
 
         {/* Footer */}
