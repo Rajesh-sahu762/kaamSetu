@@ -1,3 +1,4 @@
+import AuthFooter from "@/components/auth/authFooter";
 import React from "react";
 import {
   FaCheckCircle,
@@ -135,7 +136,7 @@ const VendorPendingApproval = () => {
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
 
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/join")}
                 className="
                   bg-[#091426]
                   text-white
@@ -178,21 +179,7 @@ const VendorPendingApproval = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#d3e4fe] bg-white py-6">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-
-          <p>
-            © 2026 Kaamsetu. Excellence in Craftsmanship.
-          </p>
-
-          <div className="flex gap-6">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Help Center</a>
-          </div>
-
-        </div>
-      </footer>
+    <AuthFooter />
 
     </section>
   );

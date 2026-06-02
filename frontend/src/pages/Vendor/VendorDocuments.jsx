@@ -1,3 +1,6 @@
+import AuthFooter from "@/components/auth/authFooter";
+import AuthHeader from "@/components/auth/authHeader";
+import ProgressBar from "@/components/auth/ProgressBar";
 import React, { useState } from "react";
 import { FaArrowLeft, FaShieldAlt, FaCloudUploadAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -82,45 +85,12 @@ const VendorDocuments = () => {
     <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
 
       {/* Header */}
-      <header className="border-b border-[#d3e4fe] bg-white">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-
-          <button
-            onClick={() =>
-              navigate("/register/vendor/business")
-            }
-            className="w-10 h-10 border border-[#d3e4fe] rounded flex items-center justify-center"
-          >
-            <FaArrowLeft />
-          </button>
-
-          <h1 className="tracking-[0.25em] text-sm font-medium">
-            KAAMSETU
-          </h1>
-
-          <button className="text-sm font-medium">
-            Support
-          </button>
-
-        </div>
-      </header>
-
+     <AuthHeader />
       {/* Content */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-8 md:py-12">
 
         {/* Progress */}
-        <div className="max-w-3xl mx-auto mb-12">
-
-          <div className="flex justify-between text-xs font-semibold mb-2">
-            <span>Step 3 of 4</span>
-            <span>Document Verification</span>
-          </div>
-
-          <div className="h-[3px] bg-[#d3e4fe] rounded-full overflow-hidden">
-            <div className="h-full w-3/4 bg-[#091426]"></div>
-          </div>
-
-        </div>
+        <ProgressBar step={3} totalSteps={4} title={"Verify Your Identity"} />
 
         {/* Heading */}
         <div className="max-w-3xl mx-auto text-center mb-10">
@@ -181,23 +151,7 @@ const VendorDocuments = () => {
             </div>
 
             {/* Buttons */}
-            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-between">
-
-              <button
-                type="button"
-                onClick={() =>
-                  navigate("/register/vendor/business")
-                }
-                className="
-                  border border-[#d3e4fe]
-                  px-8
-                  py-4
-                  rounded
-                  text-[#091426]
-                "
-              >
-                Back
-              </button>
+            <div className="mt-10 flex justify-end">
 
               <button
                 type="submit"
@@ -225,6 +179,10 @@ const VendorDocuments = () => {
         </div>
 
       </main>
+
+      {/* Footer */}
+      <AuthFooter />
+
 
     </section>
   );

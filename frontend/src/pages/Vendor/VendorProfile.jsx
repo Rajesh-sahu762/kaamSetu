@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { FaArrowLeft, FaShieldAlt } from "react-icons/fa";
+import { FaShieldAlt } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import AuthHeader from "@/components/auth/authHeader";
+import ProgressBar from "@/components/auth/ProgressBar";
+import AuthFooter from "@/components/auth/authFooter";
 
 const VendorProfileStep1 = () => {
   const navigate = useNavigate();
@@ -45,41 +48,13 @@ const VendorProfileStep1 = () => {
   return (
     <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
       {/* Header */}
-      <header className="border-b border-[#d3e4fe] bg-white">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <button
-            onClick={() => navigate("/join")}
-            className="w-10 h-10 border border-[#d3e4fe] flex items-center justify-center rounded"
-          >
-            <FaArrowLeft />
-          </button>
-
-          <h1 className="tracking-[0.25em] text-sm font-medium">
-            KAAMSETU
-          </h1>
-
-          <button className="text-sm font-medium">
-            Support
-          </button>
-        </div>
-      </header>
+    <AuthHeader />
 
       {/* Content */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-8 md:py-12">
 
         {/* Progress */}
-        <div className="max-w-3xl mx-auto mb-12">
-          <div className="flex justify-between text-xs font-semibold mb-2">
-            <span>Step 1 of 3</span>
-            <span className="text-[#45474c]">
-              Professional Profile
-            </span>
-          </div>
-
-          <div className="h-[3px] bg-[#d3e4fe] rounded-full overflow-hidden">
-            <div className="h-full w-1/3 bg-[#091426]"></div>
-          </div>
-        </div>
+        <ProgressBar  step={1} totalSteps={4} title={"Proffessional Profile" } />
 
         {/* Title */}
         <div className="max-w-3xl mx-auto text-center mb-10">
@@ -287,19 +262,7 @@ const VendorProfileStep1 = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#d3e4fe] bg-white py-6">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-          <p>
-            © 2024 Kaamsetu. Excellence in Craftsmanship.
-          </p>
-
-          <div className="flex gap-6">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Help Center</a>
-          </div>
-        </div>
-      </footer>
+     <AuthFooter />
     </section>
   );
 };

@@ -13,7 +13,7 @@ const JoinKaamsetu = () => {
     }
 
     if (selectedRole === "vendor") {
-      navigate("/register/vendor");
+      navigate("/register/vendor/Profile");
     }
   };
 

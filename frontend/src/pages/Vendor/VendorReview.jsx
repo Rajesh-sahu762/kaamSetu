@@ -1,3 +1,6 @@
+import AuthFooter from "@/components/auth/authFooter";
+import AuthHeader from "@/components/auth/authHeader";
+import ProgressBar from "@/components/auth/ProgressBar";
 import React from "react";
 import {
   FaArrowLeft,
@@ -37,46 +40,14 @@ const VendorReview = () => {
     <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
 
       {/* Header */}
-      <header className="border-b border-[#d3e4fe] bg-white">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-
-          <button
-            onClick={() =>
-              navigate("/register/vendor/documents")
-            }
-            className="w-10 h-10 border border-[#d3e4fe] rounded flex items-center justify-center"
-          >
-            <FaArrowLeft />
-          </button>
-
-          <h1 className="tracking-[0.25em] text-sm font-medium">
-            KAAMSETU
-          </h1>
-
-          <button className="text-sm font-medium">
-            Support
-          </button>
-
-        </div>
-      </header>
+     
+     <AuthHeader />
 
       {/* Main */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-8 md:py-12">
 
         {/* Progress */}
-        <div className="max-w-3xl mx-auto mb-12">
-
-          <div className="flex justify-between text-xs font-semibold mb-2">
-            <span>Step 4 of 4</span>
-            <span>Review & Submit</span>
-          </div>
-
-          <div className="h-[3px] bg-[#d3e4fe] rounded-full overflow-hidden">
-            <div className="h-full w-full bg-[#091426]"></div>
-          </div>
-
-        </div>
-
+      <ProgressBar step={4} totalSteps={4} title={"Review Your Application"} />
         {/* Title */}
         <div className="max-w-3xl mx-auto text-center mb-10">
 
@@ -245,6 +216,10 @@ const VendorReview = () => {
         </div>
 
       </main>
+
+      {/* Footer */}
+      <AuthFooter />
+
     </section>
   );
 };
