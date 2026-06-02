@@ -9,8 +9,19 @@ const VendorProfileStep1 = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     businessName: "",
+    mobileNumber: "",
+    emailAddress: "",
+    yearOfExperience: "",
     category: "",
   });
+
+  const yearOfExperience = [
+    "0-1 Years",
+"1-3 Years" ,
+"3-5 Years",
+"5-10 Years",
+"10+ Years",
+  ]
 
   const categories = [
     "Electrician",
@@ -28,7 +39,7 @@ const VendorProfileStep1 = () => {
 
     // API Call Here
 
-    navigate("/register/vendor/verification");
+    navigate("/register/vendor/business");
   };
 
   return (
@@ -128,6 +139,46 @@ const VendorProfileStep1 = () => {
                 />
               </div>
 
+              {/* Mobil Number */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
+                  Mobile Number
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Enter Your Mobile Number"
+                  className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
+                  value={formData.mobileNumber}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      mobileNumber: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              {/* Email Address */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
+                  E-mail 
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Enter Your Email"
+                  className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
+                  value={formData.emailAddress}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      emailAddress: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
               {/* Category */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
@@ -162,6 +213,41 @@ const VendorProfileStep1 = () => {
                   <IoChevronDown className="absolute right-0 top-1 text-lg" />
                 </div>
               </div>
+
+                <div className="md:col-span-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
+                  Year Of Experience
+                </label>
+
+                <div className="relative">
+                  <select
+                    className="w-full border-b border-[#c5c6cd] pb-3 appearance-none bg-transparent focus:outline-none focus:border-[#745a38]"
+                    value={formData.yearOfExperience}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        yearOfExperience: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">
+                      Select your Experience
+                    </option>
+
+                    {yearOfExperience.map((item) => (
+                      <option
+                        key={item}
+                        value={item}
+                      >
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+
+                  <IoChevronDown className="absolute right-0 top-1 text-lg" />
+                </div>
+              </div>      
+
             </div>
 
             {/* Info Box */}
@@ -191,6 +277,7 @@ const VendorProfileStep1 = () => {
                   hover:opacity-95
                   transition
                 "
+
               >
                 Continue →
               </button>

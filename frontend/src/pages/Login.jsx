@@ -1,6 +1,7 @@
 import React from "react";
 import { FaGoogle } from "react-icons/fa";
 import { FaApple } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   return (
@@ -95,12 +96,12 @@ const Login = () => {
         {/* Footer */}
         <p className="text-center mt-10 text-[#45474c]">
           Don't have an account?
-          <a
-            href="#"
+          <Link
+            to="/join"
             className="ml-1 font-semibold text-[#091426] hover:text-[#745a38]"
           >
             Create an account
-          </a>
+          </Link>
         </p>
       </div>
     </section>
