@@ -10,6 +10,7 @@ import VendorPendingApproval from './pages/Vendor/VendorPendingApproval';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import VerifyOtp from './pages/Auth/VerifyOtp';
 import ResetPassword from './pages/Auth/ResetPassword';
+import CustomerRegister from './pages/Auth/CustomerRegister';
 
 const App = () => {
   return (
@@ -41,6 +42,10 @@ const App = () => {
           <Route
   path="/reset-password"
   element={<ResetPassword />}
+/>
+<Route
+  path="/register/customer"
+  element={<CustomerRegister />}
 />
         </Routes>
       </BrowserRouter>
