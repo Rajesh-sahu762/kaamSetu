@@ -28,6 +28,7 @@ const CustomerRegister = () => {
     // API Call
 
     navigate("/verify-otp");
+    
   };
 
   return (

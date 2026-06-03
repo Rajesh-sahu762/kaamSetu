@@ -11,6 +11,7 @@ import ForgotPassword from './pages/Auth/ForgotPassword';
 import VerifyOtp from './pages/Auth/VerifyOtp';
 import ResetPassword from './pages/Auth/ResetPassword';
 import CustomerRegister from './pages/Auth/CustomerRegister';
+import RegisterSuccess from './pages/Auth/RegisterSuccess';
 
 const App = () => {
   return (
@@ -46,6 +47,10 @@ const App = () => {
 <Route
   path="/register/customer"
   element={<CustomerRegister />}
+/>
+<Route
+  path="/register/success"
+  element={<RegisterSuccess />}
 />
         </Routes>
       </BrowserRouter>
