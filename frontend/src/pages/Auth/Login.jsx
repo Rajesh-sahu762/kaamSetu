@@ -2,8 +2,23 @@ import React from "react";
 import { FaGoogle } from "react-icons/fa";
 import { FaApple } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { loginUser } from "@/services/authService";
 
 const Login = () => {
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    try {
+      
+      
+    } catch (error) {
+      
+    }
+
+  }
+
   return (
     <section className="min-h-screen bg-[#f8f9ff] flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-[520px] bg-white border border-[#d3e4fe] rounded-lg shadow-[0_4px_20px_rgba(9,20,38,0.05)] p-6 sm:p-8 md:p-12">

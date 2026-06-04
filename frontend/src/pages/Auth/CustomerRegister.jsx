@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 import AuthHeader from "../../components/auth/AuthHeader";
 import AuthFooter from "../../components/auth/AuthFooter";
@@ -13,6 +14,7 @@ const CustomerRegister = () => {
     fullName: "",
     email: "",
     mobile: "",
+    password: "",
   });
 
   const handleChange = (e) => {
@@ -41,12 +43,13 @@ const CustomerRegister = () => {
         <div className="grid lg:grid-cols-2 min-h-[650px]">
 
           {/* Left Image */}
-          <div className="hidden lg:flex items-center justify-center">
-            <img
-              src={registerImage}
-              alt="Kaamsetu"
-              className="w-3/4 h-3/4 object-cover rounded"
-            />
+          <div className="hidden lg:flex mt-10 justify-center">
+             <DotLottieReact
+      src="https://lottie.host/dde50c12-2c57-4117-96c7-4c326fcf8b1e/mmTMCrhzRX.lottie"
+      loop
+      autoplay
+      className=" w-[550px] h-[600px] "       
+    />
           </div>
 
           {/* Right Form */}
@@ -142,6 +145,33 @@ const CustomerRegister = () => {
                     "
                   />
                 </div>
+
+                 {/* Password */}
+                <div className="mt-8">
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-4">
+                    Password
+                  </label>
+
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter your password"
+                    className="
+                      w-full
+                      border-0
+                      border-b
+                      border-[#c5c6cd]
+                      bg-transparent
+                      pb-3
+                      focus:outline-none
+                      focus:border-[#745a38]
+                    "
+                  />
+                </div>
+
+
 
                 {/* Terms */}
                 <p className="mt-10 text-xs text-[#45474c] leading-6">

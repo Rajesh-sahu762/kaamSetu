@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
 const userModel = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 const registerUser = async (req,res) => {
      try {
@@ -11,7 +12,12 @@ const registerUser = async (req,res) => {
             })
         }
         // check if user already exists 
-        const existingUser = userModel.findOne({ email })
+        const existingUser = await userModel.findOne({
+    $or: [
+        { email },
+        { mobile }
+    ]
+});
         if (existingUser) {
             return res.status(400).json({
                 success: false,
@@ -42,6 +48,8 @@ const registerUser = async (req,res) => {
 
         })
 
+        console.log(req.body);
+console.log(process.env.MONGO_URI);
 
 
   } catch (error) {
@@ -52,8 +60,52 @@ const registerUser = async (req,res) => {
   }
 }
 
-const LoginUser = (req,res) => {
-    res.send('Login User')
+const LoginUser = async (req,res) => {
+    const {email, password} = req.body
+    try {
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "please provide all the required fields"
+            })
+        }
+        // check if user exists 
+        const user = await userModel.findOne({email})
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "user does not exist"
+            })
+        }
+        // compare password
+        const isMatch = await bcrypt.compare(password, user.password)
+        if (!isMatch) {
+            return res.status(400).json({
+                success: false,
+                message: "invalid credentials"
+            })
+        }
+        // generate token
+        const token = jwt.sign({userId: user._id}, process.env.JWT_SECRET, {expiresIn: '2h'})
+        res.status(200).json({
+            success:true,
+            message: "user logged in successfully",
+            token,
+            user:{
+                id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                role: user.role            
+            }
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+
 }
 
 module.exports = {
