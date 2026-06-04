@@ -1,20 +1,53 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaGoogle } from "react-icons/fa";
 import { FaApple } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "@/services/authService";
+import { toast } from "react-toastify"
 
 const Login = () => {
+
+
+  const navigate = useNavigate()
+
+    const [formData, setFormData] = useState({
+      email: "",
+      password: "",
+    });
+  
+    const handleChange = (e) => {
+      setFormData({
+        ...formData,
+        [e.target.name]: e.target.value,
+      });
+    };
 
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
     try {
-      
+     const response = await loginUser({
+  email: formData.email,
+  password: formData.password,
+});
+
+    localStorage.setItem(
+      "token",
+      response.token
+    );
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(response.user)
+    );
+
+    toast.success(response.message)
+
+    navigate("/join");
       
     } catch (error) {
-      
+  toast.error(error.response?.data?.message || "An error occurred");
     }
 
   }
@@ -35,7 +68,7 @@ const Login = () => {
         </div>
 
         {/* Form */}
-        <form className="space-y-8">
+        <form className="space-y-8" onSubmit={handleSubmit}>
           {/* Email */}
           <div>
             <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#45474c] mb-2">
@@ -44,6 +77,9 @@ const Login = () => {
 
             <input
               type="email"
+               onChange={handleChange}
+               name="email"
+               value={formData.email}
               placeholder="name@example.com"
               className="w-full bg-transparent border-0 border-b border-[#c5c6cd] px-0 py-3 focus:outline-none focus:border-[#745a38]"
             />
@@ -66,6 +102,9 @@ const Login = () => {
 
             <input
               type="password"
+              value={formData.password}
+               onChange={handleChange}
+              name="password"
               placeholder="••••••••"
               className="w-full bg-transparent border-0 border-b border-[#c5c6cd] px-0 py-3 focus:outline-none focus:border-[#745a38]"
             />
@@ -74,7 +113,7 @@ const Login = () => {
           {/* Button */}
           <button
             type="submit"
-            className="w-full bg-[#091426] text-white uppercase tracking-[0.15em] text-[12px] font-semibold py-4 rounded-md hover:opacity-95 transition"
+            className="cursor-pointer w-full bg-[#091426] text-white uppercase tracking-[0.15em] text-[12px] font-semibold py-4 rounded-md hover:opacity-95 transition"
           >
             SIGN IN →
           </button>

@@ -3,8 +3,11 @@ const app = express()
 const dotenv = require('dotenv')
 const connectDB = require('./config/db')
 const authRoutes = require('./routes/authRoutes')
+const cors = require('cors')
 
 dotenv.config()
+
+app.use(cors()) // Enable CORS for all routes
 
 const PORT = process.env.PORT || 3000
 

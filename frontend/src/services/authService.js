@@ -9,10 +9,7 @@ export const registerUser = async (userData) => {
     return response.data
 
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        })
+        throw error
     }
 }
 
@@ -27,9 +24,6 @@ export const loginUser = async (userData) => {
   return response.data;
         
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        })
+        throw error
     }
 }
