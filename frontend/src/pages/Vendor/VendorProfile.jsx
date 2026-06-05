@@ -1,60 +1,72 @@
-import React, { useState } from "react";
-import { FaShieldAlt } from "react-icons/fa";
-import { IoChevronDown } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
-import AuthHeader from "@/components/auth/authHeader";
-import ProgressBar from "@/components/auth/ProgressBar";
-import AuthFooter from "@/components/auth/authFooter";
+import React, { useState } from 'react';
+import { FaShieldAlt } from 'react-icons/fa';
+import { IoChevronDown } from 'react-icons/io5';
+import { useNavigate } from 'react-router-dom';
+import AuthHeader from '@/components/auth/authHeader';
+import ProgressBar from '@/components/auth/ProgressBar';
+import AuthFooter from '@/components/auth/authFooter';
+import { vendorRegister } from '@/services/authService';
 
 const VendorProfileStep1 = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    fullName: "",
-    businessName: "",
-    mobileNumber: "",
-    emailAddress: "",
-    yearOfExperience: "",
-    category: "",
+    fullName: '',
+    businessName: '',
+    mobileNumber: '',
+    emailAddress: '',
+    yearOfExperience: '',
+    category: '',
   });
 
   const yearOfExperience = [
-    "0-1 Years",
-"1-3 Years" ,
-"3-5 Years",
-"5-10 Years",
-"10+ Years",
-  ]
-
-  const categories = [
-    "Electrician",
-    "Plumber",
-    "Carpenter",
-    "Painter",
-    "AC Repair",
-    "Home Cleaning",
-    "Interior Designer",
-    "Appliance Repair",
+    '0-1 Years',
+    '1-3 Years',
+    '3-5 Years',
+    '5-10 Years',
+    '10+ Years',
   ];
 
-  const handleSubmit = (e) => {
+  const categories = [
+    'Electrician',
+    'Plumber',
+    'Carpenter',
+    'Painter',
+    'AC Repair',
+    'Home Cleaning',
+    'Interior Designer',
+    'Appliance Repair',
+  ];
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // API Call Here
+    try {
+      // Here you would typically send formData to your backend API to create the user account. For this example, we'll just log it.
+      console.log(formData);
+      const response = await vendorRegister({
+        fullName: formData.fullName,
+        businessName: formData.businessName,
+        mobileNumber: formData.mobileNumber,
+        emailAddress: formData.emailAddress,
+        yearOfExperience: formData.yearOfExperience,
+      });
+    } catch (error) {
+      throw error;
+    }
 
-    navigate("/register/vendor/business");
+    navigate('/register/vendor/business');
   };
 
   return (
     <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
       {/* Header */}
-    <AuthHeader />
+      <AuthHeader />
 
       {/* Content */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-8 md:py-12">
-
         {/* Progress */}
-        <ProgressBar  step={1} totalSteps={4} title={"Proffessional Profile" } />
+        <ProgressBar step={1} totalSteps={4} title={'Proffessional Profile'} />
 
         {/* Title */}
         <div className="max-w-3xl mx-auto text-center mb-10">
@@ -63,17 +75,14 @@ const VendorProfileStep1 = () => {
           </h2>
 
           <p className="mt-3 text-[#45474c]">
-            Provide your professional details to begin the
-            verification process.
+            Provide your professional details to begin the verification process.
           </p>
         </div>
 
         {/* Form Card */}
         <div className="max-w-3xl mx-auto bg-white border border-[#d3e4fe] rounded-lg p-6 md:p-10 shadow-sm">
-
           <form onSubmit={handleSubmit}>
             <div className="grid md:grid-cols-2 gap-8">
-
               {/* Full Name */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
@@ -137,7 +146,7 @@ const VendorProfileStep1 = () => {
               {/* Email Address */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
-                  E-mail 
+                  E-mail
                 </label>
 
                 <input
@@ -171,15 +180,10 @@ const VendorProfileStep1 = () => {
                       })
                     }
                   >
-                    <option value="">
-                      Select your specialty...
-                    </option>
+                    <option value="">Select your specialty...</option>
 
                     {categories.map((item) => (
-                      <option
-                        key={item}
-                        value={item}
-                      >
+                      <option key={item} value={item}>
                         {item}
                       </option>
                     ))}
@@ -189,7 +193,7 @@ const VendorProfileStep1 = () => {
                 </div>
               </div>
 
-                <div className="md:col-span-2">
+              <div className="md:col-span-2">
                 <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
                   Year Of Experience
                 </label>
@@ -205,15 +209,10 @@ const VendorProfileStep1 = () => {
                       })
                     }
                   >
-                    <option value="">
-                      Select your Experience
-                    </option>
+                    <option value="">Select your Experience</option>
 
                     {yearOfExperience.map((item) => (
-                      <option
-                        key={item}
-                        value={item}
-                      >
+                      <option key={item} value={item}>
                         {item}
                       </option>
                     ))}
@@ -221,8 +220,7 @@ const VendorProfileStep1 = () => {
 
                   <IoChevronDown className="absolute right-0 top-1 text-lg" />
                 </div>
-              </div>      
-
+              </div>
             </div>
 
             {/* Info Box */}
@@ -230,8 +228,8 @@ const VendorProfileStep1 = () => {
               <FaShieldAlt className="text-[#745a38] mt-1" />
 
               <p className="text-sm text-[#091426]">
-                Your information is securely encrypted and
-                used solely for verification purposes.
+                Your information is securely encrypted and used solely for
+                verification purposes.
               </p>
             </div>
 
@@ -252,7 +250,6 @@ const VendorProfileStep1 = () => {
                   hover:opacity-95
                   transition
                 "
-
               >
                 Continue →
               </button>
@@ -262,7 +259,7 @@ const VendorProfileStep1 = () => {
       </main>
 
       {/* Footer */}
-     <AuthFooter />
+      <AuthFooter />
     </section>
   );
 };

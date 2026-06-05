@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-
 import AuthHeader from "../../components/auth/AuthHeader";
 import AuthFooter from "../../components/auth/AuthFooter";
+import { toast} from "react-toastify"
+import { registerUser } from "@/services/authService";
 
-import registerImage from "../../assets/images/customer-register.jpg";
 
 const CustomerRegister = () => {
+
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -24,13 +25,27 @@ const CustomerRegister = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // API Call
+    try {
+      // Here you would typically send formData to your backend API to create the user account. For this example, we'll just log it.
+      const response = await registerUser({
+        fullName: formData.fullName,
+        email: formData.email,
+        mobile: formData.mobile,
+        password: formData.password,
+      })
+      navigate("/login");
+      
+      toast.success("Account created successfully! Please verify your email.");
 
-    navigate("/verify-otp");
-    
+      
+    } catch (error) {
+      toast.error("An error occurred while creating the account. Please try again.");
+      throw error;
+    }
+
   };
 
   return (

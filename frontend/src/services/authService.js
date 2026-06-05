@@ -13,6 +13,18 @@ export const registerUser = async (userData) => {
     }
 }
 
+export const vendorRegister = async (vendorData) => {
+    try {
+        const response = await api.post(
+    "/auth/vendor/register",
+    vendorData
+  );
+    return response.data
+    } catch (error) {
+        throw error
+    }
+}
+
 
 export const loginUser = async (userData) => {
     try {
