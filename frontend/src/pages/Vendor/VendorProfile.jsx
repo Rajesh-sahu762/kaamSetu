@@ -12,14 +12,14 @@ const VendorProfileStep1 = () => {
 
   const [formData, setFormData] = useState({
     fullName: '',
+    email: '',
+    mobile: '',
     businessName: '',
-    mobileNumber: '',
-    emailAddress: '',
-    yearOfExperience: '',
-    category: '',
+    businessType: '',
+    experience: '',
   });
 
-  const yearOfExperience = [
+  const experience = [
     '0-1 Years',
     '1-3 Years',
     '3-5 Years',
@@ -27,7 +27,7 @@ const VendorProfileStep1 = () => {
     '10+ Years',
   ];
 
-  const categories = [
+  const businessType = [
     'Electrician',
     'Plumber',
     'Carpenter',
@@ -47,12 +47,14 @@ const VendorProfileStep1 = () => {
       const response = await vendorRegister({
         fullName: formData.fullName,
         businessName: formData.businessName,
-        mobileNumber: formData.mobileNumber,
-        emailAddress: formData.emailAddress,
-        yearOfExperience: formData.yearOfExperience,
+        mobile: formData.mobile,
+        email: formData.email,
+        experience: formData.experience,
+        businessType: formData.businessType,
       });
     } catch (error) {
       throw error;
+      
     }
 
     navigate('/register/vendor/business');
@@ -133,11 +135,11 @@ const VendorProfileStep1 = () => {
                   type="text"
                   placeholder="Enter Your Mobile Number"
                   className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
-                  value={formData.mobileNumber}
+                  value={formData.mobile}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      mobileNumber: e.target.value,
+                      mobile: e.target.value,
                     })
                   }
                 />
@@ -153,11 +155,11 @@ const VendorProfileStep1 = () => {
                   type="text"
                   placeholder="Enter Your Email"
                   className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
-                  value={formData.emailAddress}
+                  value={formData.email}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      emailAddress: e.target.value,
+                      email: e.target.value,
                     })
                   }
                 />
@@ -172,17 +174,17 @@ const VendorProfileStep1 = () => {
                 <div className="relative">
                   <select
                     className="w-full border-b border-[#c5c6cd] pb-3 appearance-none bg-transparent focus:outline-none focus:border-[#745a38]"
-                    value={formData.category}
+                    value={formData.businessType}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        category: e.target.value,
+                        businessType: e.target.value,
                       })
                     }
                   >
                     <option value="">Select your specialty...</option>
 
-                    {categories.map((item) => (
+                    {businessType.map((item) => (
                       <option key={item} value={item}>
                         {item}
                       </option>
@@ -201,17 +203,17 @@ const VendorProfileStep1 = () => {
                 <div className="relative">
                   <select
                     className="w-full border-b border-[#c5c6cd] pb-3 appearance-none bg-transparent focus:outline-none focus:border-[#745a38]"
-                    value={formData.yearOfExperience}
+                    value={formData.experience}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        yearOfExperience: e.target.value,
+                        experience: e.target.value,
                       })
                     }
                   >
                     <option value="">Select your Experience</option>
 
-                    {yearOfExperience.map((item) => (
+                    {experience.map((item) => (
                       <option key={item} value={item}>
                         {item}
                       </option>
