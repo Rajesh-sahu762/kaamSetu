@@ -1,12 +1,18 @@
 import AuthFooter from '@/components/auth/authFooter';
 import AuthHeader from '@/components/auth/authHeader';
 import ProgressBar from '@/components/auth/ProgressBar';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaArrowLeft, FaShieldAlt, FaCloudUploadAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useVendor } from '@/context/vendorContext';
 
 const VendorDocuments = () => {
+
+  useEffect(() => {
+  if (!vendorData.address) {
+    navigate("/register/vendor/profile");
+  }
+}, []);
   const navigate = useNavigate();
   const { vendorData, updateVendorData } = useVendor();
 
@@ -15,6 +21,7 @@ const VendorDocuments = () => {
     aadhaar: null,
     pan: null,
   });
+  const [error, setError] = useState('');
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
@@ -28,9 +35,15 @@ const VendorDocuments = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (!documents.profilePhoto || !documents.aadhaar || !documents.pan) {
+      setError('Please select the images to continue.');
+      return;
+    }
+
+    setError('');
     updateVendorData({
       aadhaarImage: documents.aadhaar?.name,
-
+      profileImage: documents.profilePhoto?.name,
       panImage: documents.pan?.name,
     });
 
@@ -103,6 +116,7 @@ const VendorDocuments = () => {
           <form onSubmit={handleSubmit}>
             <div className="grid md:grid-cols-2 gap-8">
               <UploadBox
+              
                 title="Profile Photo"
                 subtitle="Upload profile image"
                 name="profilePhoto"
@@ -135,6 +149,12 @@ const VendorDocuments = () => {
                 verification purposes.
               </p>
             </div>
+
+            {error && (
+              <div className="mt-6 bg-[#fde8e8] border border-[#f5c2c7] text-[#842029] rounded-lg p-4 text-sm">
+                {error}
+              </div>
+            )}
 
             {/* Buttons */}
             <div className="mt-10 flex justify-end">

@@ -6,7 +6,7 @@ import AuthHeader from '@/components/auth/authHeader';
 import ProgressBar from '@/components/auth/ProgressBar';
 import AuthFooter from '@/components/auth/authFooter';
 import { useVendor } from '@/context/vendorContext';
-
+import { toast } from 'react-toastify';
 const VendorProfileStep1 = () => {
   const navigate = useNavigate(); 
 
@@ -19,6 +19,7 @@ const VendorProfileStep1 = () => {
     businessName: '',
     businessType: '',
     password: '',
+    confirmPassword: '',
   });
 
   const businessType = [
@@ -34,6 +35,23 @@ const VendorProfileStep1 = () => {
 
  const handleSubmit = (e) => {
   e.preventDefault();
+
+    if (
+    !formData.fullName ||
+    !formData.email ||
+    !formData.mobile ||
+    !formData.password ||
+    !formData.businessType
+  ) {
+    toast.error("Please fill all required fields");
+    return;
+  }
+
+  if (formData.password !== formData.confirmPassword) {
+  toast.error("Passwords do not match");
+  return;
+}
+
 
   updateVendorData({
     fullName: formData.fullName,
@@ -80,6 +98,7 @@ const VendorProfileStep1 = () => {
                 </label>
 
                 <input
+                  required
                   type="text"
                   placeholder="As it appears on your government ID"
                   className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
@@ -100,6 +119,7 @@ const VendorProfileStep1 = () => {
                 </label>
 
                 <input
+                  required
                   type="text"
                   placeholder="e.g. Acme Plumbing Solutions"
                   className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
@@ -120,6 +140,7 @@ const VendorProfileStep1 = () => {
                 </label>
 
                 <input
+                  required
                   type="text"
                   placeholder="Enter Your Mobile Number"
                   className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
@@ -140,6 +161,7 @@ const VendorProfileStep1 = () => {
                 </label>
 
                 <input
+                  required
                   type="text"
                   placeholder="Enter Your Email"
                   className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
@@ -160,6 +182,7 @@ const VendorProfileStep1 = () => {
                   </label>
 
                   <input
+                  required
                     type="password"
                     name="password"
                     value={formData.password}
@@ -170,6 +193,37 @@ const VendorProfileStep1 = () => {
                       })
                     }
                     placeholder="Enter your password"
+                    className="
+                      w-full
+                      border-0
+                      border-b
+                      border-[#c5c6cd]
+                      bg-transparent
+                      pb-3
+                      focus:outline-none
+                      focus:border-[#745a38]
+                    "
+                  />
+                </div>
+
+                    {/* confirm Password */}
+                                     <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider">
+                    Confirm Password
+                  </label>
+
+                  <input
+                  required
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    placeholder="Confirm your password"
                     className="
                       w-full
                       border-0

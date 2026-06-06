@@ -1,7 +1,7 @@
 import AuthFooter from '@/components/auth/authFooter';
 import AuthHeader from '@/components/auth/authHeader';
 import ProgressBar from '@/components/auth/ProgressBar';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FaArrowLeft,
   FaUserTie,
@@ -15,9 +15,14 @@ import { toast } from 'react-toastify';
 import { vendorRegister } from '@/services/authService';
 
 const VendorReview = () => {
+  useEffect(() => {
+  if (!vendorData.fullName) {
+    navigate("/register/vendor/profile");
+  }
+}, []);
   const navigate = useNavigate();
     const { vendorData } = useVendor();
-    
+
      console.log("REVIEW DATA", vendorData);
  
   const handleSubmit = async () => {

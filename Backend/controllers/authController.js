@@ -115,6 +115,7 @@ const vendorRegister = async (req, res) => {
       aadhaarImage,
       panImage,
       radius,
+      profileImage
     } = req.body;
     if (
       !fullName ||
@@ -131,7 +132,8 @@ const vendorRegister = async (req, res) => {
       // !panNumber ||
       !aadhaarImage ||
       !panImage ||
-      !radius
+      !radius ||
+      !profileImage
     ) {
       return res.status(400).json({
         success: false,
@@ -178,6 +180,7 @@ const vendorRegister = async (req, res) => {
       aadhaarImage,
       panImage,
       radius,
+      profileImage
     });
 
     await newUser.save();

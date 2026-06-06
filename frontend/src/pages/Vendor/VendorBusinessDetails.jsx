@@ -5,8 +5,17 @@ import React, { useState } from "react";
 import { FaShieldAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useVendor } from "@/context/vendorContext";
+import { useEffect } from "react";
+
 
 const VendorBusinessDetails = () => {
+
+  useEffect(() => {
+  if (!vendorData.fullName) {
+    navigate("/register/vendor/profile");
+  }
+}, []);
+
   const navigate = useNavigate();
 
   const { vendorData, updateVendorData } = useVendor();
@@ -80,6 +89,7 @@ console.log("Business Page:", vendorData);
                 </label>
 
                 <input
+                required
                   type="text"
                   name="address"
                   value={formData.address}
@@ -96,6 +106,7 @@ console.log("Business Page:", vendorData);
                 </label>
 
                 <input
+                required
                   type="text"
                   name="city"
                   value={formData.city}
@@ -112,6 +123,7 @@ console.log("Business Page:", vendorData);
                 </label>
 
                 <input
+                required
                   type="text"
                   name="state"
                   value={formData.state}
@@ -128,6 +140,7 @@ console.log("Business Page:", vendorData);
                 </label>
 
                 <input
+                required
                   type="text"
                   name="pincode"
                   value={formData.pincode}
@@ -144,6 +157,7 @@ console.log("Business Page:", vendorData);
                 </label>
 
                 <select
+                required
                   name="experience"
                   value={formData.experience}
                   onChange={handleChange}
@@ -171,6 +185,7 @@ console.log("Business Page:", vendorData);
                   onChange={handleChange}
                   placeholder="50"
                   className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
+                  required
                 />
               </div>
             </div>
