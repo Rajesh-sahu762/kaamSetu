@@ -160,6 +160,7 @@ const vendorRegister = async (req, res) => {
       mobile,
       password: hashedPassword,
       role: "vendor",
+      profileImage,
     });
 
     const newVendor = await vendorModel.create({
@@ -180,7 +181,6 @@ const vendorRegister = async (req, res) => {
       aadhaarImage,
       panImage,
       radius,
-      profileImage
     });
 
     await newUser.save();

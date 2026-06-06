@@ -12,6 +12,8 @@ import VerifyOtp from '../pages/Auth/VerifyOtp';
 import ResetPassword from '../pages/Auth/ResetPassword';
 import CustomerRegister from '../pages/Auth/CustomerRegister';
 import RegisterSuccess from '../pages/Auth/RegisterSuccess';
+import Home from '@/pages/client/home';
+
 
 const AppRoutes = () => {
   return (
@@ -36,6 +38,7 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register/customer" element={<CustomerRegister />} />
       <Route path="/register/success" element={<RegisterSuccess />} />
+      <Route path="/" element={<Home />} />
     </Routes>
   );
 };
