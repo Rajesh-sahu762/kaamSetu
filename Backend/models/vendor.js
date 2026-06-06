@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
-const userModel = require('./user')
+
 
 const vendorSchema = new mongoose.Schema({
-    userid: {
+    userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
@@ -38,11 +38,11 @@ const vendorSchema = new mongoose.Schema({
 
   aadhaarNumber: {
         type: String,
-        required: true
+        // required: true
     },
   panNumber: {
         type: String,
-        required: true
+        // required: true
     },
 
   aadhaarImage: {
@@ -60,6 +60,11 @@ const vendorSchema = new mongoose.Schema({
         default: 'pending',
         required: true
     }, 
+    radius: {
+        type: Number,
+        default: 10,
+        
+    }
 },
 {
     timestamps: true,

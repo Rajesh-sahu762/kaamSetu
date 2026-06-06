@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user");
-const vendorModel = require('../models/vendor')
+const vendorModel = require("../models/vendor");
 
 const registerUser = async (req, res) => {
   try {
@@ -114,6 +114,7 @@ const vendorRegister = async (req, res) => {
       panNumber,
       aadhaarImage,
       panImage,
+      radius,
     } = req.body;
     if (
       !fullName ||
@@ -126,10 +127,11 @@ const vendorRegister = async (req, res) => {
       !city ||
       !state ||
       !pincode ||
-      !aadhaarNumber ||
-      !panNumber ||
+      // !aadhaarNumber ||
+      // !panNumber ||
       !aadhaarImage ||
-      !panImage
+      !panImage ||
+      !radius
     ) {
       return res.status(400).json({
         success: false,
@@ -151,36 +153,36 @@ const vendorRegister = async (req, res) => {
 
     // create new user
     const newUser = await userModel.create({
-  fullName,
-  email,
-  mobile,
-  password: hashedPassword,
-  role: "vendor"
-});
+      fullName,
+      email,
+      mobile,
+      password: hashedPassword,
+      role: "vendor",
+    });
 
-const newVendor = await vendorModel.create({
-  userId: newUser._id,
+    const newVendor = await vendorModel.create({
+      userId: newUser._id,
 
-  businessName,
-  businessType,
-  experience,
+      businessName,
+      businessType,
+      experience,
 
-  address,
-  city,
-  state,
-  pincode,
+      address,
+      city,
+      state,
+      pincode,
 
-  aadhaarNumber,
-  panNumber,
+      aadhaarNumber,
+      panNumber,
 
-  aadhaarImage,
-  panImage
-});
+      aadhaarImage,
+      panImage,
+      radius,
+    });
 
     await newUser.save();
     await newVendor.save();
 
-    
     res.status(201).json({
       success: true,
       message: "user registered successfully",

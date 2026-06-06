@@ -5,10 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import AuthHeader from '@/components/auth/authHeader';
 import ProgressBar from '@/components/auth/ProgressBar';
 import AuthFooter from '@/components/auth/authFooter';
-import { vendorRegister } from '@/services/authService';
+import { useVendor } from '@/context/vendorContext';
 
 const VendorProfileStep1 = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
+
+  const { updateVendorData } = useVendor();
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -16,16 +18,8 @@ const VendorProfileStep1 = () => {
     mobile: '',
     businessName: '',
     businessType: '',
-    experience: '',
+    password: '',
   });
-
-  const experience = [
-    '0-1 Years',
-    '1-3 Years',
-    '3-5 Years',
-    '5-10 Years',
-    '10+ Years',
-  ];
 
   const businessType = [
     'Electrician',
@@ -38,27 +32,21 @@ const VendorProfileStep1 = () => {
     'Appliance Repair',
   ];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = (e) => {
+  e.preventDefault();
 
-    try {
-      // Here you would typically send formData to your backend API to create the user account. For this example, we'll just log it.
-      console.log(formData);
-      const response = await vendorRegister({
-        fullName: formData.fullName,
-        businessName: formData.businessName,
-        mobile: formData.mobile,
-        email: formData.email,
-        experience: formData.experience,
-        businessType: formData.businessType,
-      });
-    } catch (error) {
-      throw error;
-      
-    }
+  updateVendorData({
+    fullName: formData.fullName,
+    email: formData.email,
+    mobile: formData.mobile,
+    businessName: formData.businessName,
+    businessType: formData.businessType,
+    password: formData.password,
+  });
 
-    navigate('/register/vendor/business');
-  };
+
+  navigate('/register/vendor/business');
+};
 
   return (
     <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
@@ -165,6 +153,37 @@ const VendorProfileStep1 = () => {
                 />
               </div>
 
+                   {/* Password */}
+                 <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider">
+                    Password
+                  </label>
+
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        password: e.target.value,
+                      })
+                    }
+                    placeholder="Enter your password"
+                    className="
+                      w-full
+                      border-0
+                      border-b
+                      border-[#c5c6cd]
+                      bg-transparent
+                      pb-3
+                      focus:outline-none
+                      focus:border-[#745a38]
+                    "
+                  />
+                </div>
+
+
               {/* Category */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
@@ -195,34 +214,6 @@ const VendorProfileStep1 = () => {
                 </div>
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-3">
-                  Year Of Experience
-                </label>
-
-                <div className="relative">
-                  <select
-                    className="w-full border-b border-[#c5c6cd] pb-3 appearance-none bg-transparent focus:outline-none focus:border-[#745a38]"
-                    value={formData.experience}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        experience: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="">Select your Experience</option>
-
-                    {experience.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-
-                  <IoChevronDown className="absolute right-0 top-1 text-lg" />
-                </div>
-              </div>
             </div>
 
             {/* Info Box */}

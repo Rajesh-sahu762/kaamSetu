@@ -4,9 +4,13 @@ import ProgressBar from "@/components/auth/ProgressBar";
 import React, { useState } from "react";
 import { FaShieldAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useVendor } from "@/context/vendorContext";
 
 const VendorBusinessDetails = () => {
   const navigate = useNavigate();
+
+  const { vendorData, updateVendorData } = useVendor();
+
 
   const [formData, setFormData] = useState({
     address: "",
@@ -14,7 +18,7 @@ const VendorBusinessDetails = () => {
     state: "",
     pincode: "",
     experience: "",
-    serviceRadius: "",
+    radius: "",
   });
 
   const handleChange = (e) => {
@@ -26,8 +30,17 @@ const VendorBusinessDetails = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    updateVendorData({
+       address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      pincode: formData.pincode,
+      radius: formData.radius,
+      experience: formData.experience,
+    })
 
-    // API Call
+
+console.log("Business Page:", vendorData);
 
     navigate("/register/vendor/documents");
   };
@@ -153,8 +166,8 @@ const VendorBusinessDetails = () => {
 
                 <input
                   type="number"
-                  name="serviceRadius"
-                  value={formData.serviceRadius}
+                  name="radius"
+                  value={formData.radius}
                   onChange={handleChange}
                   placeholder="50"
                   className="w-full border-b border-[#c5c6cd] pb-3 focus:outline-none focus:border-[#745a38]"
