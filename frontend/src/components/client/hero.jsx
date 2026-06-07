@@ -8,7 +8,7 @@ const HeroSection = () => {
   const y2 = useTransform(scrollY, [0, 500], [0, -70]);
 
   return (
-    <section className="relative overflow-hidden bg-[#f8f9ff] min-h-screen flex items-center">
+    <section className="relative overflow-hidden mt-15 bg-[#f8f9ff] min-h-screen flex items-center">
       
       {/* Background Blobs */}
       <motion.div
@@ -165,7 +165,7 @@ const HeroSection = () => {
                 "
               >
                 <img
-                  src="/images/artisan.jpg"
+                  src="/src/assets/images/success-artisan.png"
                   alt="artisan"
                   className="w-full h-[260px] object-cover"
                 />
@@ -230,8 +230,8 @@ const HeroSection = () => {
                 }}
                 className="
                   absolute
-                  bottom-24
-                  right-10
+                  bottom-28
+                  right-2
                   bg-white
                   border
                   border-[#d3e4fe]
@@ -256,7 +256,7 @@ const HeroSection = () => {
                 }}
                 className="
                   absolute
-                  bottom-0
+                  bottom-20
                   left-0
                   bg-white
                   border

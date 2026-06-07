@@ -1,234 +1,456 @@
-import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from 'react';
+import { Search, Bell, Moon, Sun, Menu, X } from 'lucide-react';
+
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 30);
+      setIsScrolled(window.scrollY > 20);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
 
-    return () =>
-      window.removeEventListener(
-        "scroll",
-        handleScroll
-      );
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    "Services",
-    "Professionals",
-    "How It Works",
-    "About",
-  ];
+  const navLinks = ['Services', 'Experts', 'How It Works', 'Contact'];
 
   return (
     <>
-      <header
+      {/* Navbar */}
+      <motion.header
+        initial={{
+          y: -100,
+          opacity: 0,
+        }}
+        animate={{
+          y: 0,
+          opacity: 1,
+        }}
+        transition={{
+          duration: 0.6,
+        }}
         className={`
           fixed
-          top-0
-          left-0
-          w-full
+          top-4
+          left-1/2
+          -translate-x-1/2
+          w-[100%]
+          max-w-[1380px]
+          h-[78px]
           z-50
+
+          rounded-2xl
+
           transition-all
           duration-300
 
           ${
-            scrolled
-              ? "backdrop-blur-md bg-white/80 border-b border-[#d3e4fe]"
-              : "bg-transparent"
+            isScrolled
+              ? 'bg-white/85 backdrop-blur-xl shadow-[0_10px_40px_rgba(9,20,38,0.08)] border border-[#d3e4fe]'
+              : 'bg-white/65 backdrop-blur-md border border-white/30'
           }
         `}
       >
         <div
           className="
-            max-w-7xl
-            mx-auto
+            h-full
             px-5
             lg:px-8
-            h-20
+
             flex
             items-center
             justify-between
           "
         >
           {/* Logo */}
-          <div>
+          <motion.div
+            whileHover={{
+              scale: 1.03,
+            }}
+            className="cursor-pointer"
+          >
             <h1
               className="
-                text-[#091426]
+                text-[15px]
                 font-semibold
-                tracking-[0.25em]
-                text-sm
-                md:text-base
+                tracking-[0.35em]
               "
             >
-              KAAMSETU
+              <span className="text-[#091426]">KAAM</span>
+
+              <span className="text-[#745A38]">SETU</span>
             </h1>
-          </div>
+          </motion.div>
 
           {/* Desktop Links */}
-          <nav className="hidden lg:flex items-center gap-10">
+
+          <nav
+            className="
+              hidden
+              lg:flex
+              items-center
+              gap-8
+            "
+          >
             {navLinks.map((item) => (
-              <a
+              <motion.a
                 key={item}
                 href="#"
+                whileHover={{
+                  y: -2,
+                }}
                 className="
+                  relative
                   text-[#45474c]
                   hover:text-[#091426]
                   transition
-                  relative
-                  group
+
+                  after:absolute
+                  after:left-0
+                  after:-bottom-1
+                  after:w-0
+                  after:h-[2px]
+                  after:bg-[#745A38]
+                  after:transition-all
+
+                  hover:after:w-full
                 "
               >
                 {item}
-
-                <span
-                  className="
-                    absolute
-                    left-0
-                    -bottom-1
-                    w-0
-                    h-[2px]
-                    bg-[#745A38]
-                    transition-all
-                    duration-300
-                    group-hover:w-full
-                  "
-                />
-              </a>
+              </motion.a>
             ))}
           </nav>
 
-          {/* Desktop Buttons */}
-          <div className="hidden lg:flex items-center gap-4">
-            <button
+          {/* Search */}
+
+          <motion.div
+            whileHover={{
+              scale: 1.02,
+            }}
+            className="
+              hidden
+              lg:flex
+
+              items-center
+
+              w-[280px]
+              h-[46px]
+
+              px-4
+
+              bg-[#f8f9ff]
+
+              border
+              border-[#d3e4fe]
+
+              rounded-xl
+            "
+          >
+            <Search size={18} className="text-[#45474c]" />
+
+            <input
+              type="text"
+              placeholder="Search services..."
               className="
+                ml-3
+                flex-1
+                bg-transparent
+                outline-none
+                text-sm
+              "
+            />
+          </motion.div>
+
+          {/* Right Actions */}
+
+          <div
+            className="
+              hidden
+              lg:flex
+              items-center
+              gap-3
+            "
+          >
+            {/* Theme Toggle */}
+
+            <motion.button
+              whileHover={{
+                y: -2,
+              }}
+              whileTap={{
+                scale: 0.95,
+              }}
+              onClick={() => setDarkMode(!darkMode)}
+              className="
+                w-11
+                h-11
+
+                flex
+                items-center
+                justify-center
+
+                rounded-xl
+
+                border
+                border-[#d3e4fe]
+
+                bg-white
+              "
+            >
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </motion.button>
+
+            {/* Notification */}
+
+            <motion.button
+              whileHover={{
+                y: -2,
+              }}
+              className="
+                relative
+
+                w-11
+                h-11
+
+                flex
+                items-center
+                justify-center
+
+                rounded-xl
+
+                border
+                border-[#d3e4fe]
+
+                bg-white
+              "
+            >
+              <Bell size={18} />
+
+              <span
+                className="
+                  absolute
+                  top-2
+                  right-2
+
+                  w-2
+                  h-2
+
+                  rounded-full
+                  bg-red-500
+                "
+              />
+            </motion.button>
+
+            {/* Login */}
+
+            {/* <motion.button
+              whileHover={{
+                y: -2,
+              }}
+              className="
+                px-4
+                py-2
+
                 text-[#091426]
-                hover:text-[#745A38]
-                transition
+                font-medium
               "
             >
               Login
-            </button>
+            </motion.button> */}
 
-            <button
+            {/* Sign Up */}
+
+            <motion.button
+              whileHover={{
+                y: -2,
+              }}
               className="
-                bg-[#091426]
-                text-white
                 px-5
-                py-3
-                rounded-md
-                hover:-translate-y-1
-                hover:shadow-xl
-                transition-all
+                py-2.5
+
+                border
+                border-[#d3e4fe]
+
+                rounded-xl
+
+                bg-white
               "
             >
-              Become a Professional
-            </button>
+              Sign Up
+            </motion.button>
+
+            {/* Find Work */}
+
+            <motion.button
+              whileHover={{
+                y: -2,
+                scale: 1.03,
+              }}
+              whileTap={{
+                scale: 0.98,
+              }}
+              className="
+                px-6
+                py-3
+
+                rounded-xl
+
+                text-white
+                font-medium
+
+                bg-gradient-to-r
+                from-[#745A38]
+                to-[#8c6a43]
+
+                shadow-lg
+              "
+            >
+              Find Work
+            </motion.button>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={() =>
-              setMobileMenu(!mobileMenu)
-            }
-            className="lg:hidden"
-          >
-            {mobileMenu ? (
-              <X size={26} />
-            ) : (
-              <Menu size={26} />
-            )}
+
+          <button className="lg:hidden" onClick={() => setMobileOpen(true)}>
+            <Menu size={26} />
           </button>
         </div>
-      </header>
+      </motion.header>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Menu */}
 
       <AnimatePresence>
-        {mobileMenu && (
+        {mobileOpen && (
           <motion.div
             initial={{
               opacity: 0,
-              x: "100%",
             }}
             animate={{
               opacity: 1,
-              x: 0,
             }}
             exit={{
               opacity: 0,
-              x: "100%",
-            }}
-            transition={{
-              duration: 0.3,
             }}
             className="
               fixed
-              top-0
-              right-0
-              w-[80%]
-              h-screen
-              bg-white
-              z-[60]
-              shadow-2xl
-              p-8
+              inset-0
+              bg-[#091426]
+              z-[100]
             "
           >
-            <div className="flex justify-end">
-              <button
-                onClick={() =>
-                  setMobileMenu(false)
-                }
+            <div
+              className="
+                p-6
+
+                flex
+                items-center
+                justify-between
+              "
+            >
+              <h2
+                className="
+                  text-white
+                  tracking-[0.3em]
+                "
               >
-                <X size={28} />
+                KAAMSETU
+              </h2>
+
+              <button onClick={() => setMobileOpen(false)}>
+                <X size={30} className="text-white" />
               </button>
             </div>
 
-            <div className="mt-12 flex flex-col gap-8">
-              {navLinks.map((item) => (
-                <a
+            <div
+              className="
+                h-[80vh]
+
+                flex
+                flex-col
+                justify-center
+                items-center
+
+                gap-8
+              "
+            >
+              {navLinks.map((item, index) => (
+                <motion.a
                   key={item}
-                  href="#"
+                  initial={{
+                    opacity: 0,
+                    y: 30,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  transition={{
+                    delay: index * 0.1,
+                  }}
                   className="
-                    text-lg
-                    text-[#091426]
-                    font-medium
-                  "
+                      text-white
+                      text-2xl
+                      font-medium
+                    "
                 >
                   {item}
-                </a>
+                </motion.a>
               ))}
 
-              <hr />
-
-              <button
+              <div
                 className="
-                  text-left
-                  text-[#091426]
-                  font-medium
+                  flex
+                  flex-col
+                  gap-4
+                  w-[80%]
+                  mt-8
                 "
               >
-                Login
-              </button>
+                <button
+                  className="
+                    py-4
+                    rounded-xl
+                    bg-white
+                    text-[#091426]
+                  "
+                >
+                  Login
+                </button>
 
-              <button
-                className="
-                  bg-[#091426]
-                  text-white
-                  py-4
-                  rounded-md
-                "
-              >
-                Become a Professional
-              </button>
+                <button
+                  className="
+                    py-4
+                    rounded-xl
+
+                    border
+                    border-white
+
+                    text-white
+                  "
+                >
+                  Sign Up
+                </button>
+
+                <button
+                  className="
+                    py-4
+                    rounded-xl
+
+                    bg-[#745A38]
+                    text-white
+                  "
+                >
+                  Find Work
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
