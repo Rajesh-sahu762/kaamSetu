@@ -11,13 +11,13 @@ const VendorPendingApproval = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
+    <section className="min-h-screen bg-card flex flex-col">
 
       {/* Header */}
-      <header className="border-b border-[#d3e4fe] bg-white">
+      <header className="border-b border-theme bg-card">
         <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-center">
 
-          <h1 className="tracking-[0.25em] text-sm font-medium text-[#091426]">
+          <h1 className="tracking-[0.25em] text-sm font-medium text-primary">
             KAAMSETU
           </h1>
 
@@ -30,7 +30,7 @@ const VendorPendingApproval = () => {
         <div className="w-full max-w-3xl">
 
           {/* Success Card */}
-          <div className="bg-white border border-[#d3e4fe] rounded-lg shadow-sm p-8 md:p-12 text-center">
+          <div className="bg-card border border-theme rounded-lg shadow-sm p-8 md:p-12 text-center">
 
             {/* Icon */}
             <div className="flex justify-center mb-8">
@@ -47,25 +47,25 @@ const VendorPendingApproval = () => {
             </div>
 
             {/* Title */}
-            <h2 className="text-3xl md:text-5xl font-semibold text-[#091426]">
+            <h2 className="text-3xl md:text-5xl font-semibold text-primary">
               Application Submitted
             </h2>
 
             {/* Subtitle */}
-            <p className="mt-5 text-[#45474c] text-base md:text-lg leading-relaxed max-w-xl mx-auto">
+            <p className="mt-5 text-muted text-base md:text-lg leading-relaxed max-w-xl mx-auto">
               Thank you for joining Kaamsetu.
               Your application has been successfully submitted
               and is now under review by our verification team.
             </p>
 
             {/* Timeline Box */}
-            <div className="mt-10 bg-[#eff4ff] border border-[#d3e4fe] rounded-lg p-6">
+            <div className="mt-10 bg-[#eff4ff] border border-theme rounded-lg p-6">
 
               <div className="flex items-center justify-center gap-3">
 
                 <FaClock className="text-[#745a38]" />
 
-                <span className="font-medium text-[#091426]">
+                <span className="font-medium text-primary">
                   Estimated Review Time: 24 - 48 Hours
                 </span>
 
@@ -76,7 +76,7 @@ const VendorPendingApproval = () => {
             {/* What Happens Next */}
             <div className="mt-10 text-left">
 
-              <h3 className="text-lg font-semibold text-[#091426] mb-5">
+              <h3 className="text-lg font-semibold text-primary mb-5">
                 What Happens Next?
               </h3>
 
@@ -87,7 +87,7 @@ const VendorPendingApproval = () => {
                     1.
                   </span>
 
-                  <p className="text-[#45474c]">
+                  <p className="text-muted">
                     Our team will verify your profile and
                     uploaded documents.
                   </p>
@@ -98,7 +98,7 @@ const VendorPendingApproval = () => {
                     2.
                   </span>
 
-                  <p className="text-[#45474c]">
+                  <p className="text-muted">
                     We may contact you if additional
                     information is required.
                   </p>
@@ -109,7 +109,7 @@ const VendorPendingApproval = () => {
                     3.
                   </span>
 
-                  <p className="text-[#45474c]">
+                  <p className="text-muted">
                     Once approved, you'll receive an email
                     and gain access to your Vendor Dashboard.
                   </p>
@@ -120,11 +120,11 @@ const VendorPendingApproval = () => {
             </div>
 
             {/* Support Box */}
-            <div className="mt-10 bg-[#e5eeff] border border-[#d3e4fe] rounded-lg p-4 flex items-start gap-3">
+            <div className="mt-10 bg-[#e5eeff] border border-theme rounded-lg p-4 flex items-start gap-3">
 
               <FaHeadset className="text-[#745a38] mt-1" />
 
-              <p className="text-sm text-[#091426] text-left">
+              <p className="text-sm text-primary text-left">
                 Need help? Contact our support team anytime.
                 We're here to assist you throughout the
                 onboarding process.
@@ -158,11 +158,11 @@ const VendorPendingApproval = () => {
                 onClick={() => navigate("/login")}
                 className="
                   border
-                  border-[#d3e4fe]
+                  border-theme
                   px-8
                   py-4
                   rounded
-                  text-[#091426]
+                  text-primary
                   hover:bg-[#eff4ff]
                   transition
                 "

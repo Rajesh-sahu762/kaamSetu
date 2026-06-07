@@ -56,7 +56,7 @@ const professionalSteps = [
 
 const HowItWorks = () => {
   return (
-    <section className="py-24 bg-[#f8f9ff]">
+    <section className="py-2 bg-card">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         
         {/* Heading */}
@@ -80,7 +80,7 @@ const HowItWorks = () => {
               text-4xl
               md:text-5xl
               font-semibold
-              text-[#091426]
+              text-primary
             "
           >
             Simple, Fast & Reliable
@@ -90,7 +90,7 @@ const HowItWorks = () => {
             className="
               mt-5
               text-lg
-              text-[#45474c]
+              text-muted
               leading-8
             "
           >
@@ -107,9 +107,9 @@ const HowItWorks = () => {
 
           <div
             className="
-              bg-white
+              bg-card
               border
-              border-[#d3e4fe]
+              border-theme
               rounded-3xl
               p-8
             "
@@ -118,7 +118,7 @@ const HowItWorks = () => {
               className="
                 text-2xl
                 font-semibold
-                text-[#091426]
+                text-primary
                 mb-10
               "
             >
@@ -176,7 +176,7 @@ const HowItWorks = () => {
                         className="
                           font-semibold
                           text-lg
-                          text-[#091426]
+                          text-primary
                         "
                       >
                         {index + 1}. {step.title}
@@ -185,7 +185,7 @@ const HowItWorks = () => {
                       <p
                         className="
                           mt-2
-                          text-[#45474c]
+                          text-muted
                           leading-7
                         "
                       >

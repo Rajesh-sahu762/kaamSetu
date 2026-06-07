@@ -67,7 +67,7 @@ const VendorProfileStep1 = () => {
 };
 
   return (
-    <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
+    <section className="min-h-screen bg-card flex flex-col">
       {/* Header */}
       <AuthHeader />
 
@@ -78,17 +78,17 @@ const VendorProfileStep1 = () => {
 
         {/* Title */}
         <div className="max-w-3xl mx-auto text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-semibold text-[#091426]">
+          <h2 className="text-3xl md:text-4xl font-semibold text-primary">
             Join the Network
           </h2>
 
-          <p className="mt-3 text-[#45474c]">
+          <p className="mt-3 text-muted">
             Provide your professional details to begin the verification process.
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="max-w-3xl mx-auto bg-white border border-[#d3e4fe] rounded-lg p-6 md:p-10 shadow-sm">
+        <div className="max-w-3xl mx-auto bg-card border border-theme rounded-lg p-6 md:p-10 shadow-sm">
           <form onSubmit={handleSubmit}>
             <div className="grid md:grid-cols-2 gap-8">
               {/* Full Name */}
@@ -271,10 +271,10 @@ const VendorProfileStep1 = () => {
             </div>
 
             {/* Info Box */}
-            <div className="mt-8 bg-[#e5eeff] border border-[#d3e4fe] p-4 flex gap-3 items-start">
+            <div className="mt-8 bg-[#e5eeff] border border-theme p-4 flex gap-3 items-start">
               <FaShieldAlt className="text-[#745a38] mt-1" />
 
-              <p className="text-sm text-[#091426]">
+              <p className="text-sm text-primary">
                 Your information is securely encrypted and used solely for
                 verification purposes.
               </p>

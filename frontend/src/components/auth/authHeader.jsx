@@ -11,11 +11,11 @@ const navigate = useNavigate();
 
   return (
     
-   <header className="border-b border-[#d3e4fe] bg-white">
+   <header className="border-b border-theme bg-card">
         <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 border border-[#d3e4fe] flex items-center justify-center rounded"
+            className="w-10 h-10 border border-theme flex items-center justify-center rounded"
           >
             <FaArrowLeft />
           </button>

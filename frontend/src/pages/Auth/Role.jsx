@@ -35,23 +35,23 @@ const JoinKaamsetu = () => {
   ];
 
   return (
-    <section className="min-h-screen bg-[#f8f9ff] px-4 py-8 md:py-16">
+    <section className="min-h-screen bg-card px-4 py-8 md:py-16">
       <div className="max-w-6xl mx-auto">
 
         {/* Logo */}
         <div className="text-center">
-          <h2 className="text-sm tracking-[0.25em] text-[#091426] font-medium">
+          <h2 className="text-sm tracking-[0.25em] text-primary font-medium">
             KAAMSETU
           </h2>
         </div>
 
         {/* Heading */}
         <div className="text-center mt-8 md:mt-12">
-          <h1 className="text-[38px] md:text-[56px] font-semibold text-[#091426]">
+          <h1 className="text-[38px] md:text-[56px] font-semibold text-primary">
             Join Kaamsetu
           </h1>
 
-          <p className="max-w-xl mx-auto mt-4 text-[#45474c] text-base md:text-lg leading-relaxed">
+          <p className="max-w-xl mx-auto mt-4 text-muted text-base md:text-lg leading-relaxed">
             Select how you would like to use our platform.
             You can always change this later in your account settings.
           </p>
@@ -69,7 +69,7 @@ const JoinKaamsetu = () => {
                 onClick={() => setSelectedRole(role.id)}
                 className={`
                   relative
-                  bg-white
+                  bg-card
                   border
                   rounded-xl
                   p-7
@@ -82,7 +82,7 @@ const JoinKaamsetu = () => {
                   ${
                     selectedRole === role.id
                       ? "border-[#745a38] ring-2 ring-[#745a38]/20"
-                      : "border-[#d3e4fe]"
+                      : "border-theme"
                   }
                 `}
               >
@@ -90,7 +90,7 @@ const JoinKaamsetu = () => {
                 <div className="w-14 h-14 rounded-xl bg-[#e5eeff] flex items-center justify-center">
                   <Icon
                     size={24}
-                    className="text-[#091426]"
+                    className="text-primary"
                   />
                 </div>
 
@@ -114,11 +114,11 @@ const JoinKaamsetu = () => {
                 </div>
 
                 {/* Content */}
-                <h3 className="mt-8 text-3xl font-semibold text-[#091426]">
+                <h3 className="mt-8 text-3xl font-semibold text-primary">
                   {role.title}
                 </h3>
 
-                <p className="mt-4 text-[#45474c] leading-8 text-lg">
+                <p className="mt-4 text-muted leading-8 text-lg">
                   {role.description}
                 </p>
               </button>
@@ -152,11 +152,11 @@ const JoinKaamsetu = () => {
 
         {/* Login Link */}
         <div className="text-center mt-12">
-          <p className="text-[#45474c]">
+          <p className="text-muted">
             Already have an account?
             <button
               onClick={() => navigate("/login")}
-              className="ml-1 font-semibold text-[#091426] hover:text-[#745a38]"
+              className="ml-1 font-semibold text-primary hover:text-[#745a38]"
             >
               Sign in
             </button>

@@ -19,18 +19,18 @@ const ForgotPassword = () => {
   };
 
   return (
-    <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
+    <section className="min-h-screen bg-card flex flex-col">
       <AuthHeader />
 
       <main className="flex-1 flex items-center justify-center px-6 py-10">
         <div className="w-full max-w-[520px]">
           {/* Heading */}
           <div className="text-center md:text-left">
-            <h1 className="text-[42px] md:text-[56px] font-semibold text-[#091426] leading-tight">
+            <h1 className="text-[42px] md:text-[56px] font-semibold text-primary leading-tight">
               Reset Password
             </h1>
 
-            <p className="mt-5 text-[#45474c] text-[16px] leading-8">
+            <p className="mt-5 text-muted text-[16px] leading-8">
               Enter the email address associated with your account, and we will
               send you secure instructions to reset your password.
             </p>
@@ -39,7 +39,7 @@ const ForgotPassword = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="mt-12">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#45474c] mb-4">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-4">
                 Email Address
               </label>
 
@@ -56,7 +56,7 @@ const ForgotPassword = () => {
                   border-[#c5c6cd]
                   px-0
                   pb-3
-                  text-[#091426]
+                  text-primary
                   placeholder:text-[#c5c6cd]
                   focus:outline-none
                   focus:border-[#745a38]

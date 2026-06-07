@@ -12,7 +12,7 @@ const ProgressBar = ({
   <div className="max-w-3xl mx-auto mb-12">
           <div className="flex justify-between text-xs font-semibold mb-2">
                       Step {step} of {totalSteps}
-            <span className="text-[#45474c]">
+            <span className="text-muted">
               <span>{title}</span>
             </span>
           </div>

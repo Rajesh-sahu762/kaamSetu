@@ -35,7 +35,7 @@ const features = [
 
 const WhyChooseKaamSetu = () => {
   return (
-    <section className="py-24 bg-[#f8f9ff]">
+    <section className="py-2 bg-card">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         
         {/* Section Heading */}
@@ -59,7 +59,7 @@ const WhyChooseKaamSetu = () => {
               text-4xl
               md:text-5xl
               font-semibold
-              text-[#091426]
+              text-primary
             "
           >
             Why Choose KaamSetu
@@ -69,7 +69,7 @@ const WhyChooseKaamSetu = () => {
             className="
               mt-5
               text-lg
-              text-[#45474c]
+              text-muted
               leading-8
             "
           >
@@ -115,9 +115,9 @@ const WhyChooseKaamSetu = () => {
                 }}
                 className="
                   group
-                  bg-white
+                  bg-card
                   border
-                  border-[#d3e4fe]
+                  border-theme
                   rounded-2xl
                   p-8
 
@@ -161,7 +161,7 @@ const WhyChooseKaamSetu = () => {
                     mt-6
                     text-xl
                     font-semibold
-                    text-[#091426]
+                    text-primary
                   "
                 >
                   {item.title}
@@ -170,7 +170,7 @@ const WhyChooseKaamSetu = () => {
                 <p
                   className="
                     mt-4
-                    text-[#45474c]
+                    text-muted
                     leading-7
                   "
                 >

@@ -1,122 +1,141 @@
-
 @import "tailwindcss";
- 
+
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Inter:wght@100..900&display=swap");
+
 /* =========================
-   FONT FAMILIES
+   LIGHT THEME
 ========================= */
 
-
-@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:ital,wght@0,100..900;1,100..900&display=swap');
-
 :root {
+  /* Fonts */
   --font-heading: "Geist Mono", monospace;
   --font-body: "Inter", sans-serif;
 
-  /* =========================
-     DISPLAY
-  ========================= */
-
-  --display-lg-size: 48px;
-  --display-lg-weight: 600;
-  --display-lg-line-height: 1.1;
-  --display-lg-letter-spacing: -0.02em;
-
-  --display-lg-mobile-size: 32px;
-  --display-lg-mobile-weight: 600;
-  --display-lg-mobile-line-height: 1.2;
-  --display-lg-mobile-letter-spacing: -0.02em;
-
-  /* =========================
-     HEADINGS
-  ========================= */
-
-  --headline-md-size: 24px;
-  --headline-md-weight: 500;
-  --headline-md-line-height: 1.3;
-  --headline-md-letter-spacing: -0.01em;
-
-  /* =========================
-     BODY TEXT
-  ========================= */
-
-  --body-lg-size: 18px;
-  --body-lg-weight: 400;
-  --body-lg-line-height: 1.6;
-  --body-lg-letter-spacing: 0;
-
-  --body-md-size: 16px;
-  --body-md-weight: 400;
-  --body-md-line-height: 1.5;
-  --body-md-letter-spacing: 0;
-
-  /* =========================
-     LABELS
-  ========================= */
-
-  --label-sm-size: 12px;
-  --label-sm-weight: 600;
-  --label-sm-line-height: 1;
-  --label-sm-letter-spacing: 0.05em;
-
-  /* =========================
-     COLORS
-  ========================= */
-
+  /* Brand Colors */
   --color-primary: #091426;
   --color-secondary: #745a38;
 
-  --color-bronze: #a88a64;
-  --color-slate: #1e293b;
-  --color-ivory: #f8f5f0;
-
+  /* Backgrounds */
   --color-bg: #f8f9ff;
-  --color-text: #0b1c30;
+  --color-surface: #ffffff;
+  --color-card: #ffffff;
+
+  /* Text */
+  --color-text: #091426;
   --color-text-muted: #45474c;
 
-  --color-border: #c5c6cd;
+  /* Border */
+  --color-border: #d3e4fe;
 
-  /* =========================
-     BORDER RADIUS
-  ========================= */
+  /* Shadows */
+  --shadow-card: 0 4px 20px rgba(9, 20, 38, 0.08);
 
-  --radius-soft: 4px;
-  --radius-card: 8px;
-  --radius-xl: 12px;
-  --radius-full: 9999px;
+  /* Radius */
+  --radius-card: 16px;
 
-  /* =========================
-     SPACING
-  ========================= */
-
-  --space-xs: 8px;
-  --space-sm: 16px;
-  --space-md: 24px;
-  --space-lg: 48px;
-  --space-xl: 64px;
-
-  /* =========================
-     LAYOUT
-  ========================= */
-
-  --container-width: 1200px;
-
-  /* =========================
-     SHADOWS
-  ========================= */
-
-  --shadow-card: 0 4px 20px rgba(30, 41, 59, 0.12);
-  --shadow-modal: 0 12px 40px rgba(30, 41, 59, 0.2);
-
-  /* =========================
-     TRANSITIONS
-  ========================= */
-
-  --transition-fast: 0.2s ease;
-  --transition-normal: 0.3s ease;
+  /* Transition */
+  --transition: 0.3s ease;
 }
+
+/* =========================
+   DARK THEME
+========================= */
+
+.dark {
+  --color-primary: #ffffff;
+  --color-secondary: #c59a6a;
+
+  --color-bg: #0b1220;
+
+  --color-surface: #111827;
+
+  --color-card: #132033;
+
+  --color-text: #ffffff;
+
+  --color-text-muted: #cbd5e1;
+
+  --color-border: #22324a;
+
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* =========================
+   GLOBAL
+========================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: var(--color-bg);
+  background: var(--color-bg);
   color: var(--color-text);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
+
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
+/* =========================
+   REUSABLE UTILITY CLASSES
+========================= */
+
+.bg-theme {
+  background: var(--color-bg);
+}
+
+.bg-surface {
+  background: var(--color-surface);
+}
+
+.bg-card {
+  background: var(--color-card);
+}
+
+.text-primary {
+  color: var(--color-text);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-accent {
+  color: var(--color-secondary);
+}
+
+.border-theme {
+  border-color: var(--color-border);
+}
+
+.shadow-theme {
+  box-shadow: var(--shadow-card);
+}
+
+/* =========================
+   CUSTOM SCROLLBAR
+========================= */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-secondary);
+  border-radius: 999px;
+}
+
+/* =========================
+   SELECTION
+========================= */
+
+::selection {
+  background: var(--color-secondary);
+  color: white;
+}

@@ -1,4 +1,6 @@
+import FinalCTA from '@/components/client/CTA'
 import FeaturedExperts from '@/components/client/FeaturedExperts'
+import Footer from '@/components/client/Footer'
 import HeroSection from '@/components/client/hero'
 import HowItWorks from '@/components/client/HowItWorks'
 import Navbar from '@/components/client/navbar'
@@ -17,7 +19,9 @@ const Home = () => {
      <FeaturedExperts />
      <HowItWorks />
      <Testimonials />
-     
+     <FinalCTA />
+     <Footer />
+
     </>
   )
 }

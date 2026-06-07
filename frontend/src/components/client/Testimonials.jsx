@@ -30,7 +30,7 @@ const testimonials = [
 
 const Testimonials = () => {
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-card">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         
         {/* Heading */}
@@ -54,7 +54,7 @@ const Testimonials = () => {
               text-4xl
               md:text-5xl
               font-semibold
-              text-[#091426]
+              text-primary
             "
           >
             Trusted By Thousands
@@ -64,7 +64,7 @@ const Testimonials = () => {
             className="
               mt-5
               text-lg
-              text-[#45474c]
+              text-muted
               leading-8
             "
           >
@@ -131,9 +131,9 @@ const Testimonials = () => {
                   y: -8,
                 }}
                 className="
-                  bg-[#f8f9ff]
+                  bg-card
                   border
-                  border-[#d3e4fe]
+                  border-theme
                   rounded-3xl
                   p-8
 
@@ -178,7 +178,7 @@ const Testimonials = () => {
                 <p
                   className="
                     mt-5
-                    text-[#45474c]
+                    text-muted
                     leading-8
                   "
                 >
@@ -191,7 +191,7 @@ const Testimonials = () => {
                   <h4
                     className="
                       font-semibold
-                      text-[#091426]
+                      text-primary
                     "
                   >
                     {testimonial.name}

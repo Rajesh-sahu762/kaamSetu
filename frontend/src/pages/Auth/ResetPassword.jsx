@@ -54,13 +54,13 @@ const ResetPassword = () => {
   };
 
   return (
-    <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
+    <section className="min-h-screen bg-card flex flex-col">
 
       <AuthHeader />
 
       <main className="flex-1 flex items-center justify-center px-4 py-10">
 
-        <div className="w-full max-w-[520px] bg-white border border-[#d3e4fe] rounded-lg p-6 md:p-10 shadow-sm">
+        <div className="w-full max-w-[520px] bg-card border border-theme rounded-lg p-6 md:p-10 shadow-sm">
 
           {/* Icon */}
           <div className="flex justify-center">
@@ -69,7 +69,7 @@ const ResetPassword = () => {
 
               <FaRedoAlt
                 size={20}
-                className="text-[#091426]"
+                className="text-primary"
               />
 
             </div>
@@ -79,11 +79,11 @@ const ResetPassword = () => {
           {/* Heading */}
           <div className="text-center mt-8">
 
-            <h1 className="text-4xl font-semibold text-[#091426]">
+            <h1 className="text-4xl font-semibold text-primary">
               Set New Password
             </h1>
 
-            <p className="mt-4 text-[#45474c] leading-7">
+            <p className="mt-4 text-muted leading-7">
               Please create a strong, secure password
               for your account.
             </p>
@@ -99,7 +99,7 @@ const ResetPassword = () => {
             {/* Password */}
             <div>
 
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#45474c] mb-4">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-4">
                 New Password
               </label>
 
@@ -156,7 +156,7 @@ const ResetPassword = () => {
             {/* Confirm Password */}
             <div className="mt-8">
 
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#45474c] mb-4">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-4">
                 Confirm Password
               </label>
 
@@ -211,7 +211,7 @@ const ResetPassword = () => {
             </div>
 
             {/* Note */}
-            <p className="mt-8 text-xs text-[#45474c] leading-5">
+            <p className="mt-8 text-xs text-muted leading-5">
               Password must be at least 8 characters
               long and include a mix of letters,
               numbers, and symbols.

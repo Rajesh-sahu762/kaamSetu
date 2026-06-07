@@ -67,20 +67,20 @@ const VerifyOtp = () => {
   };
 
   return (
-    <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
+    <section className="min-h-screen bg-card flex flex-col">
 
       <AuthHeader />
 
       <main className="flex-1 flex items-center justify-center px-4 py-10">
 
-        <div className="w-full max-w-[520px] bg-white border border-[#d3e4fe] rounded-lg p-6 md:p-10 shadow-sm">
+        <div className="w-full max-w-[520px] bg-card border border-theme rounded-lg p-6 md:p-10 shadow-sm">
 
           {/* Icon */}
           <div className="flex justify-center">
             <div className="w-16 h-16 bg-[#e5eeff] rounded-xl flex items-center justify-center">
               <FaLock
                 size={22}
-                className="text-[#091426]"
+                className="text-primary"
               />
             </div>
           </div>
@@ -88,11 +88,11 @@ const VerifyOtp = () => {
           {/* Title */}
           <div className="text-center mt-8">
 
-            <h1 className="text-3xl font-semibold text-[#091426]">
+            <h1 className="text-3xl font-semibold text-primary">
               Verify your identity
             </h1>
 
-            <p className="mt-4 text-[#45474c] leading-7">
+            <p className="mt-4 text-muted leading-7">
               We've sent a code to your mobile number
             </p>
 
@@ -134,7 +134,7 @@ const VerifyOtp = () => {
                     text-xl
                     font-semibold
                     border
-                    border-[#d3e4fe]
+                    border-theme
                     rounded
                     focus:outline-none
                     focus:border-[#745a38]
@@ -169,7 +169,7 @@ const VerifyOtp = () => {
           {/* Resend */}
           <div className="text-center mt-8">
 
-            <p className="text-[#45474c]">
+            <p className="text-muted">
               Didn't receive a code?
             </p>
 

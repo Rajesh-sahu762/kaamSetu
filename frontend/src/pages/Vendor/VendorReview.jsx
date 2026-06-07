@@ -51,7 +51,7 @@ const VendorReview = () => {
 };
 
   return (
-    <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
+    <section className="min-h-screen bg-card flex flex-col">
       {/* Header */}
 
       <AuthHeader />
@@ -66,23 +66,23 @@ const VendorReview = () => {
         />
         {/* Title */}
         <div className="max-w-3xl mx-auto text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-semibold text-[#091426]">
+          <h2 className="text-3xl md:text-4xl font-semibold text-primary">
             Review Your Application
           </h2>
 
-          <p className="mt-3 text-[#45474c]">
+          <p className="mt-3 text-muted">
             Please verify all information before submitting your application for
             approval.
           </p>
         </div>
 
         {/* Card */}
-        <div className="max-w-3xl mx-auto bg-white border border-[#d3e4fe] rounded-lg shadow-sm overflow-hidden">
+        <div className="max-w-3xl mx-auto bg-card border border-theme rounded-lg shadow-sm overflow-hidden">
           {/* Professional Profile */}
-          <div className="p-6 md:p-8 border-b border-[#d3e4fe]">
+          <div className="p-6 md:p-8 border-b border-theme">
             <div className="flex items-center gap-3 mb-6">
               <FaUserTie className="text-[#745a38]" />
-              <h3 className="text-xl font-semibold text-[#091426]">
+              <h3 className="text-xl font-semibold text-primary">
                 Professional Profile
               </h3>
             </div>
@@ -97,10 +97,10 @@ const VendorReview = () => {
           </div>
 
           {/* Business Details */}
-          <div className="p-6 md:p-8 border-b border-[#d3e4fe]">
+          <div className="p-6 md:p-8 border-b border-theme">
             <div className="flex items-center gap-3 mb-6">
               <FaMapMarkerAlt className="text-[#745a38]" />
-              <h3 className="text-xl font-semibold text-[#091426]">
+              <h3 className="text-xl font-semibold text-primary">
                 Business Details
               </h3>
             </div>
@@ -124,7 +124,7 @@ const VendorReview = () => {
           <div className="p-6 md:p-8">
             <div className="flex items-center gap-3 mb-6">
               <FaFileAlt className="text-[#745a38]" />
-              <h3 className="text-xl font-semibold text-[#091426]">
+              <h3 className="text-xl font-semibold text-primary">
                 Uploaded Documents
               </h3>
             </div>
@@ -138,8 +138,8 @@ const VendorReview = () => {
         </div>
 
         {/* Terms */}
-        <div className="max-w-3xl mx-auto mt-8 bg-[#e5eeff] border border-[#d3e4fe] p-4 rounded">
-          <p className="text-sm text-[#091426]">
+        <div className="max-w-3xl mx-auto mt-8 bg-[#e5eeff] border border-theme p-4 rounded">
+          <p className="text-sm text-primary">
             By submitting this application, you confirm that all information
             provided is accurate and that you agree to Kaamsetu's verification
             process and platform policies.
@@ -151,11 +151,11 @@ const VendorReview = () => {
           <button
             onClick={() => navigate('/register/vendor/documents')}
             className="
-              border border-[#d3e4fe]
+              border border-theme
               px-8
               py-4
               rounded
-              text-[#091426]
+              text-primary
             "
           >
             Back
@@ -190,16 +190,16 @@ const VendorReview = () => {
 
 const Info = ({ label, value }) => (
   <div>
-    <p className="text-xs uppercase tracking-wider text-[#45474c] mb-1">
+    <p className="text-xs uppercase tracking-wider text-muted mb-1">
       {label}
     </p>
 
-    <p className="font-medium text-[#091426]">{value}</p>
+    <p className="font-medium text-primary">{value}</p>
   </div>
 );
 
 const DocumentItem = ({ title }) => (
-  <div className="flex items-center justify-between border border-[#d3e4fe] rounded p-4">
+  <div className="flex items-center justify-between border border-theme rounded p-4">
     <span>{title}</span>
 
     <div className="flex items-center gap-2 text-green-600">

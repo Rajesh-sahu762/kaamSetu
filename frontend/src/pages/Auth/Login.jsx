@@ -53,16 +53,16 @@ const Login = () => {
   }
 
   return (
-    <section className="min-h-screen bg-[#f8f9ff] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[520px] bg-white border border-[#d3e4fe] rounded-lg shadow-[0_4px_20px_rgba(9,20,38,0.05)] p-6 sm:p-8 md:p-12">
+    <section className="min-h-screen bg-card flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-[520px] bg-card border border-theme rounded-lg shadow-[0_4px_20px_rgba(9,20,38,0.05)] p-6 sm:p-8 md:p-12">
         
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-[38px] md:text-[52px] font-semibold text-[#091426] tracking-tight">
+          <h1 className="text-[38px] md:text-[52px] font-semibold text-primary tracking-tight">
             Welcome back
           </h1>
 
-          <p className="mt-3 text-[16px] md:text-[18px] text-[#45474c]">
+          <p className="mt-3 text-[16px] md:text-[18px] text-muted">
             Sign in to your Kaamsetu account.
           </p>
         </div>
@@ -71,7 +71,7 @@ const Login = () => {
         <form className="space-y-8" onSubmit={handleSubmit}>
           {/* Email */}
           <div>
-            <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#45474c] mb-2">
+            <label className="block text-[12px] font-semibold uppercase tracking-wider text-muted mb-2">
               Email Address
             </label>
 
@@ -88,7 +88,7 @@ const Login = () => {
           {/* Password */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="text-[12px] font-semibold uppercase tracking-wider text-[#45474c]">
+              <label className="text-[12px] font-semibold uppercase tracking-wider text-muted">
                 Password
               </label>
 
@@ -121,11 +121,11 @@ const Login = () => {
 
         {/* Divider */}
         <div className="flex items-center gap-4 my-8">
-          <div className="flex-1 border-t border-[#d3e4fe]" />
-          <span className="text-[12px] font-semibold text-[#45474c]">
+          <div className="flex-1 border-t border-theme" />
+          <span className="text-[12px] font-semibold text-muted">
             OR
           </span>
-          <div className="flex-1 border-t border-[#d3e4fe]" />
+          <div className="flex-1 border-t border-theme" />
         </div>
 
         {/* Social */}
@@ -148,11 +148,11 @@ const Login = () => {
         </div>
 
         {/* Footer */}
-        <p className="text-center mt-10 text-[#45474c]">
+        <p className="text-center mt-10 text-muted">
           Don't have an account?
           <Link
             to="/join"
-            className="ml-1 font-semibold text-[#091426] hover:text-[#745a38]"
+            className="ml-1 font-semibold text-primary hover:text-[#745a38]"
           >
             Create an account
           </Link>

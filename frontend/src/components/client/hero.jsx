@@ -8,7 +8,7 @@ const HeroSection = () => {
   const y2 = useTransform(scrollY, [0, 500], [0, -70]);
 
   return (
-    <section className="relative overflow-hidden mt-15 bg-[#f8f9ff] min-h-screen flex items-center">
+    <section className="relative overflow-hidden mt-15 bg-card min-h-screen flex items-center">
       
       {/* Background Blobs */}
       <motion.div
@@ -40,7 +40,7 @@ const HeroSection = () => {
                 md:text-[58px]
                 leading-[1.1]
                 font-semibold
-                text-[#091426]
+                text-primary
                 tracking-[-0.03em]
               "
             >
@@ -55,7 +55,7 @@ const HeroSection = () => {
                 mt-8
                 text-[18px]
                 leading-8
-                text-[#45474c]
+                text-muted
                 max-w-xl
               "
             >
@@ -94,7 +94,7 @@ const HeroSection = () => {
                   items-center
                   justify-center
                   gap-2
-                  hover:bg-white
+                  hover:bg-card
                   hover:-translate-y-1
                   transition-all
                   duration-300
@@ -110,28 +110,28 @@ const HeroSection = () => {
             <div className="mt-14 flex flex-wrap gap-10">
               
               <div>
-                <h3 className="text-3xl font-semibold text-[#091426]">
+                <h3 className="text-3xl font-semibold text-primary">
                   10K+
                 </h3>
-                <p className="text-[#45474c] mt-1">
+                <p className="text-muted mt-1">
                   Verified Experts
                 </p>
               </div>
 
               <div>
-                <h3 className="text-3xl font-semibold text-[#091426]">
+                <h3 className="text-3xl font-semibold text-primary">
                   50K+
                 </h3>
-                <p className="text-[#45474c] mt-1">
+                <p className="text-muted mt-1">
                   Jobs Completed
                 </p>
               </div>
 
               <div>
-                <h3 className="text-3xl font-semibold text-[#091426]">
+                <h3 className="text-3xl font-semibold text-primary">
                   98%
                 </h3>
-                <p className="text-[#45474c] mt-1">
+                <p className="text-muted mt-1">
                   Satisfaction Rate
                 </p>
               </div>
@@ -156,9 +156,9 @@ const HeroSection = () => {
                   left-16
                   w-[360px]
                   h-[420px]
-                  bg-white
+                  bg-card
                   border
-                  border-[#d3e4fe]
+                  border-theme
                   rounded-xl
                   shadow-[0_12px_40px_rgba(9,20,38,0.08)]
                   overflow-hidden
@@ -184,11 +184,11 @@ const HeroSection = () => {
                     VERIFIED
                   </span>
 
-                  <h3 className="mt-4 text-xl font-semibold text-[#091426]">
+                  <h3 className="mt-4 text-xl font-semibold text-primary">
                     Master Carpenter
                   </h3>
 
-                  <p className="text-[#45474c] mt-2">
+                  <p className="text-muted mt-2">
                     12+ Years Experience
                   </p>
                 </div>
@@ -206,9 +206,9 @@ const HeroSection = () => {
                   absolute
                   top-8
                   right-0
-                  bg-white
+                  bg-card
                   border
-                  border-[#d3e4fe]
+                  border-theme
                   rounded-lg
                   px-5
                   py-4
@@ -232,9 +232,9 @@ const HeroSection = () => {
                   absolute
                   bottom-28
                   right-2
-                  bg-white
+                  bg-card
                   border
-                  border-[#d3e4fe]
+                  border-theme
                   rounded-lg
                   px-5
                   py-4
@@ -258,9 +258,9 @@ const HeroSection = () => {
                   absolute
                   bottom-20
                   left-0
-                  bg-white
+                  bg-card
                   border
-                  border-[#d3e4fe]
+                  border-theme
                   rounded-lg
                   px-5
                   py-4

@@ -3,12 +3,18 @@ import { Search, Bell, Moon, Sun, Menu, X } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { useTheme } from '@/context/ThemeContext';
+
+
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const [darkMode, setDarkMode] = useState(false);
+  const {
+  theme,
+  toggleTheme,
+} = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,8 +60,8 @@ const Navbar = () => {
 
           ${
             isScrolled
-              ? 'bg-white/85 backdrop-blur-xl shadow-[0_10px_40px_rgba(9,20,38,0.08)] border border-[#d3e4fe]'
-              : 'bg-white/65 backdrop-blur-md border border-white/30'
+              ? 'bg-card/85 backdrop-blur-xl shadow-[0_10px_40px_rgba(9,20,38,0.08)] border border-theme'
+              : 'bg-card/65 backdrop-blur-md border border-white/30'
           }
         `}
       >
@@ -84,7 +90,7 @@ const Navbar = () => {
                 tracking-[0.35em]
               "
             >
-              <span className="text-[#091426]">KAAM</span>
+              <span className="text-primary">KAAM</span>
 
               <span className="text-[#745A38]">SETU</span>
             </h1>
@@ -109,8 +115,8 @@ const Navbar = () => {
                 }}
                 className="
                   relative
-                  text-[#45474c]
-                  hover:text-[#091426]
+                  text-muted
+                  hover:text-primary
                   transition
 
                   after:absolute
@@ -146,15 +152,15 @@ const Navbar = () => {
 
               px-4
 
-              bg-[#f8f9ff]
+              bg-card
 
               border
-              border-[#d3e4fe]
+              border-theme
 
               rounded-xl
             "
           >
-            <Search size={18} className="text-[#45474c]" />
+            <Search size={18} className="text-muted" />
 
             <input
               type="text"
@@ -188,7 +194,7 @@ const Navbar = () => {
               whileTap={{
                 scale: 0.95,
               }}
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={toggleTheme}
               className="
                 w-11
                 h-11
@@ -200,12 +206,13 @@ const Navbar = () => {
                 rounded-xl
 
                 border
-                border-[#d3e4fe]
+                border-theme
 
-                bg-white
+                bg-card
               "
             >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+               {theme === "light"
+    ? <Sun size={18} /> : <Moon size={18} />}
             </motion.button>
 
             {/* Notification */}
@@ -227,9 +234,9 @@ const Navbar = () => {
                 rounded-xl
 
                 border
-                border-[#d3e4fe]
+                border-theme
 
-                bg-white
+                bg-card
               "
             >
               <Bell size={18} />
@@ -249,23 +256,6 @@ const Navbar = () => {
               />
             </motion.button>
 
-            {/* Login */}
-
-            {/* <motion.button
-              whileHover={{
-                y: -2,
-              }}
-              className="
-                px-4
-                py-2
-
-                text-[#091426]
-                font-medium
-              "
-            >
-              Login
-            </motion.button> */}
-
             {/* Sign Up */}
 
             <motion.button
@@ -277,11 +267,11 @@ const Navbar = () => {
                 py-2.5
 
                 border
-                border-[#d3e4fe]
+                border-theme
 
                 rounded-xl
 
-                bg-white
+                bg-card
               "
             >
               Sign Up
@@ -418,8 +408,8 @@ const Navbar = () => {
                   className="
                     py-4
                     rounded-xl
-                    bg-white
-                    text-[#091426]
+                    bg-card
+                    text-primary
                   "
                 >
                   Login

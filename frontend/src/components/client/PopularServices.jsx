@@ -55,7 +55,7 @@ const services = [
 
 const PopularServices = () => {
   return (
-    <section className="py-24 bg-white">
+    <section className="py-22 bg-card">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         
         {/* Header */}
@@ -79,7 +79,7 @@ const PopularServices = () => {
               text-4xl
               md:text-5xl
               font-semibold
-              text-[#091426]
+              text-primary
             "
           >
             Services Trusted By Thousands
@@ -89,7 +89,7 @@ const PopularServices = () => {
             className="
               mt-5
               text-lg
-              text-[#45474c]
+              text-muted
               leading-8
             "
           >
@@ -135,9 +135,9 @@ const PopularServices = () => {
                 }}
                 className="
                   group
-                  bg-[#f8f9ff]
+                  bg-card
                   border
-                  border-[#d3e4fe]
+                  border-theme
                   rounded-2xl
                   p-7
                   cursor-pointer
@@ -153,9 +153,9 @@ const PopularServices = () => {
                     w-14
                     h-14
                     rounded-xl
-                    bg-white
+                    bg-card
                     border
-                    border-[#d3e4fe]
+                    border-theme
 
                     flex
                     items-center
@@ -182,7 +182,7 @@ const PopularServices = () => {
                     mt-6
                     text-xl
                     font-semibold
-                    text-[#091426]
+                    text-primary
                   "
                 >
                   {service.title}
@@ -191,7 +191,7 @@ const PopularServices = () => {
                 <p
                   className="
                     mt-3
-                    text-[#45474c]
+                    text-muted
                     leading-7
                     text-sm
                   "

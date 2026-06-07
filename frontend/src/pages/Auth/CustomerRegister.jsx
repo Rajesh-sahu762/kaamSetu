@@ -49,7 +49,7 @@ const CustomerRegister = () => {
   };
 
   return (
-    <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
+    <section className="min-h-screen bg-card flex flex-col">
 
       <AuthHeader backPath="/join" />
 
@@ -72,11 +72,11 @@ const CustomerRegister = () => {
 
             <div className="w-full max-w-md">
 
-              <h1 className="text-4xl font-semibold text-[#091426]">
+              <h1 className="text-4xl font-semibold text-primary">
                 Create an Account
               </h1>
 
-              <p className="mt-4 text-[#45474c] leading-8">
+              <p className="mt-4 text-muted leading-8">
                 Join Kaamsetu to discover and book premium
                 services with trusted artisans.
               </p>
@@ -189,7 +189,7 @@ const CustomerRegister = () => {
 
 
                 {/* Terms */}
-                <p className="mt-10 text-xs text-[#45474c] leading-6">
+                <p className="mt-10 text-xs text-muted leading-6">
                   By continuing, you agree to Kaamsetu's{" "}
                   <button
                     type="button"
@@ -227,9 +227,9 @@ const CustomerRegister = () => {
               </form>
 
               {/* Login */}
-              <div className="mt-10 pt-8 border-t border-[#d3e4fe] text-center">
+              <div className="mt-10 pt-8 border-t border-theme text-center">
 
-                <p className="text-[#45474c]">
+                <p className="text-muted">
                   Already have an account?
 
                   <button
@@ -239,7 +239,7 @@ const CustomerRegister = () => {
                     className="
                       ml-2
                       font-semibold
-                      text-[#091426]
+                      text-primary
                     "
                   >
                     LOG IN

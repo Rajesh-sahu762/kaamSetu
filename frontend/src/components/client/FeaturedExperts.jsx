@@ -55,7 +55,7 @@ const experts = [
 
 const FeaturedExperts = () => {
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-card">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         
         {/* Heading */}
@@ -79,7 +79,7 @@ const FeaturedExperts = () => {
               text-4xl
               md:text-5xl
               font-semibold
-              text-[#091426]
+              text-primary
             "
           >
             Meet Our Top Professionals
@@ -89,7 +89,7 @@ const FeaturedExperts = () => {
             className="
               mt-5
               text-lg
-              text-[#45474c]
+              text-muted
               leading-8
             "
           >
@@ -131,9 +131,9 @@ const FeaturedExperts = () => {
                 y: -8,
               }}
               className="
-                bg-white
+                bg-card
                 border
-                border-[#d3e4fe]
+                border-theme
                 rounded-3xl
                 overflow-hidden
                 group
@@ -165,7 +165,7 @@ const FeaturedExperts = () => {
                     items-center
                     gap-1
 
-                    bg-white
+                    bg-card
                     px-3
                     py-1.5
 
@@ -197,7 +197,7 @@ const FeaturedExperts = () => {
                     className="
                       text-xl
                       font-semibold
-                      text-[#091426]
+                      text-primary
                     "
                   >
                     {expert.name}
@@ -233,7 +233,7 @@ const FeaturedExperts = () => {
                       items-center
                       gap-2
 
-                      text-[#45474c]
+                      text-muted
                     "
                   >
                     <MapPin size={16} />
@@ -246,7 +246,7 @@ const FeaturedExperts = () => {
                       items-center
                       gap-2
 
-                      text-[#45474c]
+                      text-muted
                     "
                   >
                     <Briefcase size={16} />
@@ -265,7 +265,7 @@ const FeaturedExperts = () => {
                   <span
                     className="
                       text-sm
-                      text-[#45474c]
+                      text-muted
                     "
                   >
                     {expert.jobs}

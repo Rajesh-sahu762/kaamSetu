@@ -19,7 +19,7 @@ const RegisterSuccess = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="min-h-screen bg-[#f8f9ff] flex flex-col">
+    <section className="min-h-screen bg-card flex flex-col">
 
       <AuthHeader showBack={false} />
 
@@ -32,9 +32,9 @@ const RegisterSuccess = () => {
 
             <div
               className="
-                bg-white
+                bg-card
                 border
-                border-[#d3e4fe]
+                border-theme
                 rounded-lg
                 p-6
                 shadow-sm
@@ -83,7 +83,7 @@ const RegisterSuccess = () => {
               md:text-[64px]
               leading-tight
               font-semibold
-              text-[#091426]
+              text-primary
             "
           >
             Welcome to the
@@ -97,7 +97,7 @@ const RegisterSuccess = () => {
               mt-6
               max-w-2xl
               mx-auto
-              text-[#45474c]
+              text-muted
               text-lg
               leading-9
             "
@@ -154,7 +154,7 @@ const RegisterSuccess = () => {
                 tracking-[0.15em]
                 text-sm
                 font-semibold
-                text-[#091426]
+                text-primary
               "
             >
               Complete Your Profile
