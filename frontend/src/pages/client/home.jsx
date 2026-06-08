@@ -12,7 +12,6 @@ import React from 'react'
 const Home = () => {
   return (
     <>
-     <Navbar />
      <HeroSection /> 
      <PopularServices />
      <WhyChooseKaamSetu />
@@ -20,7 +19,7 @@ const Home = () => {
      <HowItWorks />
      <Testimonials />
      <FinalCTA />
-     <Footer />
+     
 
     </>
   )

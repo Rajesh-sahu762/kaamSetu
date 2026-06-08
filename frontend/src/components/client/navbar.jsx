@@ -5,16 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { useTheme } from '@/context/ThemeContext';
 
-
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const {
-  theme,
-  toggleTheme,
-} = useTheme();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,7 +22,12 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = ['Services', 'Experts', 'How It Works', 'Contact'];
+  const navLinks = [
+    { name: 'Services', to: '/Services' },
+    { name: 'Experts', to: '/Experts' },
+    { name: 'How It Works', to: '/How-It-Works' },
+    { name: 'CONTACT', to: '/Contact' },
+  ];
 
   return (
     <>
@@ -211,8 +212,7 @@ const Navbar = () => {
                 bg-card
               "
             >
-               {theme === "light"
-    ? <Sun size={18} /> : <Moon size={18} />}
+              {theme === 'light' ? <Sun size={18} /> : <Moon size={18} />}
             </motion.button>
 
             {/* Notification */}

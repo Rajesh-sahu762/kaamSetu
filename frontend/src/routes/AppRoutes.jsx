@@ -13,12 +13,21 @@ import ResetPassword from '../pages/Auth/ResetPassword';
 import CustomerRegister from '../pages/Auth/CustomerRegister';
 import RegisterSuccess from '../pages/Auth/RegisterSuccess';
 import Home from '@/pages/client/home';
+import ClientLayout from '@/layouts/ClientLayout';
+import Services from '@/pages/client/services';
 
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Routes */}
+        {/* Client */}
+      <Route element={<ClientLayout />}>
+
+      <Route path="/" element={<Home />} />
+      <Route path='/services' element={<Services />} />
+      </Route>
+
+      {/* Auth Routes */}
       <Route path="/login" element={<LoginView />} />
       <Route path="/Join" element={<JoinKaamsetu />} />
       <Route path="/register/vendor/Profile" element={<VendorProfileStep1 />} />
@@ -33,12 +42,11 @@ const AppRoutes = () => {
         element={<VendorPendingApproval />}
       />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="*" element={<LoginView />} />
+      {/* <Route path="*" element={<LoginView />} /> */}
       <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register/customer" element={<CustomerRegister />} />
       <Route path="/register/success" element={<RegisterSuccess />} />
-      <Route path="/" element={<Home />} />
     </Routes>
   );
 };
