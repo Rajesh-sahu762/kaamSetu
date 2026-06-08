@@ -4,6 +4,7 @@ import { Search, Bell, Moon, Sun, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useTheme } from '@/context/ThemeContext';
+import { Link, useNavigate  } from "react-router-dom";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -22,12 +23,39 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: 'Services', to: '/Services' },
-    { name: 'Experts', to: '/Experts' },
-    { name: 'How It Works', to: '/How-It-Works' },
-    { name: 'CONTACT', to: '/Contact' },
-  ];
+ const navLinks = [
+  {
+    name: "Services",
+    to: "/services",
+  },
+  {
+    name: "Experts",
+    to: "/experts",
+  },
+  {
+    name: "How It Works",
+    to: "/how-it-works",
+  },
+  {
+    name: "Contact",
+    to: "/contact",
+  },
+];
+
+const navigate = useNavigate()
+
+const btnClick = (type) => {
+
+  if (type === "login") {
+    navigate("/login");
+  }
+
+  else if (type === "vendor") {
+    navigate("/register/vendor/profile");
+  }
+
+};
+
 
   return (
     <>
@@ -78,24 +106,27 @@ const Navbar = () => {
           "
         >
           {/* Logo */}
+          <Link to={"/"}>
+          
           <motion.div
             whileHover={{
               scale: 1.03,
             }}
             className="cursor-pointer"
-          >
+            >
             <h1
               className="
                 text-[15px]
                 font-semibold
                 tracking-[0.35em]
-              "
+                "
             >
               <span className="text-primary">KAAM</span>
 
               <span className="text-[#745A38]">SETU</span>
             </h1>
           </motion.div>
+                </Link>
 
           {/* Desktop Links */}
 
@@ -107,33 +138,26 @@ const Navbar = () => {
               gap-8
             "
           >
-            {navLinks.map((item) => (
-              <motion.a
-                key={item}
-                href="#"
-                whileHover={{
-                  y: -2,
-                }}
-                className="
-                  relative
-                  text-muted
-                  hover:text-primary
-                  transition
-
-                  after:absolute
-                  after:left-0
-                  after:-bottom-1
-                  after:w-0
-                  after:h-[2px]
-                  after:bg-[#745A38]
-                  after:transition-all
-
-                  hover:after:w-full
-                "
-              >
-                {item}
-              </motion.a>
-            ))}
+         {navLinks.map((item) => (
+  <motion.div
+    key={item.name}
+    whileHover={{
+      y: -2,
+    }}
+  >
+    <Link
+      to={item.to}
+      className="
+        relative
+        text-muted
+        hover:text-primary
+        transition
+      "
+    >
+      {item.name}
+    </Link>
+  </motion.div>
+))}
           </nav>
 
           {/* Search */}
@@ -262,6 +286,7 @@ const Navbar = () => {
               whileHover={{
                 y: -2,
               }}
+               onClick={() => btnClick("login")}
               className="
                 px-5
                 py-2.5
@@ -287,6 +312,8 @@ const Navbar = () => {
               whileTap={{
                 scale: 0.98,
               }}
+             onClick={() => btnClick("vendor")}
+
               className="
                 px-6
                 py-3
@@ -372,7 +399,7 @@ const Navbar = () => {
               "
             >
               {navLinks.map((item, index) => (
-                <motion.a
+                <motion.div
                   key={item}
                   initial={{
                     opacity: 0,
@@ -391,8 +418,17 @@ const Navbar = () => {
                       font-medium
                     "
                 >
-                  {item}
-                </motion.a>
+                  <Link
+                  to={item.to}
+                  className="
+        relative
+        hover:text-primary
+        transition
+      "
+                  >
+                  {item.name}
+                  </Link>
+                </motion.div>
               ))}
 
               <div
@@ -404,18 +440,12 @@ const Navbar = () => {
                   mt-8
                 "
               >
-                <button
-                  className="
-                    py-4
-                    rounded-xl
-                    bg-card
-                    text-primary
-                  "
-                >
-                  Login
-                </button>
+              
 
                 <button
+                
+
+               onClick={() => btnClick("login")}
                   className="
                     py-4
                     rounded-xl
@@ -430,6 +460,7 @@ const Navbar = () => {
                 </button>
 
                 <button
+                 onClick={() => btnClick("vendor")}
                   className="
                     py-4
                     rounded-xl
