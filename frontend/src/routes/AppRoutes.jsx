@@ -18,6 +18,8 @@ import Services from '@/pages/client/services';
 import Experts from '@/pages/client/experts';
 import ExpertProfile from '@/pages/client/expertProfile';
 import BookingPage from '@/pages/client/BookingPage';
+import CheckoutPage from '@/pages/client/CheckoutPage';
+import BookingSuccess from '@/pages/client/BookingSuccess';
 
 
 const AppRoutes = () => {
@@ -30,7 +32,9 @@ const AppRoutes = () => {
       <Route path='/services' element={<Services />} />
       <Route path='/experts' element={<Experts />} />
       <Route path='/expertProfile' element={<ExpertProfile />} />
-      <Route path='/booking' element={<BookingPage/>}  />
+      <Route path='/booking' element={<BookingPage />}  />
+      <Route path='/checkout' element={<CheckoutPage />}  />
+      <Route path='/bookingSuccess' element={<BookingSuccess />}  />
       </Route>
 
       {/* Auth Routes */}
