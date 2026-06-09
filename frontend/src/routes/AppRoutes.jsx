@@ -16,6 +16,8 @@ import Home from '@/pages/client/home';
 import ClientLayout from '@/layouts/ClientLayout';
 import Services from '@/pages/client/services';
 import Experts from '@/pages/client/experts';
+import ExpertProfile from '@/pages/client/expertProfile';
+import BookingPage from '@/pages/client/BookingPage';
 
 
 const AppRoutes = () => {
@@ -27,6 +29,8 @@ const AppRoutes = () => {
       <Route path="/" element={<Home />} />
       <Route path='/services' element={<Services />} />
       <Route path='/experts' element={<Experts />} />
+      <Route path='/expertProfile' element={<ExpertProfile />} />
+      <Route path='/booking' element={<BookingPage/>}  />
       </Route>
 
       {/* Auth Routes */}
