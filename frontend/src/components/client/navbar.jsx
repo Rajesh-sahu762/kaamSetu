@@ -52,7 +52,7 @@ const navLinks = [
   },
   {
     name: "Support",
-    to: "/contact",
+    to: "/support",
   },
 ];
 

@@ -286,7 +286,7 @@ const ReviewsSection = () => {
               <button
                 onClick={() =>
                   navigate(
-                    "/expert/1/reviews"
+                    "/review/:bookingId"
                   )
                 }
                 className="

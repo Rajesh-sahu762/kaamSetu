@@ -25,6 +25,8 @@ import MyBookingsPage from '@/pages/client/MyBookingsPage';
 import CustomerProfilePage from '@/pages/client/CustomerProfilePage';
 import NotificationsPage from '@/pages/client/NotificationsPage';
 import WriteReviewPage from '@/pages/client/WriteReviewPage';
+import SupportPage from '@/pages/client/SupportPage';
+import NotFound from '@/pages/client/NotFound';
 
 
 const AppRoutes = () => {
@@ -45,6 +47,8 @@ const AppRoutes = () => {
       <Route path='/profile' element={<CustomerProfilePage />} />
       <Route path='/notifications' element={<NotificationsPage />} />
       <Route path='/review/:bookingId' element={<WriteReviewPage />} />
+      <Route path='/support' element={<SupportPage />} />
+      <Route path='*' element={<NotFound />} />
 
       </Route>
 
