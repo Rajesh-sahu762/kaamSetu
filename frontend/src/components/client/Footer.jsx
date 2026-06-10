@@ -1,7 +1,9 @@
 import {
-  Send,
   ArrowUp,
-} from 'lucide-react';
+  ChevronDown,
+} from "lucide-react";
+
+import { useState } from "react";
 
 import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
 
@@ -30,21 +32,21 @@ const Footer = () => {
       />
 
       <div className="relative max-w-[1280px] mx-auto px-6 lg:px-8">
-        {/* Newsletter */}
 
 
         {/* Main Footer */}
 
         <div
-          className="
-            py-20
+  className="
+    hidden lg:grid
 
-            grid
-            lg:grid-cols-5
+    py-20
 
-            gap-10
-          "
-        >
+    lg:grid-cols-5
+
+    gap-10
+  "
+>
           {/* Brand */}
 
           <div className="lg:col-span-2">
@@ -134,6 +136,98 @@ const Footer = () => {
             ]}
           />
         </div>
+
+        {/* Mobile Footer */}
+
+<div className="lg:hidden py-12">
+  
+  <div className="text-center">
+    
+    <h2
+      className="
+        text-3xl
+        font-bold
+        tracking-[0.25em]
+      "
+    >
+      <span className="text-white">KAAM</span>
+      <span className="text-[#C59A6A]">SETU</span>
+    </h2>
+
+    <p
+      className="
+        mt-4
+        text-[#9cb4d8]
+        leading-7
+      "
+    >
+      Trusted local services at your fingertips.
+    </p>
+
+    <div
+      className="
+        flex
+        justify-center
+        gap-4
+        mt-8
+      "
+    >
+      <SocialIcon>
+        <FaFacebook size={18} />
+      </SocialIcon>
+
+      <SocialIcon>
+        <FaInstagram size={18} />
+      </SocialIcon>
+
+      <SocialIcon>
+        <FaLinkedin size={18} />
+      </SocialIcon>
+
+      <SocialIcon>
+        <FaTwitter size={18} />
+      </SocialIcon>
+    </div>
+  </div>
+
+  <div className="mt-10">
+
+    <MobileFooterSection
+      title="Services"
+      links={[
+        "Electrician",
+        "Plumber",
+        "Carpenter",
+        "Painter",
+        "AC Repair",
+      ]}
+    />
+
+    <MobileFooterSection
+      title="Company"
+      links={[
+        "About Us",
+        "How It Works",
+        "Careers",
+        "Contact",
+        "Blog",
+      ]}
+    />
+
+    <MobileFooterSection
+      title="Support"
+      links={[
+        "Help Center",
+        "Privacy Policy",
+        "Terms",
+        "Refund Policy",
+        "FAQ",
+      ]}
+    />
+
+  </div>
+
+</div>
 
         {/* Bottom */}
 
@@ -228,35 +322,101 @@ const FooterColumn = ({ title, links }) => {
   );
 };
 
+const MobileFooterSection = ({ title, links }) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="border-b border-[#22324a] py-4">
+      
+      <button
+        onClick={() => setOpen(!open)}
+        className="
+          w-full
+          flex
+          justify-between
+          items-center
+          text-white
+          font-medium
+        "
+      >
+        {title}
+
+        <motion.div
+          animate={{
+            rotate: open ? 180 : 0,
+          }}
+        >
+          <ChevronDown size={18} />
+        </motion.div>
+      </button>
+
+      <motion.div
+        initial={false}
+        animate={{
+          height: open ? "auto" : 0,
+          opacity: open ? 1 : 0,
+        }}
+        className="overflow-hidden"
+      >
+        <div className="pt-4 space-y-3">
+
+          {links.map((item) => (
+            <a
+              key={item}
+              href="#"
+              className="
+                block
+                text-[#d3e4fe]
+                hover:text-[#C59A6A]
+              "
+            >
+              {item}
+            </a>
+          ))}
+
+        </div>
+      </motion.div>
+
+    </div>
+  );
+};
+
 const SocialIcon = ({ children }) => {
   return (
     <motion.a
       whileHover={{
-        y: -4,
-        scale: 1.05,
-      }}
+  y: -3,
+  scale: 1.08,
+}}
+
+whileTap={{
+  scale: 0.95,
+}}
       href="#"
-      className="
-        w-11
-        h-11
+     className="
+  w-12
+  h-12
 
-        rounded-xl
+  rounded-2xl
 
-        bg-[#132033]
+  bg-white/5
 
-        border
-        border-[#22324a]
+  backdrop-blur-md
 
-        flex
-        items-center
-        justify-center
+  border
+  border-white/10
 
-        text-white
+  flex
+  items-center
+  justify-center
 
-        hover:bg-[#745A38]
+  text-white
 
-        transition-all
-      "
+  hover:border-[#C59A6A]
+  hover:bg-[#C59A6A]/10
+
+  transition-all
+"
     >
       {children}
     </motion.a>

@@ -294,7 +294,7 @@ const HowItWorks = () => {
 
         {/* CTA */}
 
-        <div className="mt-16 text-center">
+        {/* <div className="mt-16 text-center">
           <button
             className="
               px-8
@@ -314,6 +314,7 @@ const HowItWorks = () => {
             Get Started Today
           </button>
         </div>
+         */}
       </div>
     </section>
   );
