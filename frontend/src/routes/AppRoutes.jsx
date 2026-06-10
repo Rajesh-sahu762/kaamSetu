@@ -20,6 +20,11 @@ import ExpertProfile from '@/pages/client/expertProfile';
 import BookingPage from '@/pages/client/BookingPage';
 import CheckoutPage from '@/pages/client/CheckoutPage';
 import BookingSuccess from '@/pages/client/BookingSuccess';
+import TrackBookingPage from '@/pages/client/TrackBookingPage';
+import MyBookingsPage from '@/pages/client/MyBookingsPage';
+import CustomerProfilePage from '@/pages/client/CustomerProfilePage';
+import NotificationsPage from '@/pages/client/NotificationsPage';
+import WriteReviewPage from '@/pages/client/WriteReviewPage';
 
 
 const AppRoutes = () => {
@@ -31,15 +36,21 @@ const AppRoutes = () => {
       <Route path="/" element={<Home />} />
       <Route path='/services' element={<Services />} />
       <Route path='/experts' element={<Experts />} />
-      <Route path='/expertProfile' element={<ExpertProfile />} />
+      <Route path='/expert/:id' element={<ExpertProfile />} />
       <Route path='/booking' element={<BookingPage />}  />
       <Route path='/checkout' element={<CheckoutPage />}  />
-      <Route path='/bookingSuccess' element={<BookingSuccess />}  />
+      <Route path='/booking-success' element={<BookingSuccess />}  />
+      <Route path='/booking/:id' element={<TrackBookingPage />} />
+      <Route path='/my-booking' element={<MyBookingsPage />} />
+      <Route path='/profile' element={<CustomerProfilePage />} />
+      <Route path='/notifications' element={<NotificationsPage />} />
+      <Route path='/review/:bookingId' element={<WriteReviewPage />} />
+
       </Route>
 
       {/* Auth Routes */}
       <Route path="/login" element={<LoginView />} />
-      <Route path="/Join" element={<JoinKaamsetu />} />
+      <Route path="/join" element={<JoinKaamsetu />} />
       <Route path="/register/vendor/Profile" element={<VendorProfileStep1 />} />
       <Route
         path="/register/vendor/business"
@@ -52,7 +63,8 @@ const AppRoutes = () => {
         element={<VendorPendingApproval />}
       />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      {/* <Route path="*" element={<LoginView />} /> */}
+      {/* <Route path="*" element={<LoginView /
+      >} /> */} 
       <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register/customer" element={<CustomerRegister />} />
