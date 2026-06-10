@@ -1,8 +1,10 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Wrench, Hammer, Paintbrush, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   const { scrollY } = useScroll();
+  const navigate = useNavigate();
 
   const y1 = useTransform(scrollY, [0, 500], [0, -120]);
   const y2 = useTransform(scrollY, [0, 500], [0, -70]);
@@ -67,6 +69,7 @@ const HeroSection = () => {
             <div className="mt-10 flex flex-col sm:flex-row gap-4">
               
               <button
+              onClick={() => navigate('/services') }
                 className="
                   bg-[#091426]
                   text-white
@@ -84,6 +87,7 @@ const HeroSection = () => {
               </button>
 
               <button
+              onClick={() => navigate('/register/vendor/Profile')}
                 className="
                   border
                   border-[#c5c6cd]

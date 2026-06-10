@@ -4,8 +4,10 @@ import {
   Briefcase,
   Wrench,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const FinalCTA = () => {
+  const navigate = useNavigate();
   return (
     <section className="py-15 bg-card">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
@@ -141,6 +143,7 @@ const FinalCTA = () => {
                   whileTap={{
                     scale: 0.98,
                   }}
+                  onClick={() => navigate('/services')}
                   className="
                     flex
                     items-center
@@ -167,6 +170,7 @@ const FinalCTA = () => {
                 {/* Vendor CTA */}
 
                 <motion.button
+                onClick={() => navigate('/register/vendor/Profile')}
                   whileHover={{
                     y: -3,
                     scale: 1.03,

@@ -3,6 +3,7 @@ import {
   Star,
   Quote,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const testimonials = [
   {
@@ -29,6 +30,7 @@ const testimonials = [
 ];
 
 const Testimonials = () => {
+  const navigate = useNavigate()
   return (
     <section className="py-24 bg-card">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
@@ -210,6 +212,29 @@ const Testimonials = () => {
             )
           )}
         </div>
+
+  <div className="text-center mt-16">
+          <button
+          onClick={() => navigate('/review/:bookingId')}
+            className="
+              px-8
+              py-4
+
+              rounded-xl
+
+              bg-[#091426]
+              text-white
+
+              hover:-translate-y-1
+              transition-all
+
+              shadow-lg
+            "
+          >
+            View All Reviews
+          </button>
+        </div>
+
       </div>
     </section>
   );

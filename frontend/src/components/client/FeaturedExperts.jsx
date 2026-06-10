@@ -5,6 +5,7 @@ import {
   Briefcase,
   BadgeCheck,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const experts = [
   {
@@ -54,6 +55,9 @@ const experts = [
 ];
 
 const FeaturedExperts = () => {
+
+  const navigate =useNavigate();
+
   return (
     <section className="py-24 bg-card">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
@@ -111,6 +115,7 @@ const FeaturedExperts = () => {
         >
           {experts.map((expert, index) => (
             <motion.div
+            onClick={() => navigate('/expert/:id')}
               key={expert.id}
               initial={{
                 opacity: 0,
@@ -289,6 +294,7 @@ const FeaturedExperts = () => {
 
         <div className="text-center mt-16">
           <button
+          onClick={() => navigate('/experts')}
             className="
               px-8
               py-4

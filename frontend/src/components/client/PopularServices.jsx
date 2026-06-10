@@ -9,6 +9,8 @@ import {
   Sparkles,
   ShieldCheck,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 
 const services = [
   {
@@ -54,6 +56,10 @@ const services = [
 ];
 
 const PopularServices = () => {
+
+  const navigate = useNavigate()
+
+
   return (
     <section className="py-22 bg-card">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
@@ -114,6 +120,11 @@ const PopularServices = () => {
 
             return (
               <motion.div
+              onClick={() =>
+  navigate(
+    `/services?category=${service.title}`
+  )
+}
                 key={service.title}
                 initial={{
                   opacity: 0,
@@ -148,23 +159,25 @@ const PopularServices = () => {
               >
                 {/* Icon */}
 
-                <div
-                  className="
-                    w-14
-                    h-14
-                    rounded-xl
-                    bg-card
-                    border
-                    border-theme
+             <div
+  className="
+    w-14
+    h-14
 
-                    flex
-                    items-center
-                    justify-center
+    rounded-xl
 
-                    group-hover:bg-[#091426]
-                    transition-all
-                  "
-                >
+    bg-[#745A38]/10
+
+    flex
+    items-center
+    justify-center
+
+    transition-all
+    duration-300
+
+    group-hover:bg-[#745A38]
+  "
+>
                   <Icon
                     size={24}
                     className="
@@ -230,7 +243,8 @@ const PopularServices = () => {
 
         <div className="text-center mt-16">
           <button
-            className="
+           onClick={() => navigate('/services') }
+           className="
               px-8
               py-4
               rounded-xl
