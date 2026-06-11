@@ -11,12 +11,29 @@ import {
   CheckCircle2,
   Clock3,
 } from 'lucide-react';
+import { AuthContext } from '@/context/authContext';
 
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
 
 const CustomerProfilePage = () => {
+
+  const { logout } = useContext(AuthContext)
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+
+  logout();
+
+  navigate(
+    "/login",
+    {
+      replace: true,
+    }
+  );
+
+};
 
   return (
     <section
@@ -379,6 +396,9 @@ const CustomerProfilePage = () => {
             mt-10
 
             bg-card
+            flex  
+          
+            justify-center
 
             border
             border-red-200
@@ -389,10 +409,13 @@ const CustomerProfilePage = () => {
           "
         >
           <button
+          onClick={handleLogout}
             className="
               flex
+              cursor-pointer
 
               items-center
+            
 
               gap-3
 

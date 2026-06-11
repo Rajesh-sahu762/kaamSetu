@@ -34,6 +34,8 @@ const registerUser = async (req, res) => {
       mobile,
       role: "customer",
     });
+
+    
     await newUser.save();
     res.status(201).json({
       success: true,
