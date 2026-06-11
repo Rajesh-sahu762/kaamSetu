@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { FaGoogle } from "react-icons/fa";
 import { FaApple } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { loginUser } from "@/services/authService";
 import { toast } from "react-toastify"
 
 const Login = () => {
+
+  const location = useLocation()
+
+  const from = location.state?.form?.pathname
 
 
   const navigate = useNavigate()
@@ -23,34 +27,58 @@ const Login = () => {
     };
 
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-     const response = await loginUser({
-  email: formData.email,
-  password: formData.password,
-});
+  try {
+    const response = await loginUser({
+      email: formData.email,
+      password: formData.password,
+    });
 
-    localStorage.setItem(
-      "token",
-      response.token
+
+
+    localStorage.setItem("token", response.token);
+    localStorage.setItem("user", JSON.stringify(response.user));
+
+    toast.success(response.message);
+    
+    const user = response.user;
+
+if (user.role === "customer") {
+
+  navigate(
+    from || "/"
+  );
+
+}
+else if (
+  user.role === "vendor"
+) {
+
+  navigate(
+    "/vendor/dashboard"
+  );
+
+}
+else if (
+  user.role === "Admin"
+) {
+
+  navigate(
+    "/admin/dashboard"
+  );
+
+}
+  } catch (error) {
+    console.log("Full Error:", error);
+    console.log("Response Data:", error.response?.data);
+
+    toast.error(
+      error.response?.data?.message || "An error occurred"
     );
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(response.user)
-    );
-
-    toast.success(response.message)
-
-    navigate("/join");
-      
-    } catch (error) {
-  toast.error(error.response?.data?.message || "An error occurred");
-    }
-
   }
+};
 
   return (
     <section className="min-h-screen bg-card flex items-center justify-center px-4 py-8">

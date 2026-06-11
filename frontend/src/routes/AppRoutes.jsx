@@ -27,6 +27,7 @@ import NotificationsPage from '@/pages/client/NotificationsPage';
 import WriteReviewPage from '@/pages/client/WriteReviewPage';
 import SupportPage from '@/pages/client/SupportPage';
 import NotFound from '@/pages/client/NotFound';
+import ProtectedRoute from './ProtectedRoute';
 
 
 const AppRoutes = () => {
@@ -40,6 +41,12 @@ const AppRoutes = () => {
       <Route path='/experts' element={<Experts />} />
       <Route path='/expert/:id' element={<ExpertProfile />} />
       <Route path='/booking' element={<BookingPage />}  />
+      <Route path='*' element={<NotFound />} />
+      <Route path='/support' element={<SupportPage />} />
+
+      {/* Protected */}
+      <Route element={<ProtectedRoute />}>
+      
       <Route path='/checkout' element={<CheckoutPage />}  />
       <Route path='/booking-success' element={<BookingSuccess />}  />
       <Route path='/booking/:id' element={<TrackBookingPage />} />
@@ -47,9 +54,8 @@ const AppRoutes = () => {
       <Route path='/profile' element={<CustomerProfilePage />} />
       <Route path='/notifications' element={<NotificationsPage />} />
       <Route path='/review/:bookingId' element={<WriteReviewPage />} />
-      <Route path='/support' element={<SupportPage />} />
-      <Route path='*' element={<NotFound />} />
 
+      </Route>
       </Route>
 
       {/* Auth Routes */}
