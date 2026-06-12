@@ -75,7 +75,7 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       {/* <Route path="*" element={<LoginView /
       >} /> */} 
-      <Route path="/verify-otp" element={<VerifyOtp />} />
+      <Route path="/verify-email" element={<VerifyOtp />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register/customer" element={<CustomerRegister />} />
       <Route path="/register/success" element={<RegisterSuccess />} />

@@ -36,7 +36,12 @@ const CustomerRegister = () => {
         mobile: formData.mobile,
         password: formData.password,
       })
-      navigate("/login");
+   
+      navigate("/verify-email", {
+  state: {
+    email: values.email,
+  },
+});
       
       toast.success("Account created successfully! Please verify your email.");
 

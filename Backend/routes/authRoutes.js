@@ -1,16 +1,24 @@
-const express = require('express')
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 
-const { registerUser, LoginUser, vendorRegister } = require('../controllers/authController')
+const {
+  registerUser,
+  LoginUser,
+  vendorRegister,
+  verifyEmailOtp,
+} = require("../controllers/authController");
 
 // Register Route
 
-router.post('/register', registerUser)
+router.post("/register", registerUser);
 
 // Login Route
-router.post('/login', LoginUser)
+router.post("/login", LoginUser);
 
 // Vendor Register Route
-router.post('/vendor/register',vendorRegister)
+router.post("/vendor/register", vendorRegister);
 
-module.exports = router
+// email verification
+router.post("/verify-email", verifyEmailOtp);
+
+module.exports = router;
