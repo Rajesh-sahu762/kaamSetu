@@ -39,7 +39,7 @@ const CustomerRegister = () => {
    
       navigate("/verify-email", {
   state: {
-    email: values.email,
+    email: formData.email
   },
 });
       
@@ -47,8 +47,15 @@ const CustomerRegister = () => {
 
       
     } catch (error) {
-      toast.error("An error occurred while creating the account. Please try again.");
-      throw error;
+
+  console.log(
+    "ERROR RESPONSE:",
+    error.response?.data
+  );
+
+  toast.error(
+    error.response?.data?.message
+  );
     }
 
   };
@@ -216,6 +223,7 @@ const CustomerRegister = () => {
                   type="submit"
                   className="
                     w-full
+                    cursor-pointer
                     mt-8
                     bg-[#091426]
                     text-white

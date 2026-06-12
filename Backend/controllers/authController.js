@@ -38,14 +38,15 @@ const registerUser = async (req, res) => {
   password: hashedPassword,
   mobile,
   role: "customer",
-
   otp,
   otpExpiresAt:
     new Date(Date.now() + 10 * 60 * 1000),
 });
 
-    
     await newUser.save();
+
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("PASS LENGTH:", process.env.EMAIL_PASS.length);
 
     await transporter.sendMail({
   from: process.env.EMAIL_USER,
@@ -64,7 +65,6 @@ const registerUser = async (req, res) => {
     <p>Valid for 10 minutes.</p>
   `,
 });
-
 
     res.status(201).json({
       success: true,
@@ -128,6 +128,65 @@ const verifyEmailOtp = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message,
+    });
+
+  }
+};
+
+const resendOtp = async (req, res) => {
+  try {
+
+    const { email } = req.body;
+
+    const user =
+      await userModel.findOne({
+        email
+      });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const otp = generateOtp();
+
+    user.otp = otp;
+
+    user.otpExpiresAt =
+      new Date(
+        Date.now() +
+        10 * 60 * 1000
+      );
+
+    await user.save();
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+
+      to: email,
+
+      subject:
+        "KaamSetu OTP",
+
+      html: `
+        <h2>Your OTP</h2>
+        <h1>${otp}</h1>
+      `
+    });
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "OTP resent successfully"
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
     });
 
   }
@@ -298,4 +357,5 @@ module.exports = {
   LoginUser,
   vendorRegister,
   verifyEmailOtp,
+  resendOtp
 };

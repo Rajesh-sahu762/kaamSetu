@@ -9,13 +9,24 @@ export const registerUser = async (userData) => {
   }
 };
 
+export const verifyEmailOtp = async (data) => {
+  const response = await api.post('/auth/verify-email', data);
+
+  return response.data;
+};
+
+export const resendOtp = async (email) => {
+  const response = await api.post('/auth/resend-otp', { email });
+
+  return response.data;
+};
+
 export const vendorRegister = async (vendorData) => {
   try {
     const response = await api.post('/auth/vendor/register', vendorData);
     return response.data;
   } catch (error) {
     throw error;
-    
   }
 };
 
