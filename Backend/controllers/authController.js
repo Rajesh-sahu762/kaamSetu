@@ -47,14 +47,6 @@ const registerUser = async (req, res) => {
     
     await newUser.save();
 
-    transporter.verify(function (error, success) {
-  if (error) {
-    console.log("MAIL ERROR:", error);
-  } else {
-    console.log("MAIL SERVER READY");
-  }
-});
-
     await transporter.sendMail({
   from: process.env.EMAIL_USER,
 
