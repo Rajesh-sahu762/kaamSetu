@@ -9,6 +9,7 @@ const {
   resendOtp,
   forgotPassword,
   resetPassword,
+  googleLogin
 } = require("../controllers/authController");
 
 // Register Route
@@ -31,5 +32,7 @@ router.post("/resend-otp", resendOtp);
 router.post("/forgot-password", forgotPassword);
 
 router.post("/reset-password", resetPassword);
+
+router.post("/google", googleLogin);
 
 module.exports = router;

@@ -9,6 +9,19 @@ export const registerUser = async (userData) => {
   }
 };
 
+
+export const googleLogin =
+  async (data) => {
+
+    const response =
+      await api.post(
+        "/auth/google",
+        data
+      );
+
+    return response.data;
+};
+
 export const verifyEmailOtp = async (data) => {
   const response = await api.post('/auth/verify-email', data);
 

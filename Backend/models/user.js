@@ -20,14 +20,18 @@ const userSchema = new mongoose.Schema(
 
     mobile: {
       type: String,
-      required: true,
+       required: function () {
+    return this.provider === "local";
+  },
       unique: true,
       trim: true,
     },
 
     password: {
       type: String,
-      required: true,
+      required: function () {
+    return this.provider === "local";
+  },
     },
 
     role: {
@@ -58,6 +62,20 @@ otpExpiresAt: {
   type: Date,
   default: null,
 },
+
+googleId: {
+  type: String,
+  default: null,
+},
+
+provider: {
+  type: String,
+  enum: ["local", "google"],
+  default: "local",
+},
+
+
+
   },
   {
     timestamps: true,

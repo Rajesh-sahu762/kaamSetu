@@ -1,3 +1,5 @@
+const { OAuth2Client } = require("google-auth-library");
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user");
@@ -111,25 +113,21 @@ const verifyEmailOtp = async (req, res) => {
 
     await user.save();
 
-    const token = jwt.sign(
-  { userId: user._id },
-  process.env.JWT_SECRET,
-  {
-    expiresIn: "2h",
-  }
-);
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "2h",
+    });
 
     return res.status(200).json({
-  "success": true,
-  "message": "Email verified successfully",
-   token,
+      success: true,
+      message: "Email verified successfully",
+      token,
       user: {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
         role: user.role,
       },
-});
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -262,6 +260,102 @@ const resetPassword = async (req, res) => {
     });
   }
 };
+
+
+const googleLogin = async (req, res) => {
+  try {
+
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        message: "Google credential is required",
+      });
+    }
+
+    const ticket =
+      await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+
+    const payload = ticket.getPayload();
+
+    const email = payload.email;
+    const fullName = payload.name;
+    const googleId = payload.sub;
+    const profileImage = payload.picture;
+
+    let user = await userModel.findOne({
+      email,
+    });
+
+    // Existing User
+    if (user) {
+
+      // Google account link
+      if (!user.googleId) {
+        user.googleId = googleId;
+        user.provider = "google";
+
+        await user.save();
+      }
+
+    } else {
+
+      // New User
+      user = await userModel.create({
+        fullName,
+        email,
+
+        role: "customer",
+
+        googleId,
+
+        provider: "google",
+
+        profileImage,
+
+        isVerified: true,
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        userId: user._id,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "2h",
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Google login successful",
+
+      token,
+
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        profileImage: user.profileImage,
+      },
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
 
 const LoginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -429,5 +523,6 @@ module.exports = {
   verifyEmailOtp,
   resendOtp,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  googleLogin
 };
