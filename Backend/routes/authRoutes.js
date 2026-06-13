@@ -7,6 +7,8 @@ const {
   vendorRegister,
   verifyEmailOtp,
   resendOtp,
+  forgotPassword,
+  resetPassword,
 } = require("../controllers/authController");
 
 // Register Route
@@ -22,7 +24,12 @@ router.post("/vendor/register", vendorRegister);
 // email verification
 router.post("/verify-email", verifyEmailOtp);
 
-// reset otp 
+// reset otp
 router.post("/resend-otp", resendOtp);
+
+// forgot-password
+router.post("/forgot-password", forgotPassword);
+
+router.post("/reset-password", resetPassword);
 
 module.exports = router;

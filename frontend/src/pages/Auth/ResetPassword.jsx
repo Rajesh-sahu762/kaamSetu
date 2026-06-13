@@ -1,33 +1,38 @@
-import React, { useState } from "react";
-import {
-  FaArrowRight,
-  FaRedoAlt,
-} from "react-icons/fa";
+import React, { useEffect, useState } from 'react';
+import { FaArrowRight, FaRedoAlt } from 'react-icons/fa';
 
-import {
-  FiEye,
-  FiEyeOff,
-} from "react-icons/fi";
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
-import AuthHeader from "../../components/auth/AuthHeader";
-import AuthFooter from "../../components/auth/AuthFooter";
+import AuthHeader from '../../components/auth/AuthHeader';
+import AuthFooter from '../../components/auth/AuthFooter';
+import { resetPassword } from '@/services/authService';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const location = useLocation();
 
-  const [
-    showConfirmPassword,
-    setShowConfirmPassword,
-  ] = useState(false);
+  const email = location.state?.email;
+
+
+  useEffect(() => {
+  if (!email) {
+    navigate("/forgot-password");
+  }
+}, []);
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    password: "",
-    confirmPassword: "",
+    password: '',
+    confirmPassword: '',
   });
 
   const handleChange = (e) => {
@@ -37,80 +42,82 @@ const ResetPassword = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      formData.password !==
-      formData.confirmPassword
-    ) {
-      alert("Passwords do not match");
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
       return;
     }
 
-    // API Call
+    try {
+      setLoading(true);
 
-    navigate("/login");
+      const response = await resetPassword({
+  email,
+  password: formData.password,
+});
+
+      toast.success(response.message);
+
+      navigate('/login');
+    } catch (error) {
+
+  console.log(
+    "FULL ERROR:",
+    error
+  );
+
+  console.log(
+    "RESPONSE:",
+    error.response
+  );
+
+  console.log(
+    "DATA:",
+    error.response?.data
+  );
+
+} finally {
+      setLoading(false);
+    }
   };
 
   return (
     <section className="min-h-screen bg-card flex flex-col">
-
       <AuthHeader />
 
       <main className="flex-1 flex items-center justify-center px-4 py-10">
-
         <div className="w-full max-w-[520px] bg-card border border-theme rounded-lg p-6 md:p-10 shadow-sm">
-
           {/* Icon */}
           <div className="flex justify-center">
-
             <div className="w-16 h-16 rounded-xl bg-[#e5eeff] flex items-center justify-center">
-
-              <FaRedoAlt
-                size={20}
-                className="text-primary"
-              />
-
+              <FaRedoAlt size={20} className="text-primary" />
             </div>
-
           </div>
 
           {/* Heading */}
           <div className="text-center mt-8">
-
             <h1 className="text-4xl font-semibold text-primary">
               Set New Password
             </h1>
 
             <p className="mt-4 text-muted leading-7">
-              Please create a strong, secure password
-              for your account.
+              Please create a strong, secure password for your account.
             </p>
-
           </div>
 
           {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="mt-10"
-          >
-
+          <form onSubmit={handleSubmit} className="mt-10">
             {/* Password */}
             <div>
-
               <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-4">
                 New Password
               </label>
 
               <div className="relative">
-
                 <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
@@ -130,11 +137,7 @@ const ResetPassword = () => {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword(
-                      !showPassword
-                    )
-                  }
+                  onClick={() => setShowPassword(!showPassword)}
                   className="
                     absolute
                     right-0
@@ -142,32 +145,20 @@ const ResetPassword = () => {
                     text-[#7d8597]
                   "
                 >
-                  {showPassword ? (
-                    <FiEye />
-                  ) : (
-                    <FiEyeOff />
-                  )}
+                  {showPassword ? <FiEye /> : <FiEyeOff />}
                 </button>
-
               </div>
-
             </div>
 
             {/* Confirm Password */}
             <div className="mt-8">
-
               <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-4">
                 Confirm Password
               </label>
 
               <div className="relative">
-
                 <input
-                  type={
-                    showConfirmPassword
-                      ? "text"
-                      : "password"
-                  }
+                  type={showConfirmPassword ? 'text' : 'password'}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -187,11 +178,7 @@ const ResetPassword = () => {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowConfirmPassword(
-                      !showConfirmPassword
-                    )
-                  }
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="
                     absolute
                     right-0
@@ -199,22 +186,15 @@ const ResetPassword = () => {
                     text-[#7d8597]
                   "
                 >
-                  {showConfirmPassword ? (
-                    <FiEye />
-                  ) : (
-                    <FiEyeOff />
-                  )}
+                  {showConfirmPassword ? <FiEye /> : <FiEyeOff />}
                 </button>
-
               </div>
-
             </div>
 
             {/* Note */}
             <p className="mt-8 text-xs text-muted leading-5">
-              Password must be at least 8 characters
-              long and include a mix of letters,
-              numbers, and symbols.
+              Password must be at least 8 characters long and include a mix of
+              letters, numbers, and symbols.
             </p>
 
             {/* Submit */}
@@ -242,15 +222,11 @@ const ResetPassword = () => {
               Update Password
               <FaArrowRight size={12} />
             </button>
-
           </form>
-
         </div>
-
       </main>
 
       <AuthFooter />
-
     </section>
   );
 };

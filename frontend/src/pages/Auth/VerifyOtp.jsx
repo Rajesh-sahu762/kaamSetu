@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FaLock } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -6,16 +6,26 @@ import { verifyEmailOtp } from '@/services/authService';
 import { resendOtp } from '@/services/authService';
 
 import { toast } from 'react-toastify';
-
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthFooter from '../../components/auth/AuthFooter';
+import { AuthContext } from '@/context/authContext';
+
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
 
+  
+
+  const { login } = useContext(AuthContext);
   const location = useLocation();
 
   const email = location.state?.email;
+
+  useEffect(() => {
+    if (!email) {
+      navigate('/login');
+    }
+  }, []);
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
 
@@ -70,34 +80,36 @@ const VerifyOtp = () => {
 
       toast.success(response.message);
 
-      navigate('/login');
+      login(response.user);
+
+      localStorage.setItem('token', response.token);
+
+      if (location.state?.type === 'forgot-password') {
+        navigate('/reset-password', {
+          state: { email },
+          type: 'forgot',
+        });
+      } else {
+        navigate('/register/success', {
+          state: {
+            verified: true,
+          },
+        });
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid OTP');
     }
   };
 
+  const handleResend = async () => {
+    try {
+      const response = await resendOtp(email);
 
-  const handleResend =
-async () => {
-
-  try {
-
-    const response =
-      await resendOtp(email);
-
-    toast.success(
-      response.message
-    );
-
-  } catch (error) {
-
-    toast.error(
-      error.response?.data?.message
-    );
-
-  }
-
-};
+      toast.success(response.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message);
+    }
+  };
 
   return (
     <section className="min-h-screen bg-card flex flex-col">
@@ -182,7 +194,7 @@ async () => {
             <p className="text-muted">Didn't receive a code?</p>
 
             <button
-             onClick={handleResend}
+              onClick={handleResend}
               className="
                 mt-3
                 cursor-pointer

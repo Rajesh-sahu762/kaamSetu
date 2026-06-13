@@ -5,18 +5,50 @@ import { useNavigate } from 'react-router-dom';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthFooter from '../../components/auth/AuthFooter';
 
+import { forgotPassword } from '@/services/authService';
+
+import { toast } from 'react-toastify';
+
 const ForgotPassword = () => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit =
+async (e) => {
 
-    // API Call
+  e.preventDefault();
 
-    navigate('/verify-otp');
-  };
+  try {
+
+    const response =
+      await forgotPassword(email);
+
+    toast.success(
+      response.message
+    );
+
+    navigate(
+      "/verify-email",
+      {
+        state: {
+          email,
+          type:
+            "forgot-password",
+        },
+      }
+    );
+
+  } catch (error) {
+
+    toast.error(
+      error.response?.data?.message ||
+      "Something went wrong"
+    );
+
+  }
+
+};
 
   return (
     <section className="min-h-screen bg-card flex flex-col">
@@ -89,8 +121,6 @@ const ForgotPassword = () => {
               Send Reset Link
               <FaArrowRight size={12} />
             </button>
-
-            
           </form>
         </div>
       </main>

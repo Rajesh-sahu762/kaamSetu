@@ -1,35 +1,40 @@
-import React from "react";
-import {
-  FaShieldAlt,
-} from "react-icons/fa";
+import React, { useEffect } from 'react';
+import { FaShieldAlt } from 'react-icons/fa';
 
-import { MdVerified } from "react-icons/md";
+import { MdVerified } from 'react-icons/md';
+
+import { FaCheckCircle } from 'react-icons/fa';
+
+import { useLocation, useNavigate } from 'react-router-dom';
 
 
-import { FaCheckCircle } from "react-icons/fa";
+import AuthHeader from '../../components/auth/AuthHeader';
+import AuthFooter from '../../components/auth/AuthFooter';
 
-import { useNavigate } from "react-router-dom";
-
-import AuthHeader from "../../components/auth/AuthHeader";
-import AuthFooter from "../../components/auth/AuthFooter";
-
-import successImage from "../../assets/images/success-artisan.png";
+import successImage from '../../assets/images/success-artisan.png';
 
 const RegisterSuccess = () => {
   const navigate = useNavigate();
 
+  const location = useLocation();
+
+useEffect(() => {
+
+   if(!location.state?.verified)
+   {
+      navigate("/");
+   }
+
+}, []);
+
   return (
     <section className="min-h-screen bg-card flex flex-col">
-
       <AuthHeader showBack={false} />
 
       <main className="flex-1 flex items-center justify-center px-6 py-10">
-
         <div className="w-full max-w-4xl text-center">
-
           {/* Image Card */}
           <div className="relative inline-block">
-
             <div
               className="
                 bg-card
@@ -67,12 +72,8 @@ const RegisterSuccess = () => {
                 shadow-lg
               "
             >
-              <FaCheckCircle
-                size={26}
-                className="text-white"
-              />
+              <FaCheckCircle size={26} className="text-white" />
             </div>
-
           </div>
 
           {/* Heading */}
@@ -102,10 +103,9 @@ const RegisterSuccess = () => {
               leading-9
             "
           >
-            Your account has been created.
-            You can now explore and book premium
-            services from India's finest craftspeople.
-            Excellence in every detail, guaranteed.
+            Your account has been created. You can now explore and book premium
+            services from India's finest craftspeople. Excellence in every
+            detail, guaranteed.
           </p>
 
           {/* Buttons */}
@@ -119,11 +119,8 @@ const RegisterSuccess = () => {
               gap-4
             "
           >
-
             <button
-              onClick={() =>
-                navigate("/services")
-              }
+              onClick={() => navigate('/services')}
               className="
                 bg-[#091426]
                 text-white
@@ -141,9 +138,7 @@ const RegisterSuccess = () => {
             </button>
 
             <button
-              onClick={() =>
-                navigate("/dashboard/profile")
-              }
+              onClick={() => navigate('/profile')}
               className="
                 border
                 border-[#7d8597]
@@ -159,7 +154,6 @@ const RegisterSuccess = () => {
             >
               Complete Your Profile
             </button>
-
           </div>
 
           {/* Benefits */}
@@ -174,7 +168,6 @@ const RegisterSuccess = () => {
               text-[#7d8597]
             "
           >
-
             <div className="flex items-center gap-2">
               <MdVerified className="text-[#8b6b3f]" />
               <span>Verified Professionals</span>
@@ -184,15 +177,11 @@ const RegisterSuccess = () => {
               <FaShieldAlt className="text-[#8b6b3f]" />
               <span>Secure Booking</span>
             </div>
-
           </div>
-
         </div>
-
       </main>
 
       <AuthFooter />
-
     </section>
   );
 };

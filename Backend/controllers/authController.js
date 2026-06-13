@@ -2,12 +2,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user");
 const vendorModel = require("../models/vendor");
-const transporter = require('../config/mail')
-const generateOtp = require('../utils/generateOtp')
+const transporter = require("../config/mail");
+const generateOtp = require("../utils/generateOtp");
 
 const registerUser = async (req, res) => {
   try {
-  
     const { fullName, email, mobile, password } = req.body;
     if (!fullName || !email || !mobile || !password) {
       return res.status(400).json({
@@ -33,29 +32,28 @@ const registerUser = async (req, res) => {
 
     // create new user
     const newUser = new userModel({
-  fullName,
-  email,
-  password: hashedPassword,
-  mobile,
-  role: "customer",
-  otp,
-  otpExpiresAt:
-    new Date(Date.now() + 10 * 60 * 1000),
-});
+      fullName,
+      email,
+      password: hashedPassword,
+      mobile,
+      role: "customer",
+      otp,
+      otpExpiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
 
     await newUser.save();
 
     console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("PASS LENGTH:", process.env.EMAIL_PASS.length);
+    console.log("PASS LENGTH:", process.env.EMAIL_PASS.length);
 
     await transporter.sendMail({
-  from: process.env.EMAIL_USER,
+      from: process.env.EMAIL_USER,
 
-  to: email,
+      to: email,
 
-  subject: "KaamSetu Email Verification",
+      subject: "KaamSetu Email Verification",
 
-  html: `
+      html: `
     <h2>Verify Your Email</h2>
 
     <p>Your OTP is:</p>
@@ -64,12 +62,11 @@ console.log("PASS LENGTH:", process.env.EMAIL_PASS.length);
 
     <p>Valid for 10 minutes.</p>
   `,
-});
+    });
 
     res.status(201).json({
       success: true,
-      message:
-  "Registration successful. OTP sent to email.",
+      message: "Registration successful. OTP sent to email.",
       user: newUser,
     });
   } catch (error) {
@@ -82,11 +79,9 @@ console.log("PASS LENGTH:", process.env.EMAIL_PASS.length);
 
 const verifyEmailOtp = async (req, res) => {
   try {
-
     const { email, otp } = req.body;
 
-    const user =
-      await userModel.findOne({ email });
+    const user = await userModel.findOne({ email });
 
     if (!user) {
       return res.status(404).json({
@@ -102,9 +97,7 @@ const verifyEmailOtp = async (req, res) => {
       });
     }
 
-    if (
-      user.otpExpiresAt < new Date()
-    ) {
+    if (user.otpExpiresAt < new Date()) {
       return res.status(400).json({
         success: false,
         message: "OTP expired",
@@ -118,35 +111,45 @@ const verifyEmailOtp = async (req, res) => {
 
     await user.save();
 
+    const token = jwt.sign(
+  { userId: user._id },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "2h",
+  }
+);
+
     return res.status(200).json({
-      success: true,
-      message: "Email verified successfully",
-    });
-
+  "success": true,
+  "message": "Email verified successfully",
+   token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+});
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 
 const resendOtp = async (req, res) => {
   try {
-
     const { email } = req.body;
 
-    const user =
-      await userModel.findOne({
-        email
-      });
+    const user = await userModel.findOne({
+      email,
+    });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
@@ -154,11 +157,7 @@ const resendOtp = async (req, res) => {
 
     user.otp = otp;
 
-    user.otpExpiresAt =
-      new Date(
-        Date.now() +
-        10 * 60 * 1000
-      );
+    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     await user.save();
 
@@ -167,28 +166,100 @@ const resendOtp = async (req, res) => {
 
       to: email,
 
-      subject:
-        "KaamSetu OTP",
+      subject: "KaamSetu OTP",
 
       html: `
         <h2>Your OTP</h2>
         <h1>${otp}</h1>
-      `
+      `,
     });
 
     return res.status(200).json({
       success: true,
-      message:
-        "OTP resent successfully"
+      message: "OTP resent successfully",
     });
-
   } catch (error) {
-
     return res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
+    });
+  }
+};
+
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = generateOtp();
+
+    user.otp = otp;
+
+    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await user.save();
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Reset Password OTP",
+      html: `
+        <h2>Password Reset</h2>
+        <h1>${otp}</h1>
+        <p>Valid for 10 minutes</p>
+      `,
     });
 
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await userModel.findOne({
+      email,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user.password = hashedPassword;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -211,12 +282,11 @@ const LoginUser = async (req, res) => {
     }
 
     if (!user.isVerified) {
-  return res.status(400).json({
-    success: false,
-    message:
-      "Please verify your email first",
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: "Please verify your email first",
+      });
+    }
 
     // compare password
     const isMatch = await bcrypt.compare(password, user.password);
@@ -268,7 +338,7 @@ const vendorRegister = async (req, res) => {
       aadhaarImage,
       panImage,
       radius,
-      profileImage
+      profileImage,
     } = req.body;
     if (
       !fullName ||
@@ -357,5 +427,7 @@ module.exports = {
   LoginUser,
   vendorRegister,
   verifyEmailOtp,
-  resendOtp
+  resendOtp,
+  forgotPassword,
+  resetPassword
 };
