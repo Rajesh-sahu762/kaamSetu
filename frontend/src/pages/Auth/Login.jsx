@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { FaGoogle } from 'react-icons/fa';
 import { FaApple } from 'react-icons/fa';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { loginUser, googleLogin } from '@/services/authService';
@@ -8,6 +7,8 @@ import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const location = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const from = location.state?.form?.pathname;
 
@@ -26,7 +27,9 @@ const Login = () => {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
+    if (isGoogleLoading) return;
     try {
+      setIsGoogleLoading(true);
       const response = await googleLogin({
         credential: credentialResponse.credential,
       });
@@ -40,13 +43,17 @@ const Login = () => {
       navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.message);
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
 
     try {
+      setIsLoading(true);
       const response = await loginUser({
         email: formData.email,
         password: formData.password,
@@ -71,6 +78,8 @@ const Login = () => {
       console.log('Response Data:', error.response?.data);
 
       toast.error(error.response?.data?.message || 'An error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -133,10 +142,26 @@ const Login = () => {
 
           {/* Button */}
           <button
+            disabled={isLoading}
             type="submit"
-            className="cursor-pointer w-full bg-[#091426] text-white uppercase tracking-[0.15em] text-[12px] font-semibold py-4 rounded-md hover:opacity-95 transition"
+            className="
+    cursor-pointer
+    w-full
+    bg-[#091426]
+    text-white
+    uppercase
+    tracking-[0.15em]
+    text-[12px]
+    font-semibold
+    py-4
+    rounded-md
+    hover:opacity-95
+    transition
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+  "
           >
-            SIGN IN →
+            {isLoading ? 'PLEASE WAIT...' : 'SIGN IN →'}
           </button>
         </form>
 
@@ -149,13 +174,29 @@ const Login = () => {
 
         {/* Social */}
         <div className="grid grid-cols-2 gap-4">
-          <GoogleLogin
-            className="flex items-center justify-center gap-3 border border-[#c5c6cd] h-12 rounded-md text-sm font-medium hover:bg-[#eff4ff] transition"
-            onSuccess={handleGoogleSuccess}
-            onError={() => {
-              toast.error('Google Login Failed');
-            }}
-          />
+          {!isGoogleLoading && (
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => {
+                toast.error('Google Login Failed');
+              }}
+            />
+          )}
+
+          {isGoogleLoading && (
+            <button
+              disabled
+              className="
+        h-12
+        border
+        rounded-md
+        opacity-50
+      "
+            >
+              Please Wait...
+            </button>
+          )}
+
           <button
             type="button"
             className="flex items-center justify-center gap-3 border border-[#c5c6cd] h-12 rounded-md text-sm font-medium hover:bg-[#eff4ff] transition"

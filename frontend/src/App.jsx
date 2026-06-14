@@ -6,13 +6,21 @@ import { useEffect, useState } from "react";
 function App() {
 
    const [loading, setLoading] = useState(true);
-   
+    
+    useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        // Future me auth check kar sakte ho
 
-   useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeApp();
   }, []);
+
+
 
   if (loading) {
     return <KaamSetuLoader />;

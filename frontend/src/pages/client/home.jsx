@@ -10,6 +10,7 @@ import WhyChooseKaamSetu from '@/components/client/WhyChooseUs'
 import React from 'react'
 
 const Home = () => {
+  
   return (
     <>
      <HeroSection /> 
