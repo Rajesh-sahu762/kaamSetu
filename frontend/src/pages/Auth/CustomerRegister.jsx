@@ -1,21 +1,23 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import AuthHeader from "../../components/auth/AuthHeader";
-import AuthFooter from "../../components/auth/AuthFooter";
-import { toast} from "react-toastify"
-import { registerUser } from "@/services/authService";
-
+import AuthHeader from '../../components/auth/AuthHeader';
+import AuthFooter from '../../components/auth/AuthFooter';
+import { toast } from 'react-toastify';
+import { registerUser } from '@/services/authService';
 
 const CustomerRegister = () => {
-
   const navigate = useNavigate();
+  const location = useLocation();
+  const googleData = location.state?.googleSignup;
 
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    mobile: "",
-    password: "",
+     fullName:
+      location.state?.fullName || "",
+    email:
+      location.state?.email || "",
+    mobile: '',
+    password: '',
   });
 
   const handleChange = (e) => {
@@ -35,69 +37,51 @@ const CustomerRegister = () => {
         email: formData.email,
         mobile: formData.mobile,
         password: formData.password,
-      })
-   
-      navigate("/verify-email", {
-  state: {
-    email: formData.email
-  },
-});
-      
-      toast.success("Account created successfully! Please verify your email.");
+      });
 
-      
+      navigate('/verify-email', {
+        state: {
+          email: formData.email,
+        },
+      });
+
+      toast.success('Account created successfully! Please verify your email.');
     } catch (error) {
+      console.log('ERROR RESPONSE:', error.response?.data);
 
-  console.log(
-    "ERROR RESPONSE:",
-    error.response?.data
-  );
-
-  toast.error(
-    error.response?.data?.message
-  );
+      toast.error(error.response?.data?.message);
     }
-
   };
 
   return (
     <section className="min-h-screen bg-card flex flex-col">
-
       <AuthHeader backPath="/join" />
 
       <main className="flex-1">
-
         <div className="grid lg:grid-cols-2 min-h-[650px]">
-
           {/* Left Image */}
           <div className="hidden lg:flex mt-10 justify-center">
-             <DotLottieReact
-      src="https://lottie.host/dde50c12-2c57-4117-96c7-4c326fcf8b1e/mmTMCrhzRX.lottie"
-      loop
-      autoplay
-      className=" w-[550px] h-[600px] "       
-    />
+            <DotLottieReact
+              src="https://lottie.host/dde50c12-2c57-4117-96c7-4c326fcf8b1e/mmTMCrhzRX.lottie"
+              loop
+              autoplay
+              className=" w-[550px] h-[600px] "
+            />
           </div>
 
           {/* Right Form */}
           <div className="flex items-center justify-center px-6 py-10">
-
             <div className="w-full max-w-md">
-
               <h1 className="text-4xl font-semibold text-primary">
                 Create an Account
               </h1>
 
               <p className="mt-4 text-muted leading-8">
-                Join Kaamsetu to discover and book premium
-                services with trusted artisans.
+                Join Kaamsetu to discover and book premium services with trusted
+                artisans.
               </p>
 
-              <form
-                onSubmit={handleSubmit}
-                className="mt-10"
-              >
-
+              <form onSubmit={handleSubmit} className="mt-10">
                 {/* Name */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider mb-4">
@@ -105,6 +89,7 @@ const CustomerRegister = () => {
                   </label>
 
                   <input
+                  readOnly={googleData}
                     type="text"
                     name="fullName"
                     value={formData.fullName}
@@ -130,6 +115,7 @@ const CustomerRegister = () => {
                   </label>
 
                   <input
+                  readOnly={googleData}
                     type="email"
                     name="email"
                     value={formData.email}
@@ -173,7 +159,7 @@ const CustomerRegister = () => {
                   />
                 </div>
 
-                 {/* Password */}
+                {/* Password */}
                 <div className="mt-8">
                   <label className="block text-xs font-semibold uppercase tracking-wider mb-4">
                     Password
@@ -198,24 +184,17 @@ const CustomerRegister = () => {
                   />
                 </div>
 
-
-
                 {/* Terms */}
                 <p className="mt-10 text-xs text-muted leading-6">
-                  By continuing, you agree to Kaamsetu's{" "}
-                  <button
-                    type="button"
-                    className="underline"
-                  >
+                  By continuing, you agree to Kaamsetu's{' '}
+                  <button type="button" className="underline">
                     Terms of Service
-                  </button>{" "}
-                  and acknowledge our{" "}
-                  <button
-                    type="button"
-                    className="underline"
-                  >
+                  </button>{' '}
+                  and acknowledge our{' '}
+                  <button type="button" className="underline">
                     Privacy Policy
-                  </button>.
+                  </button>
+                  .
                 </p>
 
                 {/* Submit */}
@@ -236,19 +215,14 @@ const CustomerRegister = () => {
                 >
                   Create Account
                 </button>
-
               </form>
 
               {/* Login */}
               <div className="mt-10 pt-8 border-t border-theme text-center">
-
                 <p className="text-muted">
                   Already have an account?
-
                   <button
-                    onClick={() =>
-                      navigate("/login")
-                    }
+                    onClick={() => navigate('/login')}
                     className="
                       ml-2
                       font-semibold
@@ -257,21 +231,14 @@ const CustomerRegister = () => {
                   >
                     LOG IN
                   </button>
-
                 </p>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </main>
 
       <AuthFooter />
-
     </section>
   );
 };

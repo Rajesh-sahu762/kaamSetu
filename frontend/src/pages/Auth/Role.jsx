@@ -1,35 +1,43 @@
-import React, { useState } from "react";
-import { FaUserTie } from "react-icons/fa";
-import { MdStorefront } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { FaUserTie } from 'react-icons/fa';
+import { MdStorefront } from 'react-icons/md';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const JoinKaamsetu = () => {
-  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedRole, setSelectedRole] = useState('');
   const navigate = useNavigate();
 
+  const location = useLocation();
+
+  const googleData = location.state?.googleSignup;
+
   const handleContinue = () => {
-    if (selectedRole === "customer") {
-      navigate("/register/customer");
+    if (selectedRole === 'customer') {
+      navigate('/register/customer', {
+        state: googleData ? location.state : null,
+      });
     }
 
-    if (selectedRole === "vendor") {
-      navigate("/register/vendor/Profile");
+    if (selectedRole === 'vendor') {
+      navigate('/register/vendor/Profile', {
+        state: googleData ? location.state : null,
+      });
     }
   };
 
   const roles = [
     {
-      id: "customer",
-      title: "I want to hire services",
+      id: 'customer',
+      title: 'I want to hire services',
       description:
-        "Discover and book verified, high-quality professionals for your specific needs. Experience seamless service delivery.",
+        'Discover and book verified, high-quality professionals for your specific needs. Experience seamless service delivery.',
       icon: FaUserTie,
     },
     {
-      id: "vendor",
-      title: "I want to provide services",
+      id: 'vendor',
+      title: 'I want to provide services',
       description:
-        "Join our curated network of premium craftspeople. Manage your bookings, build your reputation, and grow your business.",
+        'Join our curated network of premium craftspeople. Manage your bookings, build your reputation, and grow your business.',
       icon: MdStorefront,
     },
   ];
@@ -37,7 +45,6 @@ const JoinKaamsetu = () => {
   return (
     <section className="min-h-screen bg-card px-4 py-8 md:py-16">
       <div className="max-w-6xl mx-auto">
-
         {/* Logo */}
         <div className="text-center">
           <h2 className="text-sm tracking-[0.25em] text-primary font-medium">
@@ -52,14 +59,13 @@ const JoinKaamsetu = () => {
           </h1>
 
           <p className="max-w-xl mx-auto mt-4 text-muted text-base md:text-lg leading-relaxed">
-            Select how you would like to use our platform.
-            You can always change this later in your account settings.
+            Select how you would like to use our platform. You can always change
+            this later in your account settings.
           </p>
         </div>
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-12 md:mt-16">
-
           {roles.map((role) => {
             const Icon = role.icon;
 
@@ -81,17 +87,14 @@ const JoinKaamsetu = () => {
 
                   ${
                     selectedRole === role.id
-                      ? "border-[#745a38] ring-2 ring-[#745a38]/20"
-                      : "border-theme"
+                      ? 'border-[#745a38] ring-2 ring-[#745a38]/20'
+                      : 'border-theme'
                   }
                 `}
               >
                 {/* Icon */}
                 <div className="w-14 h-14 rounded-xl bg-[#e5eeff] flex items-center justify-center">
-                  <Icon
-                    size={24}
-                    className="text-primary"
-                  />
+                  <Icon size={24} className="text-primary" />
                 </div>
 
                 {/* Radio */}
@@ -102,8 +105,8 @@ const JoinKaamsetu = () => {
 
                       ${
                         selectedRole === role.id
-                          ? "border-[#745a38]"
-                          : "border-gray-300"
+                          ? 'border-[#745a38]'
+                          : 'border-gray-300'
                       }
                     `}
                   >
@@ -155,14 +158,13 @@ const JoinKaamsetu = () => {
           <p className="text-muted">
             Already have an account?
             <button
-              onClick={() => navigate("/login")}
+              onClick={() => navigate('/login')}
               className="ml-1 font-semibold text-primary hover:text-[#745a38]"
             >
               Sign in
             </button>
           </p>
         </div>
-
       </div>
     </section>
   );

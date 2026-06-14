@@ -34,6 +34,26 @@ const Login = () => {
         credential: credentialResponse.credential,
       });
 
+      if (response.isNewUser) {
+        toast.info('Welcome to KaamSetu! Complete your registration.');
+
+        navigate('/join', {
+          state: {
+            googleSignup: true,
+
+            fullName: response.fullName,
+
+            email: response.email,
+
+            googleId: response.googleId,
+
+            profileImage: response.profileImage,
+          },
+        });
+
+        return;
+      }
+
       localStorage.setItem('token', response.token);
 
       localStorage.setItem('user', JSON.stringify(response.user));

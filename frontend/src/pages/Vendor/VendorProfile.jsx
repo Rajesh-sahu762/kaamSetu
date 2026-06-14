@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaShieldAlt } from 'react-icons/fa';
 import { IoChevronDown } from 'react-icons/io5';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import AuthHeader from '@/components/auth/authHeader';
 import ProgressBar from '@/components/auth/ProgressBar';
 import AuthFooter from '@/components/auth/authFooter';
@@ -11,10 +11,12 @@ const VendorProfileStep1 = () => {
   const navigate = useNavigate(); 
 
   const { updateVendorData } = useVendor();
+   const location = useLocation();
+  const googleData = location.state?.googleSignup;
 
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
+    fullName: location.state?.fullName || "",
+    email: location.state?.email || "",
     mobile: '',
     businessName: '',
     businessType: '',
@@ -161,6 +163,7 @@ const VendorProfileStep1 = () => {
                 </label>
 
                 <input
+                readOnly={googleData}
                   required
                   type="text"
                   placeholder="Enter Your Email"

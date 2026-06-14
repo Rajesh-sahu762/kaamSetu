@@ -304,23 +304,20 @@ const googleLogin = async (req, res) => {
 
     } else {
 
-      // New User
-      user = await userModel.create({
-        fullName,
-        email,
+  return res.status(200).json({
+    success: true,
+    isNewUser: true,
 
-        role: "customer",
+    fullName,
+    email,
+    googleId,
+    profileImage,
 
-        googleId,
+    message:
+      "Complete registration to continue",
+  });
 
-        provider: "google",
-
-        profileImage,
-
-        isVerified: true,
-      });
-    }
-
+}
     const token = jwt.sign(
       {
         userId: user._id,
