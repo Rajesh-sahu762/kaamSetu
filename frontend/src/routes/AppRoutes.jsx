@@ -28,6 +28,7 @@ import WriteReviewPage from '@/pages/client/WriteReviewPage';
 import SupportPage from '@/pages/client/SupportPage';
 import NotFound from '@/pages/client/NotFound';
 import ProtectedRoute from './ProtectedRoute';
+import VendorDashboard from '@/pages/Vendor/VendorDashboard';
 
 
 const AppRoutes = () => {
@@ -79,6 +80,10 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register/customer" element={<CustomerRegister />} />
       <Route path="/register/success" element={<RegisterSuccess />} />
+
+      <Route path='/vendor/dashboard' element={<VendorDashboard />} />
+
+
     </Routes>
   );
 };

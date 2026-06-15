@@ -12,16 +12,16 @@ const Login = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   useEffect(() => {
-  window.fbAsyncInit = function () {
-    window.FB.init({
-      appId: import.meta.env.VITE_FACEBOOK_APP_ID,
-      cookie: true,
-      xfbml: true,
-      version: "v23.0",
-    });
-  };
-}, []);
-  
+    window.fbAsyncInit = function () {
+      window.FB.init({
+        appId: import.meta.env.VITE_FACEBOOK_APP_ID,
+        cookie: true,
+        xfbml: true,
+        version: 'v23.0',
+      });
+    };
+  }, []);
+
   const from = location.state?.form?.pathname;
 
   const navigate = useNavigate();
@@ -80,97 +80,59 @@ const Login = () => {
     }
   };
 
-  const handleFacebookLogin = () => {
-
-  if (isLoading) return;
-
-  window.FB.login(
-    async function (response) {
-
-      if (
-        response.authResponse
-      ) {
-
-        try {
-
-          setIsLoading(true);
-
-          const result =
-            await facebookLogin({
-              accessToken:
-                response.authResponse
-                  .accessToken,
-            });
-
-          // Existing User
-          if (
-            !result.isNewUser
-          ) {
-
-            localStorage.setItem(
-              "token",
-              result.token
-            );
-
-            localStorage.setItem(
-              "user",
-              JSON.stringify(
-                result.user
-              )
-            );
-
-            toast.success(
-              result.message
-            );
-
-            navigate("/");
-
-          }
-          else {
-
-            toast.info(
-              "Please register first"
-            );
-
-            navigate(
-              "/join",
-              {
-                state: {
-                  socialUser:
-                    result,
-                  provider:
-                    "facebook",
-                },
-              }
-            );
-
-          }
-
-        }
-        catch (error) {
-
-          toast.error(
-            error.response?.data
-              ?.message
-          );
-
-        }
-        finally {
-
-          setIsLoading(false);
-
-        }
-
+  const handleFacebookResponse = async (response) => {
+    try {
+      if (!response.authResponse) {
+        return;
       }
 
-    },
-    {
-      scope:
-        "email,public_profile",
-    }
-  );
+      setIsLoading(true);
 
-};
+      const result = await facebookLogin({
+        accessToken: response.authResponse.accessToken,
+      });
+
+      // Existing User
+      if (!result.isNewUser) {
+        localStorage.setItem('token', result.token);
+
+        localStorage.setItem('user', JSON.stringify(result.user));
+
+        toast.success(result.message);
+
+        navigate('/');
+      }
+
+      // New User
+      else {
+        toast.info('Account not found. Please register first.');
+
+        navigate('/join', {
+          state: {
+            socialUser: result,
+            provider: 'facebook',
+          },
+        });
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Facebook login failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFacebookLogin = () => {
+    if (isLoading) return;
+
+    window.FB.login(
+      function (response) {
+        handleFacebookResponse(response);
+      },
+      {
+        scope: 'email,public_profile',
+      }
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -322,27 +284,27 @@ const Login = () => {
           )}
 
           <button
-  type="button"
-  disabled={isLoading}
-  onClick={handleFacebookLogin}
-  className="
+            type="button"
+            disabled={isLoading}
+            onClick={handleFacebookLogin}
+            className="
     flex
     items-center
     justify-center
     gap-3
     border
     border-[#c5c6cd]
-    h-12
+    h-10
     rounded-md
     text-sm
     font-medium
     hover:bg-[#eff4ff]
     transition
   "
->
-  <FaFacebook />
-  <span>Facebook</span>
-</button>
+          >
+            <FaFacebook />
+            <span>Facebook</span>
+          </button>
         </div>
 
         {/* Footer */}
