@@ -1,6 +1,7 @@
 const { OAuth2Client } = require("google-auth-library");
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const bcrypt = require("bcrypt");
+const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user");
 const vendorModel = require("../models/vendor");
@@ -354,6 +355,127 @@ const googleLogin = async (req, res) => {
 };
 
 
+const facebookLogin = async (req, res) => {
+  try {
+
+    const { accessToken } = req.body;
+
+    if (!accessToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Facebook access token is required",
+      });
+    }
+
+    const facebookResponse =
+      await axios.get(
+        `https://graph.facebook.com/me`,
+        {
+          params: {
+            fields: "id,name,email,picture",
+            access_token: accessToken,
+          },
+        }
+      );
+
+    const facebookUser =
+      facebookResponse.data;
+
+    const email =
+      facebookUser.email;
+
+    const fullName =
+      facebookUser.name;
+
+    const facebookId =
+      facebookUser.id;
+
+    const profileImage =
+      facebookUser.picture?.data?.url;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Facebook email permission required",
+      });
+    }
+
+    let user =
+      await userModel.findOne({
+        email,
+      });
+
+    // Existing User
+    if (user) {
+
+      if (!user.facebookId) {
+
+        user.facebookId =
+          facebookId;
+
+        user.provider =
+          "facebook";
+
+        await user.save();
+      }
+
+    } else {
+
+      return res.status(200).json({
+        success: true,
+        isNewUser: true,
+
+        fullName,
+        email,
+        facebookId,
+        profileImage,
+
+        message:
+          "Complete registration to continue",
+      });
+
+    }
+
+    const token =
+      jwt.sign(
+        {
+          userId: user._id,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "2h",
+        }
+      );
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Facebook login successful",
+
+      token,
+
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        profileImage:
+          user.profileImage,
+      },
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
+
 const LoginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -521,5 +643,6 @@ module.exports = {
   resendOtp,
   forgotPassword,
   resetPassword,
-  googleLogin
+  googleLogin,
+  facebookLogin
 };
