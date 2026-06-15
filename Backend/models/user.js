@@ -68,9 +68,14 @@ googleId: {
   default: null,
 },
 
+facebookId: {
+  type: String,
+  default: null,
+},
+
 provider: {
   type: String,
-  enum: ["local", "google"],
+  enum: ["local", "google","facebook"],
   default: "local",
 },
 

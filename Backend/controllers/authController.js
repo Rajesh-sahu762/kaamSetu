@@ -262,10 +262,8 @@ const resetPassword = async (req, res) => {
   }
 };
 
-
 const googleLogin = async (req, res) => {
   try {
-
     const { credential } = req.body;
 
     if (!credential) {
@@ -275,11 +273,10 @@ const googleLogin = async (req, res) => {
       });
     }
 
-    const ticket =
-      await googleClient.verifyIdToken({
-        idToken: credential,
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
 
     const payload = ticket.getPayload();
 
@@ -294,7 +291,6 @@ const googleLogin = async (req, res) => {
 
     // Existing User
     if (user) {
-
       // Google account link
       if (!user.googleId) {
         user.googleId = googleId;
@@ -302,23 +298,19 @@ const googleLogin = async (req, res) => {
 
         await user.save();
       }
-
     } else {
+      return res.status(200).json({
+        success: true,
+        isNewUser: true,
 
-  return res.status(200).json({
-    success: true,
-    isNewUser: true,
+        fullName,
+        email,
+        googleId,
+        profileImage,
 
-    fullName,
-    email,
-    googleId,
-    profileImage,
-
-    message:
-      "Complete registration to continue",
-  });
-
-}
+        message: "Complete registration to continue",
+      });
+    }
     const token = jwt.sign(
       {
         userId: user._id,
@@ -326,7 +318,7 @@ const googleLogin = async (req, res) => {
       process.env.JWT_SECRET,
       {
         expiresIn: "2h",
-      }
+      },
     );
 
     return res.status(200).json({
@@ -343,21 +335,16 @@ const googleLogin = async (req, res) => {
         profileImage: user.profileImage,
       },
     });
-
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 
-
 const facebookLogin = async (req, res) => {
   try {
-
     const { accessToken } = req.body;
 
     if (!accessToken) {
@@ -367,61 +354,44 @@ const facebookLogin = async (req, res) => {
       });
     }
 
-    const facebookResponse =
-      await axios.get(
-        `https://graph.facebook.com/me`,
-        {
-          params: {
-            fields: "id,name,email,picture",
-            access_token: accessToken,
-          },
-        }
-      );
+    const facebookResponse = await axios.get(`https://graph.facebook.com/me`, {
+      params: {
+        fields: "id,name,email,picture",
+        access_token: accessToken,
+      },
+    });
 
-    const facebookUser =
-      facebookResponse.data;
+    const facebookUser = facebookResponse.data;
 
-    const email =
-      facebookUser.email;
+    const email = facebookUser.email;
 
-    const fullName =
-      facebookUser.name;
+    const fullName = facebookUser.name;
 
-    const facebookId =
-      facebookUser.id;
+    const facebookId = facebookUser.id;
 
-    const profileImage =
-      facebookUser.picture?.data?.url;
+    const profileImage = facebookUser.picture?.data?.url;
 
     if (!email) {
       return res.status(400).json({
         success: false,
-        message:
-          "Facebook email permission required",
+        message: "Facebook email permission required",
       });
     }
 
-    let user =
-      await userModel.findOne({
-        email,
-      });
+    let user = await userModel.findOne({
+      email,
+    });
 
     // Existing User
     if (user) {
-
       if (!user.facebookId) {
+        user.facebookId = facebookId;
 
-        user.facebookId =
-          facebookId;
-
-        user.provider =
-          "facebook";
+        user.provider = "facebook";
 
         await user.save();
       }
-
     } else {
-
       return res.status(200).json({
         success: true,
         isNewUser: true,
@@ -431,27 +401,23 @@ const facebookLogin = async (req, res) => {
         facebookId,
         profileImage,
 
-        message:
-          "Complete registration to continue",
+        message: "Complete registration to continue",
       });
-
     }
 
-    const token =
-      jwt.sign(
-        {
-          userId: user._id,
-        },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: "2h",
-        }
-      );
+    const token = jwt.sign(
+      {
+        userId: user._id,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "2h",
+      },
+    );
 
     return res.status(200).json({
       success: true,
-      message:
-        "Facebook login successful",
+      message: "Facebook login successful",
 
       token,
 
@@ -460,21 +426,16 @@ const facebookLogin = async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
-        profileImage:
-          user.profileImage,
+        profileImage: user.profileImage,
       },
     });
-
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
-
 
 const LoginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -644,5 +605,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   googleLogin,
-  facebookLogin
+  facebookLogin,
 };

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { FaApple } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import { FaFacebook } from 'react-icons/fa';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { loginUser, googleLogin } from '@/services/authService';
+import { loginUser, googleLogin, facebookLogin } from '@/services/authService';
+
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
 
@@ -10,6 +11,17 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  useEffect(() => {
+  window.fbAsyncInit = function () {
+    window.FB.init({
+      appId: import.meta.env.VITE_FACEBOOK_APP_ID,
+      cookie: true,
+      xfbml: true,
+      version: "v23.0",
+    });
+  };
+}, []);
+  
   const from = location.state?.form?.pathname;
 
   const navigate = useNavigate();
@@ -67,6 +79,98 @@ const Login = () => {
       setIsGoogleLoading(false);
     }
   };
+
+  const handleFacebookLogin = () => {
+
+  if (isLoading) return;
+
+  window.FB.login(
+    async function (response) {
+
+      if (
+        response.authResponse
+      ) {
+
+        try {
+
+          setIsLoading(true);
+
+          const result =
+            await facebookLogin({
+              accessToken:
+                response.authResponse
+                  .accessToken,
+            });
+
+          // Existing User
+          if (
+            !result.isNewUser
+          ) {
+
+            localStorage.setItem(
+              "token",
+              result.token
+            );
+
+            localStorage.setItem(
+              "user",
+              JSON.stringify(
+                result.user
+              )
+            );
+
+            toast.success(
+              result.message
+            );
+
+            navigate("/");
+
+          }
+          else {
+
+            toast.info(
+              "Please register first"
+            );
+
+            navigate(
+              "/join",
+              {
+                state: {
+                  socialUser:
+                    result,
+                  provider:
+                    "facebook",
+                },
+              }
+            );
+
+          }
+
+        }
+        catch (error) {
+
+          toast.error(
+            error.response?.data
+              ?.message
+          );
+
+        }
+        finally {
+
+          setIsLoading(false);
+
+        }
+
+      }
+
+    },
+    {
+      scope:
+        "email,public_profile",
+    }
+  );
+
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -218,12 +322,27 @@ const Login = () => {
           )}
 
           <button
-            type="button"
-            className="flex items-center justify-center gap-3 border border-[#c5c6cd] h-12 rounded-md text-sm font-medium hover:bg-[#eff4ff] transition"
-          >
-            <FaApple className="text-[18px]" />
-            <span>Apple</span>
-          </button>
+  type="button"
+  disabled={isLoading}
+  onClick={handleFacebookLogin}
+  className="
+    flex
+    items-center
+    justify-center
+    gap-3
+    border
+    border-[#c5c6cd]
+    h-12
+    rounded-md
+    text-sm
+    font-medium
+    hover:bg-[#eff4ff]
+    transition
+  "
+>
+  <FaFacebook />
+  <span>Facebook</span>
+</button>
         </div>
 
         {/* Footer */}

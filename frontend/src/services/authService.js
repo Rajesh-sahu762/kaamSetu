@@ -22,6 +22,15 @@ export const googleLogin =
     return response.data;
 };
 
+export const facebookLogin = async (data) => {
+  const response = await api.post(
+    "/auth/facebook",
+    data
+  );
+
+  return response.data;
+};
+
 export const verifyEmailOtp = async (data) => {
   const response = await api.post('/auth/verify-email', data);
 
