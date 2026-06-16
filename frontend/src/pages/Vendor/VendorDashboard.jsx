@@ -1,42 +1,13 @@
+import Sidebar from "@/components/vendor/sidebar";
+import Topbar from "@/components/vendor/topbar";
+import Fade from "@/components/vendor/common/Fade";
+import Avatar from "@/components/vendor/common/Avatar";
+import StatusPill from "@/components/vendor/common/StatusPill";
+
+import { T } from "@/utils/vendorTheme";
+import useBreakpoint from "@/utils/useBreakpoint";
 import { useState, useEffect, useRef } from "react";
 
-/* ── Design tokens ─────────────────────────────────────────────── */
-const T = {
-  slate:       "#091426",
-  slateMid:    "#1E293B",
-  slateGray:   "#64748B",
-  bronze:      "#A88A64",
-  bronzeLight: "#fedaaf",
-  ivory:       "#F8F5F0",
-  white:       "#ffffff",
-  surface:     "#f8f9ff",
-  surfaceLow:  "#eff4ff",
-  border:      "#E2E8F0",
-  borderDim:   "#c5c6cd",
-  green:       "#22c55e",
-  greenDim:    "rgba(34,197,94,0.12)",
-  red:         "#ef4444",
-  redDim:      "rgba(239,68,68,0.1)",
-  amber:       "#f59e0b",
-  amberDim:    "rgba(245,158,11,0.1)",
-  blue:        "#3b82f6",
-  blueDim:     "rgba(59,130,246,0.1)",
-};
-
-/* ── Breakpoints ───────────────────────────────────────────────── */
-const useBreakpoint = () => {
-  const [bp, setBp] = useState({ isMobile: false, isTablet: false, isDesktop: true, w: 1200 });
-  useEffect(() => {
-    const calc = () => {
-      const w = window.innerWidth;
-      setBp({ isMobile: w < 640, isTablet: w >= 640 && w < 1024, isDesktop: w >= 1024, w });
-    };
-    calc();
-    window.addEventListener("resize", calc);
-    return () => window.removeEventListener("resize", calc);
-  }, []);
-  return bp;
-};
 
 /* ── Mock data ─────────────────────────────────────────────────── */
 const STATS = [
@@ -74,14 +45,6 @@ const ACTIVITY = [
   { icon: "✓",  color: T.green,  text: "Booking KS-4810 marked complete",      time: "Jun 14"    },
 ];
 
-const NAV_ITEMS = [
-  { icon: HomeIcon,     label: "Dashboard" },
-  { icon: BookingIcon,  label: "Bookings",  badge: 14 },
-  { icon: EarningsIcon, label: "Earnings" },
-  { icon: ReviewIcon,   label: "Reviews"  },
-  { icon: ServicesIcon, label: "Services" },
-  { icon: ProfileIcon,  label: "Profile"  },
-];
 
 const STATUS_CONFIG = {
   confirmed:     { label: "Confirmed",   bg: T.greenDim, color: T.green },
@@ -90,33 +53,7 @@ const STATUS_CONFIG = {
 };
 
 /* ── Icons ─────────────────────────────────────────────────────── */
-function HomeIcon({ s = 18, c = "currentColor" }) {
-  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
-}
-function BookingIcon({ s = 18, c = "currentColor" }) {
-  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
-}
-function EarningsIcon({ s = 18, c = "currentColor" }) {
-  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
-}
-function ReviewIcon({ s = 18, c = "currentColor" }) {
-  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
-}
-function ServicesIcon({ s = 18, c = "currentColor" }) {
-  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M21 12h-2M5 12H3M18.66 18.66l-1.41-1.41M6.75 6.75L5.34 5.34M12 21v-2M12 5V3"/></svg>;
-}
-function ProfileIcon({ s = 18, c = "currentColor" }) {
-  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
-}
-function BellIcon({ s = 18, c = "currentColor" }) {
-  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>;
-}
-function MenuIcon({ s = 20, c = "currentColor" }) {
-  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
-}
-function CloseIcon({ s = 20, c = "currentColor" }) {
-  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-}
+
 function TrendUp() {
   return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>;
 }
@@ -124,23 +61,8 @@ function TrendDown() {
   return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T.red} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>;
 }
 
-/* ── Small reusables ───────────────────────────────────────────── */
-function StatusPill({ status }) {
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
-  return (
-    <span style={{ display:"inline-flex", alignItems:"center", gap:5, background:cfg.bg, color:cfg.color, fontFamily:"Geist,sans-serif", fontSize:11, fontWeight:600, letterSpacing:"0.04em", padding:"4px 10px", borderRadius:4, whiteSpace:"nowrap" }}>
-      <span style={{ width:5, height:5, borderRadius:"50%", background:cfg.color }} />{cfg.label}
-    </span>
-  );
-}
 
-function Avatar({ initials, size = 36, bg = T.slateMid }) {
-  return (
-    <div style={{ width:size, height:size, borderRadius:"50%", background:bg, color:T.white, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"Geist,sans-serif", fontSize:size*0.33, fontWeight:600, flexShrink:0 }}>
-      {initials}
-    </div>
-  );
-}
+
 
 /* ── Animated counter ──────────────────────────────────────────── */
 function AnimatedValue({ value, inView }) {
@@ -178,15 +100,6 @@ function useInView(threshold = 0.1) {
   return [ref, inView];
 }
 
-/* ── Fade wrapper ──────────────────────────────────────────────── */
-function Fade({ children, delay = 0, style = {} }) {
-  const [ref, inView] = useInView();
-  return (
-    <div ref={ref} style={{ opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(16px)", transition: `opacity 0.5s ease ${delay}s, transform 0.5s ease ${delay}s`, ...style }}>
-      {children}
-    </div>
-  );
-}
 
 /* ── Stat card ─────────────────────────────────────────────────── */
 function StatCard({ stat, index }) {
@@ -251,92 +164,12 @@ function BookingCard({ b, index }) {
   );
 }
 
-/* ── Sidebar content ───────────────────────────────────────────── */
-function SidebarContent({ activeNav, setActiveNav, collapsed, onClose }) {
-  return (
-    <div style={{ display:"flex", flexDirection:"column", height:"100%" }}>
-      {/* Logo row */}
-      <div style={{ height:64, display:"flex", alignItems:"center", justifyContent:"space-between", padding:collapsed?"0 18px":"0 20px", borderBottom:"1px solid rgba(255,255,255,0.06)", flexShrink:0 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ width:32, height:32, background:T.bronze, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-            <svg width="16" height="16" viewBox="0 0 28 28" fill="none">
-              <path d="M4 20 C8 8, 12 14, 14 10 C16 6, 20 14, 24 4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="14" cy="22" r="2.5" fill="white" opacity="0.55"/>
-            </svg>
-          </div>
-          {!collapsed && <span style={{ fontFamily:"Geist,sans-serif", fontWeight:600, fontSize:17, color:T.white, whiteSpace:"nowrap" }}>Kaam<span style={{ color:T.bronze }}>Setu</span></span>}
-        </div>
-        {onClose && <div onClick={onClose} style={{ cursor:"pointer", color:"rgba(255,255,255,0.4)", padding:4 }}><CloseIcon s={18} c="rgba(255,255,255,0.4)" /></div>}
-      </div>
-
-      {/* Vendor profile */}
-      {!collapsed && (
-        <div style={{ padding:"18px 20px 14px", borderBottom:"1px solid rgba(255,255,255,0.06)", flexShrink:0 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ position:"relative" }}>
-              <Avatar initials="RK" size={38} bg={T.bronze} />
-              <div style={{ position:"absolute", bottom:0, right:0, width:9, height:9, borderRadius:"50%", background:T.green, border:`2px solid ${T.slate}` }} />
-            </div>
-            <div>
-              <div style={{ fontFamily:"Geist,sans-serif", fontSize:13, fontWeight:600, color:T.white }}>Ramesh Kumar</div>
-              <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)", fontFamily:"Inter,sans-serif" }}>Electrician · Jaipur</div>
-            </div>
-          </div>
-          <div style={{ display:"inline-flex", alignItems:"center", gap:5, marginTop:10, background:"rgba(168,138,100,0.12)", border:"1px solid rgba(168,138,100,0.2)", borderRadius:4, padding:"3px 9px" }}>
-            <span style={{ color:T.bronze, fontSize:10 }}>✓</span>
-            <span style={{ fontFamily:"Geist,sans-serif", fontSize:10, fontWeight:600, color:T.bronze, letterSpacing:"0.06em", textTransform:"uppercase" }}>Verified Artisan</span>
-          </div>
-        </div>
-      )}
-
-      {/* Nav */}
-      <nav style={{ flex:1, padding:"10px 0", overflowY:"auto" }}>
-        {NAV_ITEMS.map(({ icon: Icon, label, badge }) => {
-          const active = activeNav === label;
-          return (
-            <div key={label} className="ks-nav-item" onClick={() => { setActiveNav(label); onClose && onClose(); }}
-              style={{ display:"flex", alignItems:"center", gap:12, padding:collapsed?"10px 18px":"10px 20px", margin:"1px 8px", borderRadius:6, background:active?"rgba(168,138,100,0.15)":"transparent", color:active?T.bronze:"rgba(255,255,255,0.55)", borderLeft:active&&!collapsed?`2px solid ${T.bronze}`:"2px solid transparent", position:"relative", cursor:"pointer", transition:"all 0.15s" }}>
-              <span style={{ flexShrink:0 }}><Icon s={16} c={active?T.bronze:"rgba(255,255,255,0.45)"} /></span>
-              {!collapsed && <span style={{ fontFamily:"Geist,sans-serif", fontSize:13, fontWeight:active?600:400, whiteSpace:"nowrap" }}>{label}</span>}
-              {badge && !collapsed && <span style={{ marginLeft:"auto", background:T.bronze, color:T.white, fontFamily:"Geist,sans-serif", fontSize:10, fontWeight:700, padding:"1px 6px", borderRadius:10 }}>{badge}</span>}
-              {badge && collapsed && <span style={{ position:"absolute", top:6, right:6, width:7, height:7, borderRadius:"50%", background:T.bronze }} />}
-            </div>
-          );
-        })}
-      </nav>
-
-      {/* Collapse toggle — desktop only */}
-      {!onClose && (
-        <div style={{ padding:"10px 8px", borderTop:"1px solid rgba(255,255,255,0.06)" }}>
-          <div className="ks-nav-item" style={{ display:"flex", alignItems:"center", justifyContent:collapsed?"center":"flex-start", gap:10, padding:"9px 14px", borderRadius:6, color:"rgba(255,255,255,0.3)", cursor:"pointer" }}>
-            <span style={{ display:"flex" }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-            </span>
-            {!collapsed && <span style={{ fontFamily:"Geist,sans-serif", fontSize:12 }}>Collapse</span>}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 /* ── Main component ────────────────────────────────────────────── */
 export default function VendorDashboard() {
   const { isMobile, isTablet } = useBreakpoint();
-  const [activeNav, setActiveNav] = useState("Dashboard");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
+  
   const [chartRef, chartInView] = useInView();
-
-  // auto-collapse on tablet
-  useEffect(() => { if (isTablet) setSidebarCollapsed(true); else if (!isMobile) setSidebarCollapsed(false); }, [isTablet, isMobile]);
-  // close drawer on resize to desktop
-  useEffect(() => { if (!isMobile && !isTablet) setDrawerOpen(false); }, [isMobile, isTablet]);
-
-  const showDesktopSidebar = !isMobile;
-  const sideW = sidebarCollapsed ? 68 : 240;
-
   // grid columns based on breakpoint
   const statCols   = isMobile ? "repeat(2,1fr)"        : isTablet ? "repeat(2,1fr)"        : "repeat(4,1fr)";
   const midCols    = isMobile ? "1fr"                  : isTablet ? "1fr"                  : "1fr 320px";
@@ -363,79 +196,14 @@ export default function VendorDashboard() {
 
       <div style={{ display:"flex", height:"100vh", fontFamily:"Inter,sans-serif", background:T.surface, overflow:"hidden", position:"relative" }}>
 
-        {/* ── Mobile drawer overlay ── */}
-        {isMobile && drawerOpen && (
-          <>
-            <div onClick={() => setDrawerOpen(false)} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:40, animation:"ks-fadeIn 0.2s ease" }} />
-            <div style={{ position:"fixed", left:0, top:0, bottom:0, width:260, background:T.slate, zIndex:50, animation:"ks-slideIn 0.25s cubic-bezier(.22,1,.36,1)", display:"flex", flexDirection:"column" }}>
-              <SidebarContent activeNav={activeNav} setActiveNav={setActiveNav} collapsed={false} onClose={() => setDrawerOpen(false)} />
-            </div>
-          </>
-        )}
-
-        {/* ── Desktop / Tablet sidebar ── */}
-        {showDesktopSidebar && (
-          <aside onClick={isTablet ? () => setSidebarCollapsed(c => !c) : undefined}
-            style={{ width:sideW, flexShrink:0, background:T.slate, display:"flex", flexDirection:"column", transition:"width 0.25s cubic-bezier(.22,1,.36,1)", overflow:"hidden", zIndex:20, borderRight:"1px solid rgba(255,255,255,0.05)", cursor:isTablet?"pointer":"default" }}>
-            <SidebarContent activeNav={activeNav} setActiveNav={(l) => { setActiveNav(l); }} collapsed={sidebarCollapsed} onClose={null} />
-          </aside>
-        )}
+        {/* sidebar */}
+       <Sidebar />
 
         {/* ── Main area ── */}
         <main style={{ flex:1, overflow:"auto", display:"flex", flexDirection:"column", minWidth:0 }}>
 
           {/* Topbar */}
-          <header style={{ height:60, display:"flex", alignItems:"center", padding:`0 ${isMobile?"16px":"24px"}`, justifyContent:"space-between", background:T.white, borderBottom:`1px solid ${T.border}`, position:"sticky", top:0, zIndex:10, flexShrink:0, gap:12 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:12, minWidth:0 }}>
-              {isMobile && (
-                <div className="ks-iconbtn" onClick={() => setDrawerOpen(true)} style={{ width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                  <MenuIcon s={19} c={T.slateGray} />
-                </div>
-              )}
-              <div style={{ minWidth:0 }}>
-                <h1 style={{ fontFamily:"Geist,sans-serif", fontSize:isMobile?15:17, fontWeight:600, color:T.slate, letterSpacing:"-0.01em", whiteSpace:"nowrap" }}>Dashboard</h1>
-                {!isMobile && <p style={{ fontSize:11, color:T.slateGray, fontFamily:"Inter,sans-serif", marginTop:1 }}>Tuesday, 17 June 2026</p>}
-              </div>
-            </div>
-
-            <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
-              {/* Search — hide on mobile */}
-              {!isMobile && (
-                <div style={{ display:"flex", alignItems:"center", gap:8, background:T.surface, border:`1px solid ${T.border}`, borderRadius:6, padding:"7px 12px", width:isTablet?160:200 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T.slateGray} strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                  <input placeholder="Search..." style={{ border:"none", background:"transparent", fontSize:13, fontFamily:"Inter,sans-serif", color:T.slate, outline:"none", width:"100%" }} />
-                </div>
-              )}
-
-              {/* Bell */}
-              <div style={{ position:"relative" }}>
-                <div className="ks-iconbtn" onClick={() => setNotifOpen(o => !o)} style={{ width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", position:"relative" }}>
-                  <BellIcon s={17} c={T.slateGray} />
-                  <span style={{ position:"absolute", top:7, right:7, width:7, height:7, background:T.bronze, borderRadius:"50%", border:`1.5px solid ${T.white}` }} />
-                </div>
-                {notifOpen && (
-                  <div style={{ position:"absolute", top:44, right:0, width:isMobile?Math.min(window.innerWidth-16,300):290, background:T.white, border:`1px solid ${T.border}`, borderRadius:8, boxShadow:"0 8px 32px rgba(30,41,59,0.12)", overflow:"hidden", zIndex:50 }}>
-                    <div style={{ padding:"12px 16px", borderBottom:`1px solid ${T.border}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                      <span style={{ fontFamily:"Geist,sans-serif", fontSize:13, fontWeight:600, color:T.slate }}>Notifications</span>
-                      <span style={{ fontFamily:"Geist,sans-serif", fontSize:11, color:T.bronze, cursor:"pointer" }}>Mark all read</span>
-                    </div>
-                    {ACTIVITY.slice(0,3).map((a,i) => (
-                      <div key={i} className="ks-row" style={{ padding:"11px 16px", display:"flex", gap:10, alignItems:"flex-start", borderBottom:`1px solid ${T.border}` }}>
-                        <span style={{ width:26, height:26, borderRadius:6, background:"rgba(168,138,100,0.1)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, flexShrink:0 }}>{a.icon}</span>
-                        <div>
-                          <div style={{ fontSize:12, fontFamily:"Inter,sans-serif", color:T.slate, lineHeight:1.5 }}>{a.text}</div>
-                          <div style={{ fontSize:11, color:T.slateGray, marginTop:2 }}>{a.time}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div style={{ width:1, height:22, background:T.border }} />
-              <Avatar initials="RK" size={32} bg={T.bronze} />
-            </div>
-          </header>
+        <Topbar />
 
           {/* ── Page content ── */}
           <div style={{ padding:contentPad, flex:1, paddingBottom:isMobile?"80px":"28px" }}>
@@ -610,24 +378,7 @@ export default function VendorDashboard() {
         </main>
       </div>
 
-      {/* ── Mobile bottom nav ── */}
-      {isMobile && (
-        <div style={{ position:"fixed", bottom:0, left:0, right:0, height:60, background:T.white, borderTop:`1px solid ${T.border}`, display:"flex", alignItems:"center", zIndex:30 }}>
-          {NAV_ITEMS.slice(0,5).map(({ icon: Icon, label, badge }) => {
-            const active = activeNav === label;
-            return (
-              <div key={label} className="ks-bottom-nav-item" onClick={() => setActiveNav(label)}
-                style={{ color:active?T.bronze:T.slateGray, position:"relative" }}>
-                <div style={{ position:"relative" }}>
-                  <Icon s={20} c={active?T.bronze:T.slateGray} />
-                  {badge && <span style={{ position:"absolute", top:-4, right:-6, width:14, height:14, background:T.bronze, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"Geist,sans-serif", fontSize:8, fontWeight:700, color:T.white }}>{badge}</span>}
-                </div>
-                <span style={{ fontFamily:"Geist,sans-serif", fontSize:10, fontWeight:active?600:400 }}>{label}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      
     </>
   );
 }

@@ -29,6 +29,7 @@ import SupportPage from '@/pages/client/SupportPage';
 import NotFound from '@/pages/client/NotFound';
 import ProtectedRoute from './ProtectedRoute';
 import VendorDashboard from '@/pages/Vendor/VendorDashboard';
+import Bookings from '@/pages/Vendor/Bookings';
 
 
 const AppRoutes = () => {
@@ -82,7 +83,8 @@ const AppRoutes = () => {
       <Route path="/register/success" element={<RegisterSuccess />} />
 
       <Route path='/vendor/dashboard' element={<VendorDashboard />} />
-
+      <Route path='/vendor/bookings' element={ <Bookings />} />
+      {/* <Route path='/vendor/bookings/:id' element={} /> */}
 
     </Routes>
   );
