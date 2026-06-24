@@ -1,8 +1,8 @@
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 
-import { T } from "@/utils/vendorTheme";
-import useBreakpoint from "@/utils/useBreakpoint";
+import { T } from '@/utils/vendorTheme';
+import useBreakpoint from '@/utils/useBreakpoint';
 
 const NAV_ITEMS = [
   { icon: HomeIcon, label: 'Dashboard', to: '/' },
@@ -325,7 +325,6 @@ function SidebarContent({ activeNav, setActiveNav, collapsed, onClose }) {
           return (
             <div
               key={label}
-              
               className="ks-nav-item"
               onClick={() => {
                 setActiveNav(label);
@@ -444,11 +443,11 @@ function SidebarContent({ activeNav, setActiveNav, collapsed, onClose }) {
   );
 }
 
-const Sidebar = () => {
+const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
   const { isMobile, isTablet } = useBreakpoint();
   const [activeNav, setActiveNav] = useState('Dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // const [drawerOpen, setDrawerOpen] = useState(false);
   // auto-collapse on tablet
   useEffect(() => {
     if (isTablet) setSidebarCollapsed(true);

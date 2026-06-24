@@ -1,17 +1,16 @@
-import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./routes/AppRoutes";
-import KaamSetuLoader from "./components/Loader/fullLoader";
-import { useEffect, useState } from "react";
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './routes/AppRoutes';
+import KaamSetuLoader from './components/Loader/fullLoader';
+import { useEffect, useState } from 'react';
+import VendorRoutes from './routes/VendorRoutes';
 
 function App() {
+  const [loading, setLoading] = useState(true);
 
-   const [loading, setLoading] = useState(true);
-    
-    useEffect(() => {
+  useEffect(() => {
     const initializeApp = async () => {
       try {
         // Future me auth check kar sakte ho
-
       } finally {
         setLoading(false);
       }
@@ -20,8 +19,6 @@ function App() {
     initializeApp();
   }, []);
 
-
-
   if (loading) {
     return <KaamSetuLoader />;
   }
@@ -29,6 +26,7 @@ function App() {
   return (
     <BrowserRouter>
       <AppRoutes />
+         
     </BrowserRouter>
   );
 }

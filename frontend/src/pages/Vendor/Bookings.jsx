@@ -61,6 +61,7 @@ const BOOKINGS = [
 const tabs = ['All', 'Confirmed', 'In Progress', 'Pending'];
 
 export default function Bookings() {
+  
   const bp = useBreakpoint();
 
   const [activeTab, setActiveTab] = useState('All');
@@ -91,7 +92,7 @@ export default function Bookings() {
         background: T.surface,
       }}
     >
-      <Sidebar />
+      
 
       <main
         style={{
@@ -99,7 +100,7 @@ export default function Bookings() {
           minWidth: 0,
         }}
       >
-        <Topbar />
+      
 
         <div
           style={{
