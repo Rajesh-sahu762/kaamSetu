@@ -1,53 +1,8 @@
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 
-/* ── Design tokens ─────────────────────────────────────────────── */
-const T = {
-  slate: '#091426',
-  slateMid: '#1E293B',
-  slateGray: '#64748B',
-  bronze: '#A88A64',
-  bronzeLight: '#fedaaf',
-  ivory: '#F8F5F0',
-  white: '#ffffff',
-  surface: '#f8f9ff',
-  surfaceLow: '#eff4ff',
-  border: '#E2E8F0',
-  borderDim: '#c5c6cd',
-  green: '#22c55e',
-  greenDim: 'rgba(34,197,94,0.12)',
-  red: '#ef4444',
-  redDim: 'rgba(239,68,68,0.1)',
-  amber: '#f59e0b',
-  amberDim: 'rgba(245,158,11,0.1)',
-  blue: '#3b82f6',
-  blueDim: 'rgba(59,130,246,0.1)',
-};
-
-/* ── Breakpoints ───────────────────────────────────────────────── */
-const useBreakpoint = () => {
-  const [bp, setBp] = useState({
-    isMobile: false,
-    isTablet: false,
-    isDesktop: true,
-    w: 1200,
-  });
-  useEffect(() => {
-    const calc = () => {
-      const w = window.innerWidth;
-      setBp({
-        isMobile: w < 640,
-        isTablet: w >= 640 && w < 1024,
-        isDesktop: w >= 1024,
-        w,
-      });
-    };
-    calc();
-    window.addEventListener('resize', calc);
-    return () => window.removeEventListener('resize', calc);
-  }, []);
-  return bp;
-};
+import { T } from "@/utils/vendorTheme";
+import useBreakpoint from "@/utils/useBreakpoint";
 
 /* ── Icons ─────────────────────────────────────────────────────── */
 
@@ -126,7 +81,7 @@ function useInView(threshold = 0.1) {
   return [ref, inView];
 }
 
-const Topbar = () => {
+const Topbar = ({ onMenuClick }) => {
   const { isMobile, isTablet } = useBreakpoint();
   const [notifOpen, setNotifOpen] = useState(false);
 
@@ -160,7 +115,7 @@ const Topbar = () => {
           {isMobile && (
             <div
               className="ks-iconbtn"
-              onClick={() => setDrawerOpen(true)}
+             onClick={onMenuClick}
               style={{
                 width: 36,
                 height: 36,
