@@ -175,7 +175,13 @@ function useInView(threshold = 0.1) {
 }
 
 /* ── Sidebar content ───────────────────────────────────────────── */
-function SidebarContent({ activeNav, setActiveNav, collapsed, onClose }) {
+function SidebarContent({
+  activeNav,
+  setActiveNav,
+  collapsed,
+  onClose,
+  toggleCollapse,
+}) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Logo row */}
@@ -405,20 +411,23 @@ function SidebarContent({ activeNav, setActiveNav, collapsed, onClose }) {
             borderTop: '1px solid rgba(255,255,255,0.06)',
           }}
         >
-          <div
-            className="ks-nav-item"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              gap: 10,
-              padding: '9px 14px',
-              borderRadius: 6,
-              color: 'rgba(255,255,255,0.3)',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ display: 'flex' }}>
+       <div
+  className="ks-nav-item"
+  onClick={toggleCollapse}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: collapsed ? 'center' : 'flex-start',
+    gap: 10,
+    padding: '9px 14px',
+    borderRadius: 6,
+    color: 'rgba(255,255,255,0.3)',
+    cursor: 'pointer',
+  }}
+>
+            <span style={{ display: 'flex' }}
+            
+            >
               <svg
                 width="15"
                 height="15"
@@ -427,6 +436,13 @@ function SidebarContent({ activeNav, setActiveNav, collapsed, onClose }) {
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
+                style={{
+    transform: collapsed
+      ? 'rotate(180deg)'
+      : 'rotate(0deg)',
+    transition: '0.2s',
+  }}
+                
               >
                 <polyline points="15 18 9 12 15 6" />
               </svg>
@@ -502,7 +518,7 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
       {/* ── Desktop / Tablet sidebar ── */}
       {showDesktopSidebar && (
         <aside
-          onClick={isTablet ? () => setSidebarCollapsed((c) => !c) : undefined}
+          // onClick={isTablet ? () => setSidebarCollapsed((c) => !c) : undefined}
           style={{
             width: sideW,
             flexShrink: 0,
@@ -523,6 +539,7 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
             }}
             collapsed={sidebarCollapsed}
             onClose={null}
+            toggleCollapse={() => setSidebarCollapsed((c) => !c)}
           />
         </aside>
       )}

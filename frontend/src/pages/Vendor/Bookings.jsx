@@ -1,8 +1,5 @@
 import { useMemo, useState } from 'react';
 
-import Sidebar from '@/components/vendor/sidebar';
-import Topbar from '@/components/vendor/topbar';
-
 import Avatar from '@/components/vendor/common/Avatar';
 import StatusPill from '@/components/vendor/common/StatusPill';
 import Fade from '@/components/vendor/common/Fade';

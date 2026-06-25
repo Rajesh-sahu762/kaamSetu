@@ -16,39 +16,28 @@ import { vendorRegister } from '@/services/authService';
 
 const VendorReview = () => {
   useEffect(() => {
-  if (!vendorData.fullName) {
-    navigate("/register/vendor/profile");
-  }
-}, []);
+    if (!vendorData.fullName) {
+      navigate('/register/vendor/profile');
+    }
+  }, []);
   const navigate = useNavigate();
-    const { vendorData } = useVendor();
+  const { vendorData } = useVendor();
 
-     console.log("REVIEW DATA", vendorData);
- 
+  console.log('REVIEW DATA', vendorData);
+
   const handleSubmit = async () => {
-  try {
-    const response =
-      await vendorRegister(vendorData);
+    try {
+      const response = await vendorRegister(vendorData);
 
-    toast.success(
-      "Application submitted successfully"
-    );
+      toast.success('Application submitted successfully');
 
-    console.log("Review Page:", vendorData);
+      console.log('Review Page:', vendorData);
 
-    navigate(
-      "/register/vendor/pending"
-    );
-
-  } catch (error) {
-
-    toast.error(
-      error.response?.data?.message
-      || "Something went wrong"
-    );
-
-  }
-};
+      navigate('/register/vendor/pending');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Something went wrong');
+    }
+  };
 
   return (
     <section className="min-h-screen bg-card flex flex-col">
@@ -190,9 +179,7 @@ const VendorReview = () => {
 
 const Info = ({ label, value }) => (
   <div>
-    <p className="text-xs uppercase tracking-wider text-muted mb-1">
-      {label}
-    </p>
+    <p className="text-xs uppercase tracking-wider text-muted mb-1">{label}</p>
 
     <p className="font-medium text-primary">{value}</p>
   </div>
