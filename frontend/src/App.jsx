@@ -2,7 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
 import KaamSetuLoader from './components/Loader/fullLoader';
 import { useEffect, useState } from 'react';
-import VendorRoutes from './routes/VendorRoutes';
+
 
 function App() {
   const [loading, setLoading] = useState(true);

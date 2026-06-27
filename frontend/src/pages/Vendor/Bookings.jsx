@@ -82,26 +82,13 @@ export default function Bookings() {
   }, [activeTab, search]);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        minHeight: '100vh',
-        background: T.surface,
-      }}
-    >
-      
-
-      <main
-        style={{
-          flex: 1,
-          minWidth: 0,
-        }}
-      >
-      
-
+   
+    <>
+    
         <div
           style={{
             padding: bp.isMobile ? 16 : 24,
+paddingBottom: bp.isMobile ? 90 : 24,
           }}
         >
           {/* Header */}
@@ -119,10 +106,12 @@ export default function Bookings() {
               <div>
                 <h1
                   style={{
-                    margin: 0,
-                    color: T.slate,
-                    fontSize: bp.isMobile ? 26 : 34,
-                    fontWeight: 700,
+                    fontFamily: "Geist,sans-serif",
+fontSize: bp.isMobile ? 28 : 30,
+fontWeight: 600,
+letterSpacing: "-0.02em",
+color: T.slate,
+margin: 0,
                   }}
                 >
                   Bookings
@@ -130,8 +119,12 @@ export default function Bookings() {
 
                 <p
                   style={{
-                    color: T.slateGray,
-                    marginTop: 6,
+                    fontFamily: "Inter,sans-serif",
+fontSize: 14,
+fontWeight: 400,
+lineHeight: 1.6,
+color: T.slateGray,
+marginTop: 4,
                   }}
                 >
                   Manage all your upcoming jobs.
@@ -149,10 +142,12 @@ export default function Bookings() {
                   background: T.slate,
 
                   color: T.white,
-
-                  padding: '12px 18px',
-
-                  borderRadius: 12,
+height:44,
+padding:"0 18px",
+borderRadius:8,
+fontSize:13,
+fontWeight:600,
+fontFamily:"Geist,sans-serif",
 
                   cursor: 'pointer',
                 }}
@@ -177,7 +172,7 @@ export default function Bookings() {
                 style={{
                   position: 'absolute',
                   left: 14,
-                  top: 15,
+                  top: 13,
                   color: T.slateGray,
                 }}
               />
@@ -188,11 +183,14 @@ export default function Bookings() {
                 placeholder="Search bookings..."
                 style={{
                   width: '100%',
-                  padding: '14px 14px 14px 44px',
 
                   border: `1px solid ${T.border}`,
 
-                  borderRadius: 12,
+                  height:44,
+padding:"0 14px 0 42px",
+borderRadius:8,
+fontSize:13,
+fontFamily:"Inter,sans-serif",
 
                   outline: 'none',
 
@@ -227,9 +225,13 @@ export default function Bookings() {
 
                     color: activeTab === tab ? T.white : T.slate,
 
-                    padding: '10px 18px',
+                    borderRadius: 8,
 
-                    borderRadius: 999,
+                    height:36,
+padding:"0 16px",
+fontSize:12,
+fontWeight:500,
+fontFamily:"Geist,sans-serif",
 
                     cursor: 'pointer',
 
@@ -266,9 +268,9 @@ export default function Bookings() {
 
                       border: `1px solid ${T.border}`,
 
-                      borderRadius: 18,
-
-                      padding: 20,
+                      borderRadius:12,
+padding:18,
+boxShadow:"0 2px 8px rgba(15,23,42,.04)",
 
                       marginBottom: 16,
                     }}
@@ -298,6 +300,10 @@ export default function Bookings() {
                             style={{
                               margin: 0,
 
+                              fontFamily:"Geist,sans-serif",
+fontSize:18,
+fontWeight:600,
+
                               color: T.slate,
                             }}
                           >
@@ -306,6 +312,10 @@ export default function Bookings() {
 
                           <p
                             style={{
+
+                              fontSize:13,
+fontFamily:"Inter,sans-serif",
+fontWeight:500,
                               color: T.slateGray,
                               margin: '4px 0',
                             }}
@@ -315,6 +325,8 @@ export default function Bookings() {
 
                           <small
                             style={{
+                              fontSize:12,
+fontFamily:"Inter,sans-serif",
                               color: T.slateGray,
                             }}
                           >
@@ -330,6 +342,9 @@ export default function Bookings() {
                       >
                         <h3
                           style={{
+                            fontFamily:"Geist,sans-serif",
+fontSize:18,
+fontWeight:700,
                             color: T.slate,
                             margin: 0,
                           }}
@@ -360,15 +375,17 @@ export default function Bookings() {
                     >
                       <button
                         style={{
+
+                          height:38,
+padding:"0 16px",
+borderRadius:8,
+fontSize:12,
+fontWeight:600,
                           border: 'none',
 
                           background: T.slate,
 
                           color: T.white,
-
-                          padding: '10px 16px',
-
-                          borderRadius: 10,
 
                           cursor: 'pointer',
                         }}
@@ -380,11 +397,11 @@ export default function Bookings() {
                         style={{
                           border: `1px solid ${T.border}`,
 
+                          height:38,
+padding:"0 16px",
+borderRadius:8,
+fontSize:12,
                           background: T.white,
-
-                          padding: '10px 16px',
-
-                          borderRadius: 10,
 
                           display: 'flex',
 
@@ -416,16 +433,22 @@ export default function Bookings() {
 
                     color: T.white,
 
-                    borderRadius: 18,
+                    borderRadius:12,
 
-                    padding: 20,
+                    padding: 18,
                   }}
                 >
-                  <h3>Weekly Performance</h3>
+                  <h3 style={{
+                    fontSize:11,
+letterSpacing:"0.08em",
+textTransform:"uppercase",
+                  }}>Weekly Performance</h3>
 
                   <h1
                     style={{
                       margin: '12px 0',
+                      fontSize:34,
+fontWeight:700,
                     }}
                   >
                     ₹32,500
@@ -528,38 +551,29 @@ export default function Bookings() {
           </div>
         </div>
 
-        {/* Floating Action Button */}
+        {/* Floating Action Button  */}
 
         <button
-          style={{
-            position: 'fixed',
-
-            right: 24,
-            bottom: 24,
-
-            width: 58,
-            height: 58,
-
-            borderRadius: '50%',
-
-            border: 'none',
-
-            background: T.bronze,
-
-            color: T.white,
-
-            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-
-            cursor: 'pointer',
-
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Plus size={24} />
-        </button>
-      </main>
-    </div>
+        style={{
+          position: 'fixed',
+          right: 24,
+          bottom: bp.isMobile ? 80 : 24,
+          width: 58,
+          height: 58,
+          borderRadius: '50%',
+          border: 'none',
+          background: T.bronze,
+          color: T.white,
+          boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Plus size={24} />
+      </button> 
+   
+    </>
   );
 }

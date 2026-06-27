@@ -10,6 +10,24 @@ const VendorLayout = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
+
+    <>
+     <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: ${T.border}; border-radius: 2px; }
+        .ks-nav-item:hover { background: rgba(168,138,100,0.09) !important; }
+        .ks-row:hover { background: ${T.surfaceLow} !important; }
+        .ks-abtn { transition: opacity 0.15s, transform 0.15s; cursor: pointer; }
+        .ks-abtn:hover { opacity: 0.88; transform: translateY(-1px); }
+        .ks-iconbtn { border-radius: 6px; cursor: pointer; transition: background 0.15s; }
+        .ks-iconbtn:hover { background: ${T.border} !important; }
+        .ks-bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; flex: 1; cursor: pointer; transition: color 0.15s; }
+        @keyframes ks-slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        @keyframes ks-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      `}</style>
+
     <div
       style={{
         display: 'flex',
@@ -17,7 +35,7 @@ const VendorLayout = () => {
         background: T.surface,
         overflow: 'hidden',
       }}
-    >
+      >
       <Sidebar drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
 
       <main
@@ -28,12 +46,13 @@ const VendorLayout = () => {
           overflow: 'auto',
           minWidth: 0,
         }}
-      >
+        >
         <Topbar onMenuClick={() => setDrawerOpen(true)} />
 
         <Outlet />
       </main>
     </div>
+        </>
   );
 };
 

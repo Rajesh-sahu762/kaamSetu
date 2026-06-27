@@ -28,3 +28,6 @@ export const T = {
   blue: "#3b82f6",
   blueDim: "rgba(59,130,246,0.1)",
 };
+
+
+export const MOBILE_BOTTOM_NAV_HEIGHT = 60;

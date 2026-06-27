@@ -411,23 +411,21 @@ function SidebarContent({
             borderTop: '1px solid rgba(255,255,255,0.06)',
           }}
         >
-       <div
-  className="ks-nav-item"
-  onClick={toggleCollapse}
-  style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: collapsed ? 'center' : 'flex-start',
-    gap: 10,
-    padding: '9px 14px',
-    borderRadius: 6,
-    color: 'rgba(255,255,255,0.3)',
-    cursor: 'pointer',
-  }}
->
-            <span style={{ display: 'flex' }}
-            
-            >
+          <div
+            className="ks-nav-item"
+            onClick={toggleCollapse}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              gap: 10,
+              padding: '9px 14px',
+              borderRadius: 6,
+              color: 'rgba(255,255,255,0.3)',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ display: 'flex' }}>
               <svg
                 width="15"
                 height="15"
@@ -437,12 +435,9 @@ function SidebarContent({
                 strokeWidth="2"
                 strokeLinecap="round"
                 style={{
-    transform: collapsed
-      ? 'rotate(180deg)'
-      : 'rotate(0deg)',
-    transition: '0.2s',
-  }}
-                
+                  transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: '0.2s',
+                }}
               >
                 <polyline points="15 18 9 12 15 6" />
               </svg>

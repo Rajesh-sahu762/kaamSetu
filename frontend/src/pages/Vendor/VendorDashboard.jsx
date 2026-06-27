@@ -531,7 +531,7 @@ export default function VendorDashboard() {
 
   return (
     <>
-      <style>{`
+      {/* <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 4px; }
@@ -545,7 +545,7 @@ export default function VendorDashboard() {
         .ks-bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; flex: 1; cursor: pointer; transition: color 0.15s; }
         @keyframes ks-slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
         @keyframes ks-fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      `}</style>
+      `}</style> */}
 
       <div
         style={{
