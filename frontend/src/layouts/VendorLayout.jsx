@@ -6,13 +6,17 @@ import Topbar from '@/components/vendor/topbar';
 
 import { T } from '@/utils/vendorTheme';
 
+
+
 const VendorLayout = () => {
+  console.log("VendorLayout Render");
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
 
     <>
      <style>{`
+     
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 4px; }
@@ -29,13 +33,13 @@ const VendorLayout = () => {
       `}</style>
 
     <div
-      style={{
-        display: 'flex',
-        height: '100vh',
-        background: T.surface,
-        overflow: 'hidden',
-      }}
-      >
+  style={{
+    display: "flex",
+    height: "100vh",
+    overflow: "hidden",
+    background: T.ivory,
+  }}
+>
       <Sidebar drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
 
       <main
@@ -44,6 +48,7 @@ const VendorLayout = () => {
           display: 'flex',
           flexDirection: 'column',
           overflow: 'auto',
+          background: T.ivory,
           minWidth: 0,
         }}
         >

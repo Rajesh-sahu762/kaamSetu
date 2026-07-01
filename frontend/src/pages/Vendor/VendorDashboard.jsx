@@ -552,7 +552,7 @@ export default function VendorDashboard() {
           display: 'flex',
           height: '100vh',
           fontFamily: 'Inter,sans-serif',
-          background: T.surface,
+          background: 'transparent',
           overflow: 'hidden',
           position: 'relative',
         }}

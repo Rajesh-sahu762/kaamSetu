@@ -87,6 +87,7 @@ export default function Bookings() {
     
         <div
           style={{
+            background: 'transparent',
             padding: bp.isMobile ? 16 : 24,
 paddingBottom: bp.isMobile ? 90 : 24,
           }}
