@@ -184,7 +184,6 @@ function SidebarContent({
   toggleCollapse,
   navigate
 }) {
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Logo row */}
@@ -336,13 +335,10 @@ function SidebarContent({
               key={label}
               className="ks-nav-item"
               onClick={() => {
-  setActiveNav(label);
-  navigate(to);
-
-  if (onClose) {
-    onClose();
-  }
-}}
+                setActiveNav(label);
+                navigate(to);
+                onClose && onClose();
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -508,14 +504,13 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
               flexDirection: 'column',
             }}
           >
-           <SidebarContent
-  activeNav={activeNav}
-  setActiveNav={setActiveNav}
-  collapsed={sidebarCollapsed}
-  onClose={null}
-  toggleCollapse={() => setSidebarCollapsed((c) => !c)}
-  navigate={navigate}
-/>
+            <SidebarContent
+              activeNav={activeNav}
+              setActiveNav={setActiveNav}
+              collapsed={false}
+              navigate={navigate}
+              onClose={() => setDrawerOpen(false)}
+            />
           </div>
         </>
       )}
@@ -537,13 +532,16 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
             cursor: isTablet ? 'pointer' : 'default',
           }}
         >
-        <SidebarContent
-  activeNav={activeNav}
-  setActiveNav={setActiveNav}
-  collapsed={false}
-  onClose={() => setDrawerOpen(false)}
-  navigate={navigate}
-/>
+          <SidebarContent
+            activeNav={activeNav}
+            setActiveNav={(l) => {
+              setActiveNav(l);
+            }}
+            collapsed={sidebarCollapsed}
+            onClose={null}
+            navigate={navigate}
+            toggleCollapse={() => setSidebarCollapsed((c) => !c)}
+          />
         </aside>
       )}
 
@@ -563,13 +561,16 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
             zIndex: 30,
           }}
         >
-          {NAV_ITEMS.slice(0, 5).map(({ icon: Icon, label, badge }) => {
+          {NAV_ITEMS.slice(0, 5).map(({ icon: Icon, label, badge, to }) => {
             const active = activeNav === label;
             return (
               <div
                 key={label}
                 className="ks-bottom-nav-item"
-                onClick={() => setActiveNav(label)}
+                onClick={() => { 
+                  setActiveNav(label);
+                  navigate(to)
+                }}
                 style={{
                   color: active ? T.bronze : T.slateGray,
                   position: 'relative',
