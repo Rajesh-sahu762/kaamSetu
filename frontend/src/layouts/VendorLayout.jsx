@@ -9,7 +9,7 @@ import { T } from '@/utils/vendorTheme';
 
 
 const VendorLayout = () => {
-  console.log("VendorLayout Render");
+
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (

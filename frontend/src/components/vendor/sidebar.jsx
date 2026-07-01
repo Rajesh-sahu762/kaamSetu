@@ -1,16 +1,17 @@
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 
 import { T } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
 
 const NAV_ITEMS = [
-  { icon: HomeIcon, label: 'Dashboard', to: '/' },
-  { icon: BookingIcon, label: 'Bookings', badge: 14, to: '/vendor/bookings' },
-  { icon: EarningsIcon, label: 'Earnings' },
-  { icon: ReviewIcon, label: 'Reviews' },
-  { icon: ServicesIcon, label: 'Services' },
-  { icon: ProfileIcon, label: 'Profile' },
+  { icon: HomeIcon, label: "Dashboard", to: "/vendor/dashboard" },
+  { icon: BookingIcon, label: "Bookings", badge: 14, to: "/vendor/bookings" },
+  { icon: EarningsIcon, label: "Earnings", to: "/vendor/earnings" },
+  { icon: ServicesIcon, label: "Services", to: "/vendor/services" },
+  { icon: ProfileIcon, label: "Profile", to: "/vendor/profile" },
+  { icon: ReviewIcon, label: "Reviews", to: "/vendor/reviews" },
 ];
 
 /* ── Icons ─────────────────────────────────────────────────────── */
@@ -181,7 +182,9 @@ function SidebarContent({
   collapsed,
   onClose,
   toggleCollapse,
+  navigate
 }) {
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Logo row */}
@@ -333,9 +336,13 @@ function SidebarContent({
               key={label}
               className="ks-nav-item"
               onClick={() => {
-                setActiveNav(label);
-                onClose && onClose();
-              }}
+  setActiveNav(label);
+  navigate(to);
+
+  if (onClose) {
+    onClose();
+  }
+}}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -455,6 +462,7 @@ function SidebarContent({
 }
 
 const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
+  const navigate = useNavigate();
   const { isMobile, isTablet } = useBreakpoint();
   const [activeNav, setActiveNav] = useState('Dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -500,12 +508,14 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
               flexDirection: 'column',
             }}
           >
-            <SidebarContent
-              activeNav={activeNav}
-              setActiveNav={setActiveNav}
-              collapsed={false}
-              onClose={() => setDrawerOpen(false)}
-            />
+           <SidebarContent
+  activeNav={activeNav}
+  setActiveNav={setActiveNav}
+  collapsed={sidebarCollapsed}
+  onClose={null}
+  toggleCollapse={() => setSidebarCollapsed((c) => !c)}
+  navigate={navigate}
+/>
           </div>
         </>
       )}
@@ -527,15 +537,13 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
             cursor: isTablet ? 'pointer' : 'default',
           }}
         >
-          <SidebarContent
-            activeNav={activeNav}
-            setActiveNav={(l) => {
-              setActiveNav(l);
-            }}
-            collapsed={sidebarCollapsed}
-            onClose={null}
-            toggleCollapse={() => setSidebarCollapsed((c) => !c)}
-          />
+        <SidebarContent
+  activeNav={activeNav}
+  setActiveNav={setActiveNav}
+  collapsed={false}
+  onClose={() => setDrawerOpen(false)}
+  navigate={navigate}
+/>
         </aside>
       )}
 
