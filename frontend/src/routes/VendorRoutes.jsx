@@ -21,6 +21,7 @@ const VendorRoutes = () => (
     <Route path="/vendor/reviews" element={<Reviews />} />
     <Route path="/vendor/profile" element={<Profile />} />
     <Route path="/vendor/earnings" element={<Earnings />} />
+    <Route path="/vendor/earnings" element={< />} />
     </Route>
     </Route>
   </>
