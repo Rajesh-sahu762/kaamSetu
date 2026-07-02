@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 
 import { T } from "@/utils/vendorTheme";
 import useBreakpoint from "@/utils/useBreakpoint";
+import { useLocation, useNavigate } from 'react-router-dom';
 
 /* ── Icons ─────────────────────────────────────────────────────── */
 
@@ -83,7 +84,26 @@ function useInView(threshold = 0.1) {
 
 const Topbar = ({ onMenuClick }) => {
   const { isMobile, isTablet } = useBreakpoint();
-  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);4
+  const navigate = useNavigate();
+const location = useLocation();
+
+const currentDate = new Date().toLocaleDateString("en-IN", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+const pageTitles = {
+  "/vendor/dashboard": "Dashboard",
+  "/vendor/bookings": "Bookings",
+  "/vendor/services": "Services",
+  "/vendor/reviews": "Reviews",
+  "/vendor/profile": "Profile",
+  "/vendor/earnings": "Earnings",
+  "/vendor/notifications": "Notifications",
+};
 
   return (
     <>
@@ -139,7 +159,8 @@ const Topbar = ({ onMenuClick }) => {
                 whiteSpace: 'nowrap',
               }}
             >
-              Dashboard
+    {pageTitles[location.pathname] || "Dashboard"}
+
             </h1>
             {!isMobile && (
               <p
@@ -150,7 +171,8 @@ const Topbar = ({ onMenuClick }) => {
                   marginTop: 1,
                 }}
               >
-                Tuesday, 17 June 2026
+                 {currentDate}
+
               </p>
             )}
           </div>
@@ -209,7 +231,7 @@ const Topbar = ({ onMenuClick }) => {
           <div style={{ position: 'relative' }}>
             <div
               className="ks-iconbtn"
-              onClick={() => setNotifOpen((o) => !o)}
+              onClick={() => navigate("/vendor/notifications")}
               style={{
                 width: 36,
                 height: 36,
@@ -333,7 +355,12 @@ const Topbar = ({ onMenuClick }) => {
           </div>
 
           <div style={{ width: 1, height: 22, background: T.border }} />
-          <Avatar initials="RK" size={32} bg={T.bronze} />
+          <div
+    onClick={() => navigate("/vendor/profile")}
+    style={{ cursor: "pointer" }}
+>
+    <Avatar initials="RK" size={32} bg={T.bronze} />
+</div>
         </div>
       </header>
     </>

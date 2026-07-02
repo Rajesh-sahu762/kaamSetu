@@ -9,10 +9,11 @@ import Reviews from "@/pages/Vendor/Reviews";
 import Profile from "@/pages/Vendor/Profile";
 import Earnings from "@/pages/Vendor/Earnings";
 import ProtectedRoute from "./ProtectedRoute";
+import Notifications from "@/pages/Vendor/Notifications";
 
 const VendorRoutes = () => (
   <>
-    <Route element={<ProtectedRoute />}>
+    {/* <Route element={<ProtectedRoute />}> */}
     <Route element={<VendorLayout />}>
     <Route path="/vendor/dashboard" element={<VendorDashboard />} />
     <Route path="/vendor/bookings" element={<Bookings />} />
@@ -21,9 +22,9 @@ const VendorRoutes = () => (
     <Route path="/vendor/reviews" element={<Reviews />} />
     <Route path="/vendor/profile" element={<Profile />} />
     <Route path="/vendor/earnings" element={<Earnings />} />
-    <Route path="/vendor/earnings" element={< />} />
+    <Route path="/vendor/notifications" element={<Notifications />} />
     </Route>
-    </Route>
+    {/* </Route> */}
   </>
 );
 
