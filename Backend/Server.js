@@ -3,10 +3,9 @@ const express = require('express')
 const app = express()
 const connectDB = require('./config/db')
 const authRoutes = require('./routes/authRoutes')
+const vendorRoutes = require('./routes/vendorRoutes')
 const cors = require('cors')
 const transporter = require('./config/mail');
-
-
 
 app.use(cors()) // Enable CORS for all routes
 
@@ -24,6 +23,8 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/auth',authRoutes )
+
+app.use('/api/vendor', vendorRoutes)
 
 
 app.listen(PORT, () => {
