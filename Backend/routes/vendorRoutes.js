@@ -1,16 +1,11 @@
 const express = require("express");
+const { getVendorProfile, updateVendorProfile, updateProfileImage } = require("../controllers/vendorController");
 const router = express.Router();
 
-router.get("/test", (req, res) => {
-  res.json({ message: "Vendor routes are working!" });
-});
+router.get("/profile", getVendorProfile);
 
-router.get("/", (req, res) => {
-  res.json({ message: "Vendor routes are working!" });
-});
+router.put("/profile", updateVendorProfile);
 
-router.get("/test", (req, res) => {
-  res.json({ message: "Vendor test route is working!" });
-});
+router.patch("/profile/image", updateProfileImage);
 
 module.exports = router;
