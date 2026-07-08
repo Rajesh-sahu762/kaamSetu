@@ -6,6 +6,4 @@ router.get("/profile", getVendorProfile);
 
 router.put("/profile", updateVendorProfile);
 
-router.patch("/profile/image", updateProfileImage);
-
 module.exports = router;
