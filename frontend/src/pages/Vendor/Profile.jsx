@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getVendorProfile } from "@/services/vendorService";
 
 import Fade from '@/components/vendor/common/Fade';
 import Avatar from '@/components/vendor/common/Avatar';
@@ -19,21 +20,21 @@ import {
   Target,
 } from 'lucide-react';
 
-const PROFILE = {
-  name: "Rajesh Sharma",
+// const PROFILE = {
+//   name: "Rajesh Sharma",
 
-  avatar: "RS",
+//   avatar: "RS",
 
-  profession: "Electrician",
+//   profession: "Electrician",
 
-  city: "Jaipur",
+//   city: "Jaipur",
 
-  rating: 4.9,
+//   rating: 4.9,
 
-  reviews: 1248,
+//   reviews: 1248,
 
-  verified: true,
-};
+//   verified: true,
+// };
 
 const PROFILE_PROGRESS = [
   {
@@ -78,7 +79,28 @@ export default function Profile() {
 
 const bp = useBreakpoint();
 
-const [profile] = useState(PROFILE);
+const [profile, setProfile] = useState(null);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      const response = await getVendorProfile();
+
+      setProfile(response.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProfile();
+}, []);
+
+if (loading) {
+  return <h2>Loading...</h2>;
+}
 
 return (
 
@@ -141,7 +163,7 @@ gap:18,
 
 <Avatar
 
-initials={profile.avatar}
+initials={profile.profileImage ? "" : profile.fullName.split(" ").map(n => n[0]).join("")}
 
 size={72}
 
@@ -165,7 +187,7 @@ fontWeight:600,
 
 >
 
-{profile.name}
+{profile.fullName}
 
 </h1>
 
@@ -811,17 +833,17 @@ gap:18,
 >
 
 {[
-["Full Name","Rajesh Sharma"],
+["Full Name",profile.fullName],
 
-["Email","rajesh@gmail.com"],
+["Email",profile.email],
 
-["Mobile","+91 9876543210"],
+["Mobile",profile.mobile],
 
-["Gender","Male"],
+// ["Gender",profile.gender],
 
-["Languages","Hindi, English"],
+// ["Languages",profile.languages],
 
-["Experience","8 Years"],
+["Experience",profile.experience],
 ].map(([label,value])=>(
 
 <div
@@ -948,21 +970,21 @@ gap:18,
 >
 
 {[
-["Business Name","Sharma Electrical Services"],
+["Business Name",profile.businessName],
 
-["Business Type","Individual"],
+["Business Type",profile.businessType],
 
-["Experience","8 Years"],
+["Experience",profile.experience],
 
-["Team Size","4 Members"],
+["Team Size",profile.teamSize],
 
-["Working Since","2017"],
+["Working Since",profile.workingSince],
 
-["GST","29ABCDE1234F1Z5"],
+["GST",profile.gst],
 
-["Business Address","Vaishali Nagar, Jaipur"],
+["Business Address",profile.businessAddress],
 
-["Bio","Professional electrician specializing in residential and commercial projects."],
+["Bio",profile.bio],
 
 ].map(([label,value])=>(
 
@@ -1246,7 +1268,7 @@ color:T.slate,
 }}
 >
 
-25 KM
+{profile.radius} km
 
 </div>
 
