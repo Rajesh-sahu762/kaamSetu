@@ -34,6 +34,7 @@ const VendorBusinessDetails = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+      experience: Number(e.target.value), // experience ko number me set karna
     });
   };
 
@@ -164,11 +165,11 @@ console.log("Business Page:", vendorData);
                   className="w-full border-b border-[#c5c6cd] pb-3 bg-transparent focus:outline-none focus:border-[#745a38]"
                 >
                   <option value="">Select Experience</option>
-                  <option>0-1 Years</option>
-                  <option>1-3 Years</option>
-                  <option>3-5 Years</option>
-                  <option>5-10 Years</option>
-                  <option>10+ Years</option>
+                  <option value="1">0-1 Years</option>
+                  <option value="3">1-3 Years</option>
+                  <option value="5">3-5 Years</option>
+                  <option value="10">5-10 Years</option>
+                  <option value="11">10+ Years</option>
                 </select>
               </div>
 

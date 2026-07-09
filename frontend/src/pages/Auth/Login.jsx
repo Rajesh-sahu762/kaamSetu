@@ -66,13 +66,21 @@ const Login = () => {
         return;
       }
 
+
       localStorage.setItem('token', response.token);
 
       localStorage.setItem('user', JSON.stringify(response.user));
 
       toast.success(response.message);
+      const user = response.user;
 
-      navigate('/');
+       if (user.role === 'customer') {
+        navigate(from || '/');
+      } else if (user.role === 'vendor') {
+        navigate('/vendor/dashboard');
+      } else if (user.role === 'Admin') {
+        navigate('/admin/dashboard');
+      }
     } catch (error) {
       toast.error(error.response?.data?.message);
     } finally {
