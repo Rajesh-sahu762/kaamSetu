@@ -25,14 +25,7 @@ const VendorProfileStep1 = () => {
   });
 
   const businessType = [
-    'Electrician',
-    'Plumber',
-    'Carpenter',
-    'Painter',
-    'AC Repair',
-    'Home Cleaning',
-    'Interior Designer',
-    'Appliance Repair',
+    "Individual", "Company", "Partnership"
   ];
 
  const handleSubmit = (e) => {
