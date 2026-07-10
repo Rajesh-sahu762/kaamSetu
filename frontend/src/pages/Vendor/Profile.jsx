@@ -163,7 +163,7 @@ gap:18,
 
 <Avatar
 
-initials={profile.profileImage ? "" : profile.fullName.split(" ").map(n => n[0]).join("")}
+initials={profile.user.profileImage ? "" : profile.user.fullName.split(" ").map(n => n[0]).join("")}
 
 size={72}
 
@@ -187,7 +187,7 @@ fontWeight:600,
 
 >
 
-{profile.fullName}
+{profile.user.fullName}
 
 </h1>
 
@@ -211,25 +211,25 @@ alignItems:"center",
 
 <span>
 
-⭐ {profile.rating}
+⭐ {profile.user.rating}
 
 </span>
 
 <span>
 
-({profile.reviews} Reviews)
+({profile.user.reviews} Reviews)
 
 </span>
 
 <span>
 
-{profile.profession}
+{profile.user.profession}
 
 </span>
 
 <span>
 
-{profile.city}
+{profile.user.city}
 
 </span>
 
@@ -833,17 +833,17 @@ gap:18,
 >
 
 {[
-["Full Name",profile.fullName],
+["Full Name",profile.user.fullName],
 
-["Email",profile.email],
+["Email",profile.user.email],
 
-["Mobile",profile.mobile],
+["Mobile",profile.user.mobile],
 
 // ["Gender",profile.gender],
 
 // ["Languages",profile.languages],
 
-["Experience",profile.experience],
+["Experience",profile.vendor.experience],
 ].map(([label,value])=>(
 
 <div
@@ -970,21 +970,21 @@ gap:18,
 >
 
 {[
-["Business Name",profile.businessName],
+["Business Name",profile.vendor.businessName],
 
-["Business Type",profile.businessType],
+["Business Type",profile.vendor.businessType],
 
-["Experience",profile.experience],
+["Experience",profile.vendor.experience],
 
-["Team Size",profile.teamSize],
+["Team Size",profile.vendor.teamSize],
 
-["Working Since",profile.workingSince],
+["Working Since",profile.vendor.workingSince],
 
-["GST",profile.gst],
+["GST",profile.vendor.gst],
 
-["Business Address",profile.businessAddress],
+["Business Address",profile.vendor.businessAddress],
 
-["Bio",profile.bio],
+["Bio",profile.vendor.bio],
 
 ].map(([label,value])=>(
 
@@ -1268,7 +1268,7 @@ color:T.slate,
 }}
 >
 
-{profile.radius} km
+{profile.vendor.radius} km
 
 </div>
 
