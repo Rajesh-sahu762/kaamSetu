@@ -75,16 +75,49 @@ const vendorSchema = new mongoose.Schema(
       default: "",
     },
     bio: {
-        type: String,
+      type: String,
     },
     approvedAt: {
-   type: Date,
-   default: null
+      type: Date,
+      default: null,
+    },
+    skills: { type: String, default: [] },
+    serviceAreas: { type: String, default: [] },
+   availability: {
+  type: [
+    {
+      day: String,
+      startTime: String,
+      endTime: String,
+      isHoliday: Boolean,
+    },
+  ],
+  default: [],
 },
+    bankDetails: {
+  bankName: {
+    type: String,
+    default: "",
   },
+  accountHolder: {
+    type: String,
+    default: "",
+  },
+  accountNumber: {
+    type: String,
+    default: "",
+  },
+  ifscCode: {
+    type: String,
+    default: "",
+  },
+  upiId: {
+    type: String,
+    default: "",
+  },
+},
 
-{
-      
+  {
     timestamps: true,
   },
 );

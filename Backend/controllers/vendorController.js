@@ -49,10 +49,12 @@ const getVendorProfile = async (req, res) => {
   pendingBookings,
   ratingResult,
   earnings,
+   portfolio,
 ] = await Promise.all([
   Service.countDocuments({
     vendorId: vendor._id,
   }),
+  
 
   Review.countDocuments({
     vendorId: vendor._id,
@@ -100,7 +102,22 @@ const getVendorProfile = async (req, res) => {
       },
     },
   ]),
+
+  Service.find(
+  { vendorId: vendor._id },
+  {
+    serviceName: 1,
+    coverImage: 1,
+    images: 1,
+    rating: 1,
+    totalBookings: 1,
+  }
+),
+
+
 ]);
+
+
 
 const averageRating =
   ratingResult.length > 0
@@ -120,20 +137,40 @@ const totalEarnings =
       success: true,
       message: "Vendor profile fetched successfully",
 
-      data: {
-        user,
+     data: {
+  user,
 
-        vendor,
+  vendor,
 
-        stats: {
-          averageRating,
-          totalReviews,
-          totalServices,
-          completedBookings,
-          pendingBookings,
-          totalEarnings,
-        },
-      },
+  stats: {
+    averageRating,
+    totalReviews,
+    totalServices,
+    completedBookings,
+    pendingBookings,
+    totalEarnings,
+    aiSuggestions: [
+   "Upload more service images.",
+   "Complete bank details.",
+   "Add more skills."
+]
+  },
+  profileCompletion:
+  (
+    [
+      user.profileImage,
+      vendor.bio,
+      vendor.skills?.length,
+      vendor.serviceAreas?.length,
+      vendor.bankDetails?.bankName,
+      vendor.aadhaarImage,
+      vendor.panImage,
+    ].filter(Boolean).length / 7
+  ) * 100,
+
+  portfolio,
+}
+
     });
   } catch (error) {
     console.log(error);
