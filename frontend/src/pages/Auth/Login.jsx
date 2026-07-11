@@ -160,6 +160,20 @@ const Login = () => {
 
       const user = response.user;
 
+      if (!user.isActive) {
+  return res.status(403).json({
+    success: false,
+    message: "Your account has been deactivated. Please contact support if you want to reactivate it.",
+  });
+}
+
+if (!user.isverified) {
+  return res.status(403).json({
+    success: false,
+    message: "Your account is not verified. Please check your email for the verification link or request a new one.",
+  });
+}
+
       if (user.role === 'customer') {
         navigate(from || '/');
       } else if (user.role === 'vendor') {

@@ -596,10 +596,30 @@ const vendorRegister = async (req, res) => {
   }
 };
 
+const deactivateAccount = async (req, res) => {
+    const { userId } = req.user;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+       ...
+    }
+
+    user.isActive = false;
+
+    await user.save();
+
+    return res.status(200).json({
+        success:true,
+        message:"Account deactivated successfully."
+    });
+}
+
 module.exports = {
   registerUser,
   LoginUser,
   vendorRegister,
+  deactivateAccount,
   verifyEmailOtp,
   resendOtp,
   forgotPassword,

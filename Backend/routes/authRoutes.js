@@ -10,7 +10,8 @@ const {
   forgotPassword,
   resetPassword,
   googleLogin,
-  facebookLogin
+  facebookLogin,
+  deactivateAccount
 } = require("../controllers/authController");
 
 // Register Route
@@ -19,6 +20,9 @@ router.post("/register", registerUser);
 
 // Login Route
 router.post("/login", LoginUser);
+
+// deactivateAccount Route
+router.patch("/deactivate-account", deactivateAccount);
 
 // Vendor Register Route
 router.post("/vendor/register", vendorRegister);
