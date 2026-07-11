@@ -129,6 +129,44 @@ const totalEarnings =
     ? earnings[0].totalEarnings
     : 0;
 
+const profileCompletion =
+  (
+    [
+      user.profileImage,
+      vendor.bio,
+      vendor.skills?.length,
+      vendor.serviceAreas?.length,
+      vendor.bankDetails?.bankName,
+      vendor.aadhaarImage,
+      vendor.panImage,
+    ].filter(Boolean).length / 7
+  ) * 100;
+
+const businessHealth = Math.round(
+  (
+    profileCompletion +
+    averageRating * 20 +
+    (portfolio.length > 0 ? 100 : 40)
+  ) / 3
+);
+
+const aiSuggestions = [];
+
+if (!user.profileImage)
+  aiSuggestions.push("Upload a profile photo.");
+
+if (!vendor.skills?.length)
+  aiSuggestions.push("Add your professional skills.");
+
+if (!vendor.bankDetails?.bankName)
+  aiSuggestions.push("Complete your bank details.");
+
+if (!portfolio.length)
+  aiSuggestions.push("Add service images to your portfolio.");
+
+if (!vendor.serviceAreas?.length)
+  aiSuggestions.push("Add your service areas.");
+
     // ==========================
     // Response
     // ==========================
@@ -149,24 +187,10 @@ const totalEarnings =
     completedBookings,
     pendingBookings,
     totalEarnings,
-    aiSuggestions: [
-   "Upload more service images.",
-   "Complete bank details.",
-   "Add more skills."
-]
+    businessHealth,
+    aiSuggestions,
   },
-  profileCompletion:
-  (
-    [
-      user.profileImage,
-      vendor.bio,
-      vendor.skills?.length,
-      vendor.serviceAreas?.length,
-      vendor.bankDetails?.bankName,
-      vendor.aadhaarImage,
-      vendor.panImage,
-    ].filter(Boolean).length / 7
-  ) * 100,
+  profileCompletion,
 
   portfolio,
 }
