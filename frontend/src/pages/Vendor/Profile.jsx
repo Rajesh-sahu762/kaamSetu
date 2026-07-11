@@ -115,6 +115,51 @@ const businessInfo = [
   ["Bio", vendor?.bio || "No bio added"],
 ];
 
+const maskAccountNumber = (accountNumber) => {
+  if (!accountNumber) return "N/A";
+
+  return "XXXXXXXX" + accountNumber.slice(-4);
+};
+
+const maskUpi = (upi) => {
+  if (!upi) return "N/A";
+
+  const [id, provider] = upi.split("@");
+
+  return `${"*".repeat(Math.max(id.length - 2, 0))}${id.slice(-2)}@${provider}`;
+};
+
+const bankInfo = [
+  [
+    "Bank",
+    vendor?.bankDetails?.bankName || "N/A",
+  ],
+
+  [
+    "Account Holder",
+    vendor?.bankDetails?.accountHolder || "N/A",
+  ],
+
+  [
+    "Account Number",
+    maskAccountNumber(
+      vendor?.bankDetails?.accountNumber
+    ),
+  ],
+
+  [
+    "IFSC",
+    vendor?.bankDetails?.ifscCode || "N/A",
+  ],
+
+  [
+    "UPI",
+    maskUpi(
+      vendor?.bankDetails?.upiId
+    ),
+  ],
+];
+
 
 useEffect(() => {
   const fetchProfile = async () => {
@@ -1136,226 +1181,7 @@ gap:12,
 
 </Fade>
 
-{/* documents */}
-<Fade delay={0.45}>
 
-<div
-style={{
-background:T.white,
-border:`1px solid ${T.border}`,
-borderRadius:20,
-padding:24,
-marginTop:28,
-}}
->
-
-<div
-style={{
-display:"flex",
-justifyContent:"space-between",
-alignItems:"center",
-marginBottom:24,
-}}
->
-
-<div>
-
-<h2
-style={{
-fontFamily:"Geist,sans-serif",
-fontSize:22,
-color:T.slate,
-}}
->
-Documents
-</h2>
-
-<p
-style={{
-marginTop:6,
-fontSize:13,
-color:T.slateGray,
-}}
->
-Verified documents managed by KaamSetu.
-</p>
-
-</div>
-
-</div>
-
-<div
-style={{
-display:"grid",
-gap:14,
-}}
->
-
-{[
-["Aadhar Card","Verified",T.green],
-["PAN Card","Verified",T.green],
-["Police Verification","Pending",T.amber],
-["GST Certificate","Uploaded",T.blue],
-].map(([name,status,color])=>(
-
-<div
-key={name}
-style={{
-display:"flex",
-justifyContent:"space-between",
-alignItems:"center",
-padding:"18px",
-border:`1px solid ${T.border}`,
-borderRadius:14,
-}}
->
-
-<div>
-
-<div
-style={{
-fontWeight:600,
-color:T.slate,
-}}
->
-{name}
-</div>
-
-<div
-style={{
-fontSize:13,
-marginTop:4,
-color,
-}}
->
-{status}
-</div>
-
-</div>
-
-<button
-style={{
-border:"none",
-background:T.surfaceLow,
-padding:"10px 18px",
-borderRadius:10,
-cursor:"pointer",
-fontWeight:600,
-}}
->
-View
-</button>
-
-</div>
-
-))}
-
-</div>
-
-</div>
-
-</Fade>
-
-
-<Fade delay={0.5}>
-
-<div
-style={{
-background:T.white,
-border:`1px solid ${T.border}`,
-borderRadius:20,
-padding:24,
-marginTop:28,
-}}
->
-
-<div
-style={{
-display:"flex",
-justifyContent:"space-between",
-alignItems:"center",
-marginBottom:24,
-}}
->
-
-<h2
-style={{
-fontFamily:"Geist,sans-serif",
-fontSize:22,
-color:T.slate,
-}}
->
-Availability
-</h2>
-
-<button
-style={{
-height:42,
-padding:"0 18px",
-border:"none",
-background:T.slate,
-color:T.white,
-borderRadius:10,
-cursor:"pointer",
-}}
->
-Edit
-</button>
-
-</div>
-
-<div
-style={{
-display:"grid",
-gap:12,
-}}
->
-
-{[
-["Monday","9:00 AM - 6:00 PM"],
-["Tuesday","9:00 AM - 6:00 PM"],
-["Wednesday","9:00 AM - 6:00 PM"],
-["Thursday","9:00 AM - 6:00 PM"],
-["Friday","9:00 AM - 6:00 PM"],
-["Saturday","10:00 AM - 4:00 PM"],
-["Sunday","Holiday"],
-].map(([day,time])=>(
-
-<div
-key={day}
-style={{
-display:"flex",
-justifyContent:"space-between",
-padding:"14px 0",
-borderBottom:`1px solid ${T.border}`,
-}}
->
-
-<span
-style={{
-fontWeight:600,
-}}
->
-{day}
-</span>
-
-<span
-style={{
-color:T.slateGray,
-}}
->
-{time}
-</span>
-
-</div>
-
-))}
-
-</div>
-
-</div>
-
-</Fade>
 
 <Fade delay={0.55}>
 
@@ -1406,57 +1232,61 @@ Update
 <div
 style={{
 display:"grid",
-gridTemplateColumns:
-bp.isDesktop
-?"repeat(2,1fr)"
-:"1fr",
+gridTemplateColumns: bp.isDesktop
+  ? (vendor?.bankDetails?.bankName ? "repeat(2, 1fr)" : "1fr")
+  : "1fr",
 
 gap:18,
 }}
 >
 
-{[
-["Bank","HDFC Bank"],
-
-["Account","XXXXXXXX4532"],
-
-["IFSC","HDFC0001245"],
-
-["UPI","*******@okaxis"],
-
-].map(([label,value])=>(
-
-<div
-key={label}
-style={{
-background:T.surfaceLow,
-padding:18,
-borderRadius:14,
-}}
->
-
-<div
-style={{
-fontSize:12,
-color:T.slateGray,
-marginBottom:8,
-}}
->
-{label}
-</div>
-
-<div
-style={{
-fontWeight:600,
-}}
->
-{value}
-</div>
-
-</div>
-
-))}
-
+{vendor?.bankDetails?.bankName ? (
+  bankInfo.map(([label,value])=>(
+  
+  <div
+  key={label}
+  style={{
+  background:T.surfaceLow,
+  padding:18,
+  borderRadius:14,
+  }}
+  >
+  
+  <div
+  style={{
+  fontSize:12,
+  color:T.slateGray,
+  marginBottom:8,
+  }}
+  >
+  {label}
+  </div>
+  
+  <div
+  style={{
+  fontWeight:600,
+  }}
+  >
+  {value}
+  </div>
+  
+  </div>
+  
+  ))
+) : (
+  <div
+    style={{
+      width: "100%",
+      padding: 20,
+      textAlign: "center",
+      color: T.slateGray,
+      background: T.surfaceLow,
+      borderRadius: 12,
+    }}
+  >
+    No bank details added yet.
+  </div>
+)}
 </div>
 
 </div>
@@ -1491,20 +1321,7 @@ display:"grid",
 gap:14,
 }}
 >
-
-{[
-"Change Password",
-
-"Notification Preferences",
-
-"Privacy Settings",
-
-"Logout",
-
-].map((item)=>(
-
 <div
-key={item}
 style={{
 display:"flex",
 justifyContent:"space-between",
@@ -1520,14 +1337,37 @@ style={{
 fontWeight:500,
 }}
 >
-{item}
+  <button className="btn btn-outline cursor-pointer" onClick={() => navigate("/reset-password")}>change password</button>
+
 </div>
 
 <ArrowRight size={18}/>
 
 </div>
 
-))}
+<div
+style={{
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+padding:"16px 0",
+borderBottom:`1px solid ${T.border}`,
+cursor:"pointer",
+}}
+>
+
+<div
+style={{
+fontWeight:500,
+}}
+>
+  <button className="btn btn-outline cursor-pointer" onClick={() => navigate("")}>Deactivate Account</button>
+
+</div>
+
+<ArrowRight size={18}/>
+
+</div>
 
 </div>
 
