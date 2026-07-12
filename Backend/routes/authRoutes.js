@@ -14,6 +14,9 @@ const {
   deactivateAccount
 } = require("../controllers/authController");
 
+// import token
+const verifyToken = require("../middleware/verifyToken");
+
 // Register Route
 
 router.post("/register", registerUser);
@@ -22,7 +25,7 @@ router.post("/register", registerUser);
 router.post("/login", LoginUser);
 
 // deactivateAccount Route
-router.patch("/deactivate-account", deactivateAccount);
+router.patch("/deactivate-account", verifyToken, deactivateAccount);
 
 // Vendor Register Route
 router.post("/vendor/register", vendorRegister);

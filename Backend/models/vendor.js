@@ -81,8 +81,15 @@ const vendorSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    skills: { type: String, default: [] },
-    serviceAreas: { type: String, default: [] },
+    skills: {
+  type: [String],
+  default: [],
+},
+
+serviceAreas: {
+  type: [String],
+  default: [],
+},
    availability: {
   type: [
     {

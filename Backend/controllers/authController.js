@@ -455,6 +455,14 @@ const LoginUser = async (req, res) => {
       });
     }
 
+         if (!user.isActive) {
+  return res.status(403).json({
+    success: false,
+    message: "Your account has been deactivated. Please contact support if you want to reactivate it.",
+  });
+}
+
+
     if (!user.isVerified) {
       return res.status(400).json({
         success: false,
@@ -597,23 +605,34 @@ const vendorRegister = async (req, res) => {
 };
 
 const deactivateAccount = async (req, res) => {
+  try {
     const { userId } = req.user;
 
-    const user = await User.findById(userId);
+    const user = await userModel.findById(userId);
 
     if (!user) {
-       ...
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     user.isActive = false;
+user.deactivatedAt = new Date();
 
     await user.save();
 
     return res.status(200).json({
-        success:true,
-        message:"Account deactivated successfully."
+      success: true,
+      message: "Account deactivated successfully.",
     });
-}
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   registerUser,

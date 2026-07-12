@@ -49,6 +49,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    deactivatedAt: {
+  type: Date,
+  default: null,
+},
     profileImage: {
   type: String,
   default: ""
