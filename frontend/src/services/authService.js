@@ -49,6 +49,11 @@ export const forgotPassword = async (email) => {
   return response.data;
 };
 
+export const deactivateAccount = async () => {
+  const response = await api.patch("/auth/deactivate-account");
+  return response.data;
+};
+
 export const resetPassword = async (data) => {
   const response = await api.post('/auth/reset-password', data);
 
@@ -73,3 +78,5 @@ export const loginUser = async (userData) => {
     throw error;
   }
 };
+
+

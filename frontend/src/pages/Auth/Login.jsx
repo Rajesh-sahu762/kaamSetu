@@ -5,6 +5,8 @@ import { loginUser, googleLogin, facebookLogin } from '@/services/authService';
 
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
+import { useVendor } from "@/context/vendorContext";
+import { getVendorProfile } from "@/services/vendorService";
 
 const Login = () => {
   const location = useLocation();
@@ -25,6 +27,7 @@ const Login = () => {
   const from = location.state?.form?.pathname;
 
   const navigate = useNavigate();
+  const { updateVendorData } = useVendor();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -70,6 +73,10 @@ const Login = () => {
       localStorage.setItem('token', response.token);
 
       localStorage.setItem('user', JSON.stringify(response.user));
+
+      const vendorProfile = await getVendorProfile();
+
+updateVendorData(vendorProfile.data);
 
       toast.success(response.message);
       const user = response.user;
@@ -156,23 +163,15 @@ const Login = () => {
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
 
+      const vendorProfile = await getVendorProfile();
+
+updateVendorData(vendorProfile.data);
+
       toast.success(response.message);
 
       const user = response.user;
 
-      if (!user.isActive) {
-  return res.status(403).json({
-    success: false,
-    message: "Your account has been deactivated. Please contact support if you want to reactivate it.",
-  });
-}
 
-if (!user.isverified) {
-  return res.status(403).json({
-    success: false,
-    message: "Your account is not verified. Please check your email for the verification link or request a new one.",
-  });
-}
 
       if (user.role === 'customer') {
         navigate(from || '/');

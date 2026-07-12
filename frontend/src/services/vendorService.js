@@ -9,3 +9,26 @@ export const getVendorProfile = async () => {
     throw error;
   }
 };
+
+export const updateProfileImage = async (formData) => {
+  const response = await api.patch(
+    "/vendor/profile-image",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const updateVendorProfile = async (data) => {
+  const response = await api.put(
+    "/vendor/profile",
+    data
+  );
+
+  return response.data;
+};

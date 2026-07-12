@@ -1,16 +1,14 @@
-import { useState, useEffect } from 'react';
-import { getVendorProfile } from "@/services/vendorService";
-
+import { useState, useEffect, useRef } from 'react';
+import { getVendorProfile, updateProfileImage, updateVendorProfile } from "@/services/vendorService";
 import Fade from '@/components/vendor/common/Fade';
 import Avatar from '@/components/vendor/common/Avatar';
-
+import { deactivateAccount } from '@/services/authService';
 import { T, MOBILE_BOTTOM_NAV_HEIGHT } from '@/utils/vendorTheme';
-
 import useBreakpoint from '@/utils/useBreakpoint';
 
+
 import {
-  User,
-  Briefcase,
+  Camera,
   ShieldCheck,
   TrendingUp,
   Sparkles,
@@ -20,6 +18,8 @@ import {
   Target,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import ConfirmModal from '@/components/vendor/common/ConfirmModal';
 
 
 export default function Profile() {
@@ -29,13 +29,15 @@ const navigate = useNavigate();
 
 const [profile, setProfile] = useState(null);
 const [loading, setLoading] = useState(true);
+const fileInputRef = useRef(null);
+const [skillsInput, setSkillsInput] = useState("");
+const [showLogoutModal, setShowLogoutModal] = useState(false);
+
 
 const user = profile?.user;
 const vendor = profile?.vendor;
 const stats = profile?.stats;
 const portfolio = profile?.portfolio;
-
-
 
 const PROFILE_PROGRESS = [
   {
@@ -90,29 +92,16 @@ const performanceCards = [
 ];
 
 const businessInfo = [
-  ["Business Name", vendor?.businessName || "N/A"],
-
-  ["Business Type", vendor?.businessType || "N/A"],
-
-  ["Experience", `${vendor?.experience || 0} Years`],
-
-  [
-    "Business Address",
-    `${vendor?.address || ""}, ${vendor?.city || ""}, ${vendor?.state || ""} - ${vendor?.pincode || ""}`,
-  ],
-
-  ["Service Radius", `${vendor?.radius || 0} KM`],
-
-  ["Status", vendor?.status || "Pending"],
-
-  [
-    "Member Since",
-    user?.createdAt
-      ? new Date(user.createdAt).toLocaleDateString("en-IN")
-      : "N/A",
-  ],
-
-  ["Bio", vendor?.bio || "No bio added"],
+  ["Business Name", "businessName"],
+  ["Business Type", "businessType"],
+  ["Experience", "experience"],
+  ["Business Address", "address"],
+  ["City", "city"],
+  ["State", "state"],
+  ["Pincode", "pincode"],
+  ["Service Radius", "radius"],
+  ["Status", "status"],
+  ["Bio", "bio"],
 ];
 
 const maskAccountNumber = (accountNumber) => {
@@ -160,27 +149,199 @@ const bankInfo = [
   ],
 ];
 
+const [editingSection, setEditingSection] = useState(null);
+
+const [formData, setFormData] = useState({
+  fullName: "",
+  mobile: "",
+
+  experience: 0,
+
+  businessName: "",
+  businessType: "",
+
+  bio: "",
+
+  address: "",
+  city: "",
+  state: "",
+  pincode: "",
+
+  radius: 10,
+
+  skills: [],
+
+  bankDetails: {
+    bankName: "",
+    accountHolder: "",
+    accountNumber: "",
+    ifscCode: "",
+    upiId: "",
+  },
+});
+
+const handleImageChange = async (e) => {
+
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    try {
+
+        const formData = new FormData();
+
+        formData.append("profileImage", file);
+
+        const response = await updateProfileImage(formData);
+
+        if(response.success){
+
+            await fetchProfile();
+
+        }
+
+        toast.success(response.message);
+
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+
+};
+
+
+const fetchProfile = async () => {
+  try {
+    const response = await getVendorProfile();
+
+setProfile(response.data);
+
+
+    setFormData({
+      fullName: response.data.user.fullName || "",
+      mobile: response.data.user.mobile || "",
+
+      experience: response.data.vendor.experience || 0,
+
+      businessName: response.data.vendor.businessName || "",
+
+      businessType: response.data.vendor.businessType || "",
+
+      bio: response.data.vendor.bio || "",
+
+      address: response.data.vendor.address || "",
+
+      city: response.data.vendor.city || "",
+
+      state: response.data.vendor.state || "",
+
+      pincode: response.data.vendor.pincode || "",
+
+      radius: response.data.vendor.radius || 10,
+
+      skills: setSkillsInput(response.data.vendor.skills.join(", ")) || [],
+
+      bankDetails:
+        response.data.vendor.bankDetails || {
+          bankName: "",
+          accountHolder: "",
+          accountNumber: "",
+          ifscCode: "",
+          upiId: "",
+        },
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
 
 useEffect(() => {
-  const fetchProfile = async () => {
-    try {
-      const response = await getVendorProfile();
-
-      setProfile(response.data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchProfile();
+    fetchProfile();
 }, []);
 
 if (loading) {
   return <h2>Loading...</h2>;
 }
 
+const handleDeactivateAccount = async () => {
+  try {
+    const res = await deactivateAccount();
+
+    alert(res.message);
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/login");
+  } catch (error) {
+    console.log(error);
+    
+  }
+};
+
+
+const handleChange = (e) => {
+
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+    }));
+
+};
+
+const handleUpdateProfile = async () => {
+  try {
+
+    const updatedFormData = {
+      ...formData,
+
+      skills: skillsInput
+        .split(/[,\n]+/)
+        .map((item) => item.trim())
+        .filter(Boolean),
+    };
+
+    const response = await updateVendorProfile(updatedFormData);
+
+    setProfile((prev) => ({
+      ...prev,
+      user: response.data.user,
+      vendor: response.data.vendor,
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      skills: response.data.vendor.skills,
+    }));
+
+    setSkillsInput(response.data.vendor.skills.join(", "));
+
+    setEditingSection(null);
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+const handleCancel = () => {
+
+    setEditingSection(null);
+
+    fetchProfile();
+
+};
 
 return (
 
@@ -221,19 +382,68 @@ paddingBottom:bp.isMobile
         gap: 18,
       }}
     >
-      <Avatar
-        initials={
-          user?.profileImage
+      <div
+  style={{
+    position: "relative",
+    width: 72,
+    height: 72,
+    flexShrink: 0,
+  }}
+>
+  <Avatar
+    image={
+        user?.profileImage
+            ? `http://localhost:3000/uploads/profile/${user?.profileImage}`
+            : ""
+    }
+
+    initials={
+        user?.profileImage
             ? ""
             : user?.fullName
                 ?.split(" ")
-                .map((n) => n[0])
-                .join("") || ""
-        }
-        image={user?.profileImage}
-        size={72}
-        bg={T.bronze}
-      />
+                .map((n)=>n[0])
+                .join("")
+    }
+
+    size={72}
+
+    bg={T.bronze}
+    onclick={() => fileInputRef.current?.click()}
+/>
+
+  <button
+    type="button"
+    onClick={() => fileInputRef.current?.click()}
+    style={{
+      position: "absolute",
+      bottom: -2,
+      right: -2,
+      width: 26,
+      height: 26,
+      borderRadius: "50%",
+      border: `2px solid ${T.border}`,
+      background: T.white,
+      color: T.slate,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      boxShadow: "0 2px 8px rgba(0,0,0,.25)",
+      transition: "0.2s",
+    }}
+  >
+    <Camera size={14} />
+  </button>
+</div>
+
+      <input
+  type="file"
+  ref={fileInputRef}
+  accept="image/*"
+  style={{ display: "none" }}
+  onChange={handleImageChange}
+/>
 
       <div>
         <h1
@@ -294,30 +504,10 @@ paddingBottom:bp.isMobile
         )}
       </div>
     </div>
-
-    <button
-      onClick={() => setIsEditOpen(true)}
-      style={{
-        height: 46,
-        padding: "0 18px",
-        border: "none",
-        background: T.white,
-        color: T.slate,
-        borderRadius: 10,
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        cursor: "pointer",
-        fontWeight: 600,
-      }}
-    >
-      <Pencil size={17} />
-      Edit Profile
-    </button>
   </div>
 </Fade>
 
-<Fade delay={0.08}>
+<Fade delay={0.03}>
 
 <div
 
@@ -711,7 +901,7 @@ color={item.done ? T.green : T.border}
 
 {/* performance */}
 
-<Fade delay={0.15}>
+<Fade delay={0.5}>
 
 <div
   style={{
@@ -794,7 +984,7 @@ gap:16,
 
 </Fade>
 
-<Fade delay={0.2}>
+<Fade delay={0.8}>
 
 <div
 style={{
@@ -843,6 +1033,7 @@ Basic details visible to customers.
 
 </div>
 
+{editingSection !== "personal" && (
 <button
 style={{
 height:42,
@@ -856,6 +1047,7 @@ alignItems:"center",
 gap:8,
 cursor:"pointer",
 }}
+onClick={() => setEditingSection("personal")}
 >
 
 <Pencil size={16}/>
@@ -863,6 +1055,7 @@ cursor:"pointer",
 Edit
 
 </button>
+)}
 
 </div>
 
@@ -879,7 +1072,31 @@ gap:18,
 >
 
 {[
-["Full Name",profile.user.fullName],
+["Full Name",editingSection === "personal" ? (
+
+<input
+
+name="fullName"
+
+value={formData.fullName}
+
+onChange={handleChange}
+
+style={{
+width:"100%",
+padding:10,
+backgroundColor:T.bronzeLight,
+border:`2px solid ${T.border}`,
+borderRadius:8,
+}}
+
+ />
+
+) : (
+
+profile.user.fullName
+
+)],
 
 ["Email",profile.user.email],
 
@@ -889,7 +1106,33 @@ gap:18,
 
 // ["Languages",profile.languages],
 
-["Experience",profile.vendor.experience],
+["Experience",editingSection === "personal" ? (
+
+<input
+
+style={{
+width:"100%",
+padding:10,
+backgroundColor:T.bronzeLight,
+border:`2px solid ${T.border}`,
+borderRadius:8,
+}}
+
+type="number"
+
+name="experience"
+
+value={formData.experience}
+
+onChange={handleChange}
+
+/>
+
+) : (
+
+profile.vendor.experience + " Years"
+
+)],
 ].map(([label,value])=>(
 
 <div
@@ -929,13 +1172,70 @@ color:T.slate,
 
 ))}
 </div>
+{editingSection==="personal" && (
+
+<div
+
+style={{
+
+display:"flex",
+
+justifyContent:"flex-end",
+
+gap:12,
+
+marginTop:25,
+
+}}
+
+>
+
+<button
+
+onClick={handleCancel}
+
+style={{
+
+padding:"10px 22px",
+
+}}
+
+>
+
+Cancel
+
+</button>
+
+<button
+
+onClick={handleUpdateProfile}
+
+style={{
+cursor: "pointer",
+padding:"10px 22px",
+
+background:T.slate,
+
+color:"#fff",
+
+}}
+
+>
+
+Update
+
+</button>
+
+</div>
+
+)}
 
 </div>
 
 </Fade>
 
 
-<Fade delay={0.25}>
+<Fade delay={0.12}>
 
 <div
 style={{
@@ -980,26 +1280,26 @@ Business details shown on your public profile.
 
 </div>
 
-<button
-style={{
-height:42,
-padding:"0 18px",
-border:"none",
-borderRadius:10,
-background:T.slate,
-color:T.white,
-display:"flex",
-alignItems:"center",
-gap:8,
-cursor:"pointer",
-}}
->
-
-<Pencil size={16}/>
-
-Edit
-
-</button>
+{editingSection !== "business" && (
+  <button
+    onClick={() => setEditingSection("business")}
+    style={{
+      height: 42,
+      padding: "0 18px",
+      border: "none",
+      borderRadius: 10,
+      background: T.slate,
+      color: T.white,
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      cursor: "pointer",
+    }}
+  >
+    <Pencil size={16} />
+    Edit
+  </button>
+)}
 
 </div>
 
@@ -1039,40 +1339,136 @@ marginBottom:8,
 </div>
 
 <div
-style={{
-fontWeight:600,
-fontSize:15,
-color:T.slate,
-lineHeight:1.7,
-}}
+  style={{
+    fontWeight: 600,
+    fontSize: 15,
+    color: T.slate,
+    lineHeight: 1.7,
+  }}
 >
+  {editingSection === "business" &&
+  !["Status", "Member Since"].includes(label) ? (
 
-{label === "Status" ? (
-  <span
-    style={{
-      color:
-        value === "approved"
-          ? T.green
-          : value === "pending"
-          ? "#F59E0B"
-          : "#EF4444",
-      fontWeight: 700,
-      textTransform: "capitalize",
-    }}
-  >
-    {value}
-  </span>
-) : (
-  value
-)}
+    label === "Bio" ? (
+      <textarea
+        name={value}
+        value={formData[value] || ""}
+        onChange={handleChange}
+        rows={4}
+        style={{
+          backgroundColor: T.bronzeLight,
+          width: "100%",
+          padding: 10,
+          border: `1px solid ${T.border}`,
+          borderRadius: 8,
+          resize: "vertical",
+        }}
+      />
+    ) : (
+      <input
+        type={
+          ["experience", "radius"].includes(value)
+            ? "number"
+            : "text"
+        }
+        name={value}
+        value={formData[value] || ""}
+        onChange={handleChange}
+        style={{
+          width: "100%",
+          backgroundColor: T.bronzeLight,
+          padding: 10,
+          border: `1px solid ${T.border}`,
+          borderRadius: 8,
+          outline: "none",
+        }}
+      />
+    )
 
+  ) : label === "Status" ? (
+
+    <span
+      style={{
+        color:
+          vendor?.status === "approved"
+            ? T.green
+            : vendor?.status === "pending"
+            ? "#F59E0B"
+            : "#EF4444",
+        fontWeight: 700,
+        textTransform: "capitalize",
+      }}
+    >
+      {vendor?.status}
+    </span>
+
+  ) : label === "Member Since" ? (
+
+    user?.createdAt
+      ? new Date(user.createdAt).toLocaleDateString("en-IN")
+      : "N/A"
+
+  ) : value === "experience" ? (
+
+    `${vendor?.experience || 0} Years`
+
+  ) : value === "radius" ? (
+
+    `${vendor?.radius || 0} KM`
+
+  ) : value === "address" ? (
+
+    `${vendor?.address || ""}, ${vendor?.city || ""}, ${vendor?.state || ""} - ${vendor?.pincode || ""}`
+
+  ) : (
+
+    vendor?.[value] || "N/A"
+
+  )}
 </div>
-
 </div>
 
 ))}
 
 </div>
+
+{editingSection === "business" && (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 12,
+      marginTop: 24,
+    }}
+  >
+    <button
+      onClick={handleCancel}
+      style={{
+        padding: "10px 22px",
+        border: `1px solid ${T.border}`,
+        background: T.white,
+        borderRadius: 8,
+        cursor: "pointer",
+      }}
+    >
+      Cancel
+    </button>
+
+    <button
+      onClick={handleUpdateProfile}
+      style={{
+        padding: "10px 22px",
+        border: "none",
+        background: T.slate,
+        color: T.white,
+        borderRadius: 8,
+        cursor: "pointer",
+      }}
+    >
+      Update
+    </button>
+  </div>
+)}
 
 </div>
 
@@ -1113,6 +1509,7 @@ Skills
 
 </h2>
 
+{editingSection !== "skills" && (
 <button
 style={{
 height:42,
@@ -1126,6 +1523,7 @@ alignItems:"center",
 gap:8,
 cursor:"pointer",
 }}
+onClick={() => setEditingSection("skills")}
 >
 
 <Pencil size={16}/>
@@ -1133,7 +1531,7 @@ cursor:"pointer",
 Edit
 
 </button>
-
+)}
 </div>
 
 <div
@@ -1143,8 +1541,27 @@ flexWrap:"wrap",
 gap:12,
 }}
 >
+{editingSection === "skills" ? (
 
-{vendor?.skills?.length > 0 ? (
+  <textarea
+    name="skills"
+    value={skillsInput}
+    onChange={(e) => setSkillsInput(e.target.value)}
+    rows={4}
+    placeholder="Electrical Repair, Fan Installation, House Wiring"
+    style={{
+      width: "100%",
+      padding: 12,
+      border: `1px solid ${T.border}`,
+      borderRadius: 10,
+      resize: "vertical",
+      outline: "none",
+      fontSize: 14,
+    }}
+  />
+
+) : vendor?.skills?.length > 0 ? (
+
   vendor.skills.map((skill, index) => (
     <div
       key={index}
@@ -1160,7 +1577,9 @@ gap:12,
       {skill}
     </div>
   ))
+
 ) : (
+
   <div
     style={{
       width: "100%",
@@ -1173,9 +1592,68 @@ gap:12,
   >
     No skills added yet.
   </div>
+
 )}
 
 </div>
+
+{editingSection === "skills" && (
+
+<div
+
+style={{
+
+display:"flex",
+
+justifyContent:"flex-end",
+
+gap:12,
+
+marginTop:25,
+
+}}
+
+>
+
+<button
+
+onClick={handleCancel}
+
+style={{
+
+padding:"10px 22px",
+
+}}
+
+>
+
+Cancel
+
+</button>
+
+<button
+
+onClick={handleUpdateProfile}
+
+style={{
+cursor: "pointer",
+padding:"10px 22px",
+
+background:T.slate,
+
+color:"#fff",
+
+}}
+
+>
+
+Update
+
+</button>
+
+</div>
+
+)}
 
 </div>
 
@@ -1183,7 +1661,7 @@ gap:12,
 
 
 
-<Fade delay={0.55}>
+<Fade delay={0.25}>
 
 <div
 style={{
@@ -1212,20 +1690,6 @@ fontSize:22,
 >
 Bank Details
 </h2>
-
-<button
-style={{
-height:42,
-padding:"0 18px",
-border:"none",
-background:T.slate,
-color:T.white,
-borderRadius:10,
-cursor:"pointer",
-}}
->
-Update
-</button>
 
 </div>
 
@@ -1293,7 +1757,7 @@ gap:18,
 
 </Fade>
 
-<Fade delay={0.6}>
+<Fade delay={0.3}>
 
 <div
 style={{
@@ -1361,7 +1825,7 @@ style={{
 fontWeight:500,
 }}
 >
-  <button className="btn btn-outline cursor-pointer" onClick={() => navigate("")}>Deactivate Account</button>
+  <button className="btn btn-outline cursor-pointer" onClick={() => setShowLogoutModal(true)}>Deactivate Account</button>
 
 </div>
 
@@ -1403,6 +1867,18 @@ zIndex:40,
 </button>
 
 )}
+
+        <ConfirmModal
+  open={showLogoutModal}
+  title="Deactivate Account"
+  message="Are you sure you want to deactivate your Account?"
+  confirmText="Deactivate"
+  cancelText="Cancel"
+  danger={true}
+  onCancel={() => setShowLogoutModal(false)}
+  onConfirm={handleDeactivateAccount}
+/>
+
 
 </div>
 

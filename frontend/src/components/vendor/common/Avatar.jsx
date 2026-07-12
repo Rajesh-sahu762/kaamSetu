@@ -1,9 +1,11 @@
 import { T } from "@/utils/vendorTheme";
 
 const Avatar = ({
+  image,
   initials,
   size = 36,
   bg = T.slateMid,
+  onclick,
 }) => {
   return (
     <div
@@ -12,6 +14,7 @@ const Avatar = ({
         height: size,
         borderRadius: "50%",
         background: bg,
+        overflow: "hidden",
 
         color: T.white,
 
@@ -25,8 +28,21 @@ const Avatar = ({
 
         flexShrink: 0,
       }}
+      onClick={onclick}
     >
-      {initials}
+      {image ? (
+        <img
+          src={image}
+          alt="Profile"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      ) : (
+        initials
+      )}
     </div>
   );
 };

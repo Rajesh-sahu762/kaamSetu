@@ -1,9 +1,13 @@
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { T } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
+import ConfirmModal from './common/ConfirmModal';
+import { useVendor } from '@/context/vendorContext';
+import Avatar from "./common/Avatar";
+
 
 const NAV_ITEMS = [
   { icon: HomeIcon, label: "Dashboard", to: "/vendor/dashboard" },
@@ -32,6 +36,27 @@ function HomeIcon({ s = 18, c = 'currentColor' }) {
     </svg>
   );
 }
+
+function LogoutIcon({ s = 18, c = "currentColor" }) {
+  return (
+    <svg
+      width={s}
+      height={s}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={c}
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  );
+}
+
+
 function BookingIcon({ s = 18, c = 'currentColor' }) {
   return (
     <svg
@@ -119,6 +144,7 @@ function ProfileIcon({ s = 18, c = 'currentColor' }) {
   );
 }
 function CloseIcon({ s = 20, c = 'currentColor' }) {
+
   return (
     <svg
       width={s}
@@ -135,28 +161,6 @@ function CloseIcon({ s = 20, c = 'currentColor' }) {
   );
 }
 
-function Avatar({ initials, size = 36, bg = T.slateMid }) {
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        background: bg,
-        color: T.white,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'Geist,sans-serif',
-        fontSize: size * 0.33,
-        fontWeight: 600,
-        flexShrink: 0,
-      }}
-    >
-      {initials}
-    </div>
-  );
-}
 
 /* ── InView hook ───────────────────────────────────────────────── */
 function useInView(threshold = 0.1) {
@@ -182,8 +186,17 @@ function SidebarContent({
   collapsed,
   onClose,
   toggleCollapse,
-  navigate
+  navigate,
+  handleLogout
 }) {
+
+  const { vendorData } = useVendor();
+
+const user = vendorData?.user;
+const vendor = vendorData?.vendor;
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Logo row */}
@@ -261,7 +274,23 @@ function SidebarContent({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ position: 'relative' }}>
-              <Avatar initials="RK" size={38} bg={T.bronze} />
+              <Avatar
+    image={
+        user?.profileImage
+            ? `http://localhost:3000/uploads/profile/${user.profileImage}`
+            : ""
+    }
+    initials={
+        user?.profileImage
+            ? ""
+            : user?.fullName
+                  ?.split(" ")
+                  .map((n) => n[0])
+                  .join("")
+    }
+    size={38}
+    bg={T.bronze}
+/>
               <div
                 style={{
                   position: 'absolute',
@@ -284,7 +313,7 @@ function SidebarContent({
                   color: T.white,
                 }}
               >
-                Ramesh Kumar
+                {user?.fullName || "Vendor"}
               </div>
               <div
                 style={{
@@ -293,7 +322,7 @@ function SidebarContent({
                   fontFamily: 'Inter,sans-serif',
                 }}
               >
-                Electrician · Jaipur
+                {vendor?.businessType || "Business"} • {vendor?.city || ""}
               </div>
             </div>
           </div>
@@ -303,8 +332,14 @@ function SidebarContent({
               alignItems: 'center',
               gap: 5,
               marginTop: 10,
-              background: 'rgba(168,138,100,0.12)',
-              border: '1px solid rgba(168,138,100,0.2)',
+              background:
+    vendor?.status === "approved"
+        ? "rgba(34,197,94,.12)"
+        : "rgba(245,158,11,.12)",
+              border:
+    vendor?.status === "approved"
+        ? "1px solid rgba(34,197,94,.25)"
+        : "1px solid rgba(245,158,11,.25)",
               borderRadius: 4,
               padding: '3px 9px',
             }}
@@ -315,12 +350,17 @@ function SidebarContent({
                 fontFamily: 'Geist,sans-serif',
                 fontSize: 10,
                 fontWeight: 600,
-                color: T.bronze,
+                color:
+    vendor?.status === "approved"
+        ? T.green
+        : "#F59E0B",
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',
               }}
             >
-              Verified Artisan
+              {vendor?.status === "approved"
+    ? "Verified Artisan"
+    : "Verification Pending"}
             </span>
           </div>
         </div>
@@ -406,6 +446,37 @@ function SidebarContent({
         })}
       </nav>
 
+      <div
+  className="ks-nav-item"
+  onClick={() => setShowLogoutModal(true)}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: collapsed ? "10px 18px" : "10px 20px",
+    margin: "0 8px 8px",
+    borderRadius: 6,
+    color: "#EF4444",
+    cursor: "pointer",
+  }}
+>
+  <LogoutIcon s={16} c="#EF4444" />
+
+  {!collapsed && (
+    <span
+      style={{
+        fontFamily: "Geist,sans-serif",
+        fontSize: 13,
+        fontWeight: 600,
+      }}
+    >
+      Logout
+    </span>
+  )}
+</div>
+
+      
+
       {/* Collapse toggle — desktop only */}
       {!onClose && (
         <div
@@ -453,14 +524,42 @@ function SidebarContent({
           </div>
         </div>
       )}
+
+          <ConfirmModal
+  open={showLogoutModal}
+  title="Logout from KaamSetu"
+  message="Are you sure you want to logout? You can login again anytime."
+  confirmText="Logout"
+  cancelText="Cancel"
+  danger={true}
+  onCancel={() => setShowLogoutModal(false)}
+  onConfirm={handleLogout}
+/>
     </div>
+
+    
   );
 }
 
 const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isMobile, isTablet } = useBreakpoint();
   const [activeNav, setActiveNav] = useState('Dashboard');
+  
+
+  useEffect(() => {
+
+  const currentRoute = NAV_ITEMS.find(
+    (item) => item.to === location.pathname
+  );
+
+  if (currentRoute) {
+    setActiveNav(currentRoute.label);
+  }
+
+}, [location.pathname]);
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // const [drawerOpen, setDrawerOpen] = useState(false);
   // auto-collapse on tablet
@@ -475,6 +574,22 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
 
   const showDesktopSidebar = !isMobile;
   const sideW = sidebarCollapsed ? 68 : 240;
+const { clearVendorData } = useVendor();
+
+
+  const handleLogout = () => {
+
+    clearVendorData();
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/login",{
+        replace:true
+    });
+
+}
+
   return (
     <>
       {/* ── Mobile drawer overlay ── */}
@@ -505,6 +620,7 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
             }}
           >
             <SidebarContent
+            handleLogout={handleLogout}
               activeNav={activeNav}
               setActiveNav={setActiveNav}
               collapsed={false}
@@ -533,6 +649,7 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
           }}
         >
           <SidebarContent
+          handleLogout={handleLogout}
             activeNav={activeNav}
             setActiveNav={(l) => {
               setActiveNav(l);
@@ -615,6 +732,7 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
           })}
         </div>
       )}
+
     </>
   );
 };
