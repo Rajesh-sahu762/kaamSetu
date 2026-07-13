@@ -492,24 +492,42 @@ serviceName:{
     }
 
     // ==========================
+// Generate Unique Slug
+// ==========================
+
+let slug = serviceName
+  .trim()
+  .toLowerCase()
+  .replace(/[^a-z0-9\s-]/g, "")
+  .replace(/\s+/g, "-");
+
+const slugExists = await Service.findOne({ slug });
+
+if (slugExists) {
+  slug = `${slug}-${Date.now().toString().slice(-6)}`;
+}
+
+    // ==========================
     // Create Service
     // ==========================
 
-    const service = await Service.create({
-      vendorId: vendor._id,
+   const service = await Service.create({
+  vendorId: vendor._id,
 
-      categoryId,
+  categoryId,
 
-      serviceName: serviceName.trim(),
+  serviceName: serviceName.trim(),
 
-      description,
+  slug,
 
-      priceType,
+  description,
 
-      startingPrice,
+  priceType,
 
-      duration,
-    });
+  startingPrice,
+
+  duration,
+});
 
     return res.status(201).json({
       success: true,
@@ -633,23 +651,40 @@ const updateService = async (req, res) => {
     // Duplicate Service Check
     // ==========================
 
-    if (serviceName) {
-      const existingService = await Service.findOne({
-        vendorId: vendor._id,
-        serviceName: serviceName.trim(),
-        _id: { $ne: id },
-      });
+if (serviceName) {
 
-      if (existingService) {
-        return res.status(400).json({
-          success: false,
-          message: "Service already exists",
-        });
-      }
+  const existingService = await Service.findOne({
+    vendorId: vendor._id,
+    serviceName: serviceName.trim(),
+    _id: { $ne: id },
+  });
 
-      service.serviceName = serviceName.trim();
-    }
+  if (existingService) {
+    return res.status(400).json({
+      success: false,
+      message: "Service already exists",
+    });
+  }
 
+  service.serviceName = serviceName.trim();
+
+  let slug = serviceName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-");
+
+  const slugExists = await Service.findOne({
+    slug,
+    _id: { $ne: id },
+  });
+
+  if (slugExists) {
+    slug = `${slug}-${Date.now().toString().slice(-6)}`;
+  }
+
+  service.slug = slug;
+}
     if (description !== undefined)
       service.description = description;
 

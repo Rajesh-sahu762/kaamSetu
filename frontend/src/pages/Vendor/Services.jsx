@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-
+import { useEffect, useMemo, useState } from "react";
+import { getVendorServices } from "@/services/serviceService";
 import Fade from "@/components/vendor/common/Fade";
 
 import { T, MOBILE_BOTTOM_NAV_HEIGHT } from "@/utils/vendorTheme";
@@ -51,60 +51,60 @@ const labelSm = {
   textTransform: "uppercase",
 };
 
-const SERVICES = [
-  {
-    id: 1,
-    name: "Home Deep Cleaning",
-    category: "Cleaning",
-    price: 799,
-    duration: "90 mins",
-    bookings: 158,
-    revenue: 18400,
-    rating: 4.9,
-    views: 1240,
-    status: "active",
-    performance: 92,
-  },
-  {
-    id: 2,
-    name: "Interior Painting",
-    category: "Painting",
-    price: 3500,
-    duration: "1 Day",
-    bookings: 82,
-    revenue: 28600,
-    rating: 4.8,
-    views: 920,
-    status: "active",
-    performance: 81,
-  },
-  {
-    id: 3,
-    name: "Electrical Repair",
-    category: "Electrical",
-    price: 499,
-    duration: "45 mins",
-    bookings: 64,
-    revenue: 9600,
-    rating: 4.7,
-    views: 640,
-    status: "pending",
-    performance: 64,
-  },
-  {
-    id: 4,
-    name: "False Ceiling",
-    category: "Construction",
-    price: 5200,
-    duration: "2 Days",
-    bookings: 28,
-    revenue: 41600,
-    rating: 4.6,
-    views: 420,
-    status: "paused",
-    performance: 44,
-  },
-];
+// const SERVICES = [
+//   {
+//     id: 1,
+//     name: "Home Deep Cleaning",
+//     category: "Cleaning",
+//     price: 799,
+//     duration: "90 mins",
+//     bookings: 158,
+//     revenue: 18400,
+//     rating: 4.9,
+//     views: 1240,
+//     status: "active",
+//     performance: 92,
+//   },
+//   {
+//     id: 2,
+//     name: "Interior Painting",
+//     category: "Painting",
+//     price: 3500,
+//     duration: "1 Day",
+//     bookings: 82,
+//     revenue: 28600,
+//     rating: 4.8,
+//     views: 920,
+//     status: "active",
+//     performance: 81,
+//   },
+//   {
+//     id: 3,
+//     name: "Electrical Repair",
+//     category: "Electrical",
+//     price: 499,
+//     duration: "45 mins",
+//     bookings: 64,
+//     revenue: 9600,
+//     rating: 4.7,
+//     views: 640,
+//     status: "pending",
+//     performance: 64,
+//   },
+//   {
+//     id: 4,
+//     name: "False Ceiling",
+//     category: "Construction",
+//     price: 5200,
+//     duration: "2 Days",
+//     bookings: 28,
+//     revenue: 41600,
+//     rating: 4.6,
+//     views: 420,
+//     status: "paused",
+//     performance: 44,
+//   },
+// ];
 
 const FILTERS = ["All", "Active", "Pending", "Paused"];
 
@@ -123,19 +123,54 @@ export default function Services() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoveredButton, setHoveredButton] = useState(null);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+    const fetchServices = async () => {
+
+        try {
+
+            const response = await getVendorServices();
+
+
+            setServices(response.data);
+
+
+        } catch (error) {
+
+            console.log(error);
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+    fetchServices();
+
+}, []);
+
 
   const filteredServices = useMemo(() => {
-    return SERVICES.filter((service) => {
+    return services.filter((service) => {
       const searchMatch =
-        service.name.toLowerCase().includes(search.toLowerCase()) ||
-        service.category.toLowerCase().includes(search.toLowerCase());
+        service.serviceName.toLowerCase().includes(search.toLowerCase()) ||
+        (service.categoryId?.name || "").toLowerCase().includes(search.toLowerCase());
 
       const filterMatch =
-        activeFilter === "All" ? true : service.status === activeFilter.toLowerCase();
+  activeFilter === "All"
+    ? true
+    : activeFilter === "Active"
+    ? service.isActive
+    : !service.isActive;
 
       return searchMatch && filterMatch;
     });
-  }, [search, activeFilter]);
+  }, [search, services, activeFilter]);
 
   return (
     <div
@@ -581,6 +616,7 @@ export default function Services() {
             display: "grid",
             gridTemplateColumns: bp.isDesktop ? "2fr 320px" : "1fr",
             gap: 24,
+            alignItems: "start", 
             marginTop: 32,
           }}
         >
@@ -593,14 +629,18 @@ export default function Services() {
               gap: 16,
             }}
           >
+            
             {filteredServices.map((service) => {
-              const meta = STATUS_META[service.status];
-              const isHovered = hoveredCard === service.id;
+             
+             const statusKey = service.isActive ? "active" : "paused";
 
+const meta = STATUS_META[statusKey];
+
+const isHovered = hoveredCard === service._id;
               return (
                 <div
-                  key={service.id}
-                  onMouseEnter={() => setHoveredCard(service.id)}
+                  key={service._id}
+                  onMouseEnter={() => setHoveredCard(service._id)}
                   onMouseLeave={() => setHoveredCard(null)}
                   style={{
                     background: WHITE,
@@ -657,7 +697,7 @@ export default function Services() {
                             letterSpacing: "-0.01em",
                           }}
                         >
-                          {service.name}
+                          {service.serviceName}
                         </h3>
                         <div
                           style={{
@@ -671,7 +711,7 @@ export default function Services() {
                             borderRadius: RADIUS_INTERACTIVE,
                           }}
                         >
-                          {service.category}
+                          {service.categoryId?.name}
                         </div>
                       </div>
                     </div>
@@ -699,7 +739,7 @@ export default function Services() {
                             color: SLATE,
                           }}
                         >
-                          ₹{service.price}
+                         ₹{service.startingPrice}
                         </div>
                       </div>
                       <div style={{ textAlign: "right" }}>
@@ -715,7 +755,7 @@ export default function Services() {
                             fontSize: 15,
                           }}
                         >
-                          {service.duration}
+                          {service.duration} mins
                         </div>
                       </div>
                     </div>
@@ -730,9 +770,9 @@ export default function Services() {
                       }}
                     >
                       {[
-                        { value: service.bookings, label: "Bookings" },
-                        { value: service.views, label: "Views" },
-                        { value: "₹" + (service.revenue / 1000).toFixed(1) + "K", label: "Revenue" },
+                        { value: service.totalBookings, label: "Bookings" },
+                        { value: 0, label: "Views" },
+                        { value: "₹" + (0).toFixed(1) + "K", label: "Revenue" },
                       ].map((item) => (
                         <div
                           key={item.label}
@@ -767,7 +807,7 @@ export default function Services() {
                           Performance
                         </span>
                         <span style={{ fontWeight: 600, color: SLATE, fontFamily: GEIST, fontSize: 13 }}>
-                          {service.performance}%
+                        --
                         </span>
                       </div>
                       <div
@@ -780,7 +820,7 @@ export default function Services() {
                       >
                         <div
                           style={{
-                            width: service.performance + "%",
+                            width: 0 + "%",
                             height: "100%",
                             background: BRONZE,
                             borderRadius: 999,
@@ -799,7 +839,7 @@ export default function Services() {
                         <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
                           <Star size={14} fill={BRONZE} color={BRONZE} />
                           <span style={{ fontFamily: GEIST, fontWeight: 600, color: SLATE, fontSize: 13 }}>
-                            {service.rating}
+                            {(service.rating || 0).toFixed(1)}
                           </span>
                         </div>
                         <div style={{ color: "#3F7A52", fontSize: 12, fontWeight: 600, fontFamily: INTER }}>
@@ -809,10 +849,18 @@ export default function Services() {
                     </div>
 
                     {/* Buttons */}
-                    <div style={{ display: "flex", gap: 8, marginTop: 22 }}>
+                    <div
+  style={{
+    display: "flex",
+    gap: 8,
+    marginTop: 22,
+    alignItems: "center",
+  }}
+>
                       <button
                         style={{
                           flex: 1,
+minWidth: 0,
                           height: 40,
                           border: "none",
                           borderRadius: RADIUS_INTERACTIVE,

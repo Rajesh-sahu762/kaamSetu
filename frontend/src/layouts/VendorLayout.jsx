@@ -11,6 +11,7 @@ import { T } from '@/utils/vendorTheme';
 const VendorLayout = () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const isMobile = window.innerWidth <= 768;
 
   return (
 
@@ -54,7 +55,15 @@ const VendorLayout = () => {
         >
         <Topbar onMenuClick={() => setDrawerOpen(true)} />
 
-        <Outlet />
+     <div
+  style={{
+    flex: 1,
+    paddingBottom: isMobile ? "10px" : "0px",
+  }}
+>
+  <Outlet />
+</div>
+
       </main>
     </div>
         </>
