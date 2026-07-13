@@ -5,6 +5,7 @@ import Avatar from '@/components/vendor/common/Avatar';
 import { deactivateAccount } from '@/services/authService';
 import { T, MOBILE_BOTTOM_NAV_HEIGHT } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
+import { useVendor } from '@/context/vendorContext';
 
 
 import {
@@ -26,7 +27,7 @@ export default function Profile() {
 
 const bp = useBreakpoint();
 const navigate = useNavigate();
-
+const {updateVendorData} = useVendor();
 const [profile, setProfile] = useState(null);
 const [loading, setLoading] = useState(true);
 const fileInputRef = useRef(null);
@@ -217,7 +218,7 @@ const fetchProfile = async () => {
     const response = await getVendorProfile();
 
 setProfile(response.data);
-
+updateVendorData(response.data);
 
     setFormData({
       fullName: response.data.user.fullName || "",
@@ -314,11 +315,15 @@ const handleUpdateProfile = async () => {
 
     const response = await updateVendorProfile(updatedFormData);
 
-    setProfile((prev) => ({
-      ...prev,
-      user: response.data.user,
-      vendor: response.data.vendor,
-    }));
+    const updatedProfile = {
+  ...profile,
+  user: response.data.user,
+  vendor: response.data.vendor,
+};
+
+setProfile(updatedProfile);
+
+updateVendorData(updatedProfile);
 
     setFormData((prev) => ({
       ...prev,

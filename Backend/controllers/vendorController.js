@@ -4,6 +4,7 @@ const Service = require("../models/service");
 const Review = require("../models/review");
 const Booking = require("../models/booking");
 const Transaction = require("../models/transaction");
+const Category = require("../models/category")
 const path = require("path");
 const { deleteFile } = require("../utils/fileHelper");
 
@@ -411,9 +412,287 @@ const updateVendorProfile = async (req, res) => {
   }
 };
 
+const addService = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    const {
+      categoryId,
+      serviceName,
+      description,
+      priceType,
+      startingPrice,
+      duration,
+    } = req.body;
+
+    // ==========================
+    // Validation
+    // ==========================
+
+    if (
+      !categoryId ||
+      !serviceName ||
+      !description ||
+      !priceType ||
+      !startingPrice ||
+      !duration
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please fill all required fields",
+      });
+    }
+
+    // ==========================
+    // Find Vendor
+    // ==========================
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    // ==========================
+    // Category Check
+    // ==========================
+
+    const category = await Category.findById(categoryId);
+
+    if (!category || !category.isActive) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    // ==========================
+    // Duplicate Service
+    // ==========================
+
+const existingService = await Service.findOne({
+
+vendorId:vendor._id,
+
+categoryId,
+
+serviceName:{
+    $regex:new RegExp(`^${serviceName.trim()}$`,"i")
+}
+
+});
+    if (existingService) {
+      return res.status(400).json({
+        success: false,
+        message: "Service already exists",
+      });
+    }
+
+    // ==========================
+    // Create Service
+    // ==========================
+
+    const service = await Service.create({
+      vendorId: vendor._id,
+
+      categoryId,
+
+      serviceName: serviceName.trim(),
+
+      description,
+
+      priceType,
+
+      startingPrice,
+
+      duration,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Service added successfully",
+      data: service,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+
+const getVendorServices = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    // Find Vendor
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    // Get Services
+    const services = await Service.find({
+      vendorId: vendor._id,
+    })
+      .populate("categoryId", "name slug")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Services fetched successfully",
+      data: services,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+const updateService = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { id } = req.params;
+
+    const {
+      categoryId,
+      serviceName,
+      description,
+      priceType,
+      startingPrice,
+      duration,
+    } = req.body;
+
+    // ==========================
+    // Find Vendor
+    // ==========================
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    // ==========================
+    // Find Service
+    // ==========================
+
+    const service = await Service.findOne({
+      _id: id,
+      vendorId: vendor._id,
+    });
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
+    }
+
+    // ==========================
+    // Category Validation
+    // ==========================
+
+    if (categoryId) {
+      const category = await Category.findById(categoryId);
+
+      if (!category || !category.isActive) {
+        return res.status(404).json({
+          success: false,
+          message: "Category not found",
+        });
+      }
+
+      service.categoryId = categoryId;
+    }
+
+    // ==========================
+    // Duplicate Service Check
+    // ==========================
+
+    if (serviceName) {
+      const existingService = await Service.findOne({
+        vendorId: vendor._id,
+        serviceName: serviceName.trim(),
+        _id: { $ne: id },
+      });
+
+      if (existingService) {
+        return res.status(400).json({
+          success: false,
+          message: "Service already exists",
+        });
+      }
+
+      service.serviceName = serviceName.trim();
+    }
+
+    if (description !== undefined)
+      service.description = description;
+
+    if (priceType !== undefined)
+      service.priceType = priceType;
+
+    if (startingPrice !== undefined)
+      service.startingPrice = startingPrice;
+
+    if (duration !== undefined)
+      service.duration = duration;
+
+    await service.save();
+
+    const updatedService = await Service.findById(service._id)
+      .populate("categoryId", "name slug");
+
+    return res.status(200).json({
+      success: true,
+      message: "Service updated successfully",
+      data: updatedService,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
 
 module.exports = {
   getVendorProfile,
   updateVendorProfile,
-  updateProfileImage
+  updateProfileImage,
+  addService,
+  getVendorServices,
+  updateService,
+  
+  
 };

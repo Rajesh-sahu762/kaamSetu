@@ -47,6 +47,10 @@ const serviceSchema = new mongoose.Schema(
         type: String,
         default: "",
     },
+    slug: {
+    type: String,
+    unique: true,
+},
     rating: {
         type: Number,
         default: 0,
