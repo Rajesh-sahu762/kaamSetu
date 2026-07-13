@@ -1,5 +1,5 @@
 const express = require("express");
-const { getVendorProfile, updateVendorProfile, updateProfileImage, addService, getVendorServices, updateService} = require("../controllers/vendorController");
+const { getVendorProfile, updateVendorProfile, updateProfileImage, addService, getVendorServices, updateService, deleteService, toggleServiceStatus} = require("../controllers/vendorController");
 const verifyToken = require("../middleware/verifyToken");
 const upload = require("../middleware/upload");
 const router = express.Router();
@@ -16,6 +16,10 @@ router.post("/services", verifyToken, addService);
 
 router.get("/services", verifyToken, getVendorServices);
 
-router.put("/services:id", verifyToken , updateService);
+router.put("/services/:id", verifyToken , updateService);
+
+router.delete("/services/:id" , verifyToken, deleteService);
+
+router.patch("/services/:id/status", verifyToken, toggleServiceStatus);
 
 module.exports = router;

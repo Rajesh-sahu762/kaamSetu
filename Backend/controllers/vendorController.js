@@ -685,6 +685,120 @@ const updateService = async (req, res) => {
   }
 };
 
+const deleteService = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { id } = req.params;
+
+    // ==========================
+    // Find Vendor
+    // ==========================
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    // ==========================
+    // Find Service
+    // ==========================
+
+    const service = await Service.findOne({
+      _id: id,
+      vendorId: vendor._id,
+    });
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
+    }
+
+    // ==========================
+    // Delete Images (Future)
+    // ==========================
+
+    // coverImage
+    // images[]
+
+    // ==========================
+    // Delete Service
+    // ==========================
+
+    await service.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Service deleted successfully",
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+const toggleServiceStatus = async (req, res) => {
+  try {
+
+    const { userId } = req.user;
+    const { id } = req.params;
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    const service = await Service.findOne({
+      _id: id,
+      vendorId: vendor._id,
+    });
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
+    }
+
+    service.isActive = !service.isActive;
+
+    await service.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Service ${
+        service.isActive ? "Activated" : "Deactivated"
+      } successfully`,
+      data: service,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
 
 module.exports = {
   getVendorProfile,
@@ -693,6 +807,8 @@ module.exports = {
   addService,
   getVendorServices,
   updateService,
-  
+  deleteService,
+  toggleServiceStatus,
+
   
 };
