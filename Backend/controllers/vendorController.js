@@ -9,7 +9,7 @@ const path = require("path");
 const { deleteFile } = require("../utils/fileHelper");
 
 // ================================
-// Get Vendor Profile
+//  Vendor Profile Controller
 // ================================
 const getVendorProfile = async (req, res) => {
   try {
@@ -412,17 +412,25 @@ const updateVendorProfile = async (req, res) => {
   }
 };
 
+
+// =======================================
+// Services Controllers
+// =======================================
+
+
 const addService = async (req, res) => {
   try {
     const { userId } = req.user;
-
+    const images = req.files?.map(file => file.filename) || [];
     const {
       categoryId,
+      serviceScope,
       serviceName,
       description,
       priceType,
       startingPrice,
       duration,
+      
     } = req.body;
 
     // ==========================
@@ -515,12 +523,18 @@ if (slugExists) {
   vendorId: vendor._id,
 
   categoryId,
+  
+  serviceScope,
 
   serviceName: serviceName.trim(),
 
   slug,
 
   description,
+
+  images,
+
+coverImage: images[0] || "",
 
   priceType,
 
@@ -594,6 +608,7 @@ const updateService = async (req, res) => {
 
     const {
       categoryId,
+      serviceScope,
       serviceName,
       description,
       priceType,
@@ -835,6 +850,41 @@ const toggleServiceStatus = async (req, res) => {
   }
 };
 
+// =======================================
+// Categories Controllers
+// =======================================
+
+const getCategories = async (req, res) => {
+  try {
+
+    const categories = await Category.find(
+      { isActive: true },
+      {
+        name: 1,
+        slug: 1,
+        image: 1,
+      }
+    ).sort({ name: 1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Categories fetched successfully",
+      data: categories,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+
 module.exports = {
   getVendorProfile,
   updateVendorProfile,
@@ -844,6 +894,6 @@ module.exports = {
   updateService,
   deleteService,
   toggleServiceStatus,
-
+  getCategories,
   
 };

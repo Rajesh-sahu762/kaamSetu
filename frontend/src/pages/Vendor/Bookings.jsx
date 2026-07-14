@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 
-import Avatar from '@/components/vendor/common/Avatar';
-import StatusPill from '@/components/vendor/common/StatusPill';
-import Fade from '@/components/vendor/common/Fade';
+import Avatar from '@/components/common/Avatar';
+import StatusPill from '@/components/common/StatusPill';
+import Fade from '@/components/common/Fade';
 
 import { T } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';

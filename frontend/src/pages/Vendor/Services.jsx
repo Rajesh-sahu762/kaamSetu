@@ -1,9 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
-import { getVendorServices } from "@/services/serviceService";
-import Fade from "@/components/vendor/common/Fade";
+import { useEffect, useMemo, useState } from 'react';
+import {
+  getVendorServices,
+  getCategories,
+  addService,
+} from '@/services/serviceService';
+import Fade from '@/components/common/Fade';
+import ImageUploader from "@/components/common/ImageUploader";
 
-import { T, MOBILE_BOTTOM_NAV_HEIGHT } from "@/utils/vendorTheme";
-import useBreakpoint from "@/utils/useBreakpoint";
+import { T, MOBILE_BOTTOM_NAV_HEIGHT } from '@/utils/vendorTheme';
+import useBreakpoint from '@/utils/useBreakpoint';
 
 import {
   Search,
@@ -13,112 +18,74 @@ import {
   SlidersHorizontal,
   ArrowUpRight,
   Star,
-  Wallet,
   Package,
   Eye,
   CalendarCheck,
   IndianRupee,
   ChevronDown,
   MoreHorizontal,
-} from "lucide-react";
+} from 'lucide-react';
+
+import { toast } from 'react-toastify';
 
 /* ============================================================
    Design tokens — Artisan Precision system
    Deep Slate #1E293B · Bronze #A88A64 · Soft Ivory #F8F5F0
    ============================================================ */
 
-const SLATE = "#1E293B";
-const SLATE_GRAY = "#64748B";
-const BRONZE = "#A88A64";
-const IVORY = "#F8F5F0";
-const BORDER = "#E2E8F0";
-const WHITE = "#FFFFFF";
+const SLATE = '#1E293B';
+const SLATE_GRAY = '#64748B';
+const BRONZE = '#A88A64';
+const IVORY = '#F8F5F0';
+const BORDER = '#E2E8F0';
+const WHITE = '#FFFFFF';
 
-const SHADOW_HOVER = "0 4px 20px rgba(30,41,59,0.12)";
-const SHADOW_MODAL = "0 12px 40px rgba(30,41,59,0.20)";
+const SHADOW_HOVER = '0 4px 20px rgba(30,41,59,0.12)';
+const SHADOW_MODAL = '0 12px 40px rgba(30,41,59,0.20)';
 
 const RADIUS_INTERACTIVE = 4; // buttons, inputs, chips
 const RADIUS_CARD = 8; // cards, containers
 
-const GEIST = "Geist, sans-serif";
-const INTER = "Inter, sans-serif";
+const GEIST = 'Geist, sans-serif';
+const INTER = 'Inter, sans-serif';
 
 const labelSm = {
   fontFamily: GEIST,
   fontSize: 11,
   fontWeight: 600,
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
 };
 
-// const SERVICES = [
-//   {
-//     id: 1,
-//     name: "Home Deep Cleaning",
-//     category: "Cleaning",
-//     price: 799,
-//     duration: "90 mins",
-//     bookings: 158,
-//     revenue: 18400,
-//     rating: 4.9,
-//     views: 1240,
-//     status: "active",
-//     performance: 92,
-//   },
-//   {
-//     id: 2,
-//     name: "Interior Painting",
-//     category: "Painting",
-//     price: 3500,
-//     duration: "1 Day",
-//     bookings: 82,
-//     revenue: 28600,
-//     rating: 4.8,
-//     views: 920,
-//     status: "active",
-//     performance: 81,
-//   },
-//   {
-//     id: 3,
-//     name: "Electrical Repair",
-//     category: "Electrical",
-//     price: 499,
-//     duration: "45 mins",
-//     bookings: 64,
-//     revenue: 9600,
-//     rating: 4.7,
-//     views: 640,
-//     status: "pending",
-//     performance: 64,
-//   },
-//   {
-//     id: 4,
-//     name: "False Ceiling",
-//     category: "Construction",
-//     price: 5200,
-//     duration: "2 Days",
-//     bookings: 28,
-//     revenue: 41600,
-//     rating: 4.6,
-//     views: 420,
-//     status: "paused",
-//     performance: 44,
-//   },
-// ];
-
-const FILTERS = ["All", "Active", "Pending", "Paused"];
+const FILTERS = ['All', 'Active', 'Pending', 'Paused'];
 
 const STATUS_META = {
-  active: { color: "#3F7A52", bg: "#EAF3EC", label: "Active" },
-  pending: { color: "#9A6A1E", bg: "#F7EFE1", label: "Pending" },
-  paused: { color: "#9A3B34", bg: "#F6E9E8", label: "Paused" },
+  active: { color: '#3F7A52', bg: '#EAF3EC', label: 'Active' },
+  pending: { color: '#9A6A1E', bg: '#F7EFE1', label: 'Pending' },
+  paused: { color: '#9A3B34', bg: '#F6E9E8', label: 'Paused' },
 };
 
 export default function Services() {
+  
   const bp = useBreakpoint();
+  const [showAddDrawer, setShowAddDrawer] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [serviceImages, setServiceImages] = useState([]);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [editingService, setEditingService] = useState(null);
 
-  const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [formData, setFormData] = useState({
+    categoryId: '',
+    serviceScope: 'all',
+    serviceName: '',
+    description: '',
+    priceType: 'fixed',
+    startingPrice: '',
+    duration: '',
+  });
+
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState('All');
   const [gridView, setGridView] = useState(true);
   const [searchFocused, setSearchFocused] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
@@ -126,47 +93,174 @@ export default function Services() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+
+    if (!files.length) return;
+
+    if (files.length + serviceImages.length > 8) {
+      alert('Maximum 8 images allowed.');
+      return;
+    }
+
+    setServiceImages((prev) => [...prev, ...files]);
+
+    const previews = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+
+    setPreviewImages((prev) => [...prev, ...previews]);
+  };
+
+  const removeImage = (index) => {
+    setServiceImages((prev) => prev.filter((_, i) => i !== index));
+
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddService = async () => {
+    try {
+      if (!formData.categoryId) return toast.error('Please select category.');
+
+      if (formData.serviceScope === 'custom' && !formData.serviceName.trim())
+        return toast.error('Please enter service name.');
+
+      if (!formData.description.trim())
+        return toast.error('Please enter description.');
+      
+      if (serviceImages.length === 0) return toast.error('Please upload at least one service image.')
+
+
+      if (!formData.startingPrice) return toast.error('Please enter price.');
+
+      if (!formData.duration) return toast.error('Please enter duration.');
+
+      const data = new FormData();
+
+      data.append('categoryId', formData.categoryId);
+
+      data.append('serviceScope', formData.serviceScope);
+
+      const selectedCategory = categories.find(
+        (c) => c._id === formData.categoryId
+      );
+
+      data.append(
+        'serviceName',
+        formData.serviceScope === 'all'
+          ? `All ${selectedCategory?.name} Services`
+          : formData.serviceName
+      );
+
+      data.append('description', formData.description);
+
+      data.append('priceType', formData.priceType);
+
+      data.append('startingPrice', formData.startingPrice);
+
+      data.append('duration', formData.duration);
+
+      serviceImages.forEach((image) => {
+        data.append('images', image);
+      });
+
+      const response = await addService(data);
+
+      if (response.success) {
+        await fetchServices();
+
+        resetServiceForm();
+
+setShowAddDrawer(false);
+
+        setFormData({
+          categoryId: '',
+          serviceScope: 'all',
+          serviceName: '',
+          description: '',
+          priceType: 'fixed',
+          startingPrice: '',
+          duration: '',
+        });
+
+        toast.success("Service added successfully.");
+        setServiceImages([]);
+
+        setPreviewImages([]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const resetServiceForm = () => {
+
+    setFormData({
+
+        categoryId: "",
+
+        serviceScope: "all",
+
+        serviceName: "",
+
+        description: "",
+
+        priceType: "fixed",
+
+        startingPrice: "",
+
+        duration: "",
+
+    });
+
+    setPreviewImages([]);
+
+    setServiceImages([]);
+
+};
+
+  const fetchCategories = async () => {
+    try {
+      const response = await getCategories();
+
+      setCategories(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchServices = async () => {
+    try {
+      const response = await getVendorServices();
+
+      setServices(response.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-
-    const fetchServices = async () => {
-
-        try {
-
-            const response = await getVendorServices();
-
-
-            setServices(response.data);
-
-
-        } catch (error) {
-
-            console.log(error);
-
-        } finally {
-
-            setLoading(false);
-
-        }
-
-    };
-
     fetchServices();
-
-}, []);
-
+    fetchCategories();
+  }, []);
 
   const filteredServices = useMemo(() => {
     return services.filter((service) => {
       const searchMatch =
         service.serviceName.toLowerCase().includes(search.toLowerCase()) ||
-        (service.categoryId?.name || "").toLowerCase().includes(search.toLowerCase());
+        (service.categoryId?.name || '')
+          .toLowerCase()
+          .includes(search.toLowerCase());
 
       const filterMatch =
-  activeFilter === "All"
-    ? true
-    : activeFilter === "Active"
-    ? service.isActive
-    : !service.isActive;
+        activeFilter === 'All'
+          ? true
+          : activeFilter === 'Active'
+            ? service.isActive
+            : !service.isActive;
 
       return searchMatch && filterMatch;
     });
@@ -178,18 +272,18 @@ export default function Services() {
         padding: bp.isMobile ? 16 : 32,
         paddingBottom: bp.isMobile ? MOBILE_BOTTOM_NAV_HEIGHT + 24 : 32,
         background: IVORY,
-        minHeight: "100%",
+        minHeight: '100%',
       }}
     >
       {/* ================= Header ================= */}
       <Fade>
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
             gap: 16,
-            flexWrap: "wrap",
+            flexWrap: 'wrap',
           }}
         >
           <div>
@@ -202,7 +296,7 @@ export default function Services() {
                 fontSize: bp.isMobile ? 26 : 32,
                 fontWeight: 600,
                 color: SLATE,
-                letterSpacing: "-0.02em",
+                letterSpacing: '-0.02em',
                 lineHeight: 1.15,
               }}
             >
@@ -222,26 +316,27 @@ export default function Services() {
           </div>
 
           <button
-            onMouseEnter={() => setHoveredButton("add")}
+            onMouseEnter={() => setHoveredButton('add')}
             onMouseLeave={() => setHoveredButton(null)}
             style={{
               height: 46,
-              padding: "0 20px",
-              border: "none",
+              padding: '0 20px',
+              border: 'none',
               borderRadius: RADIUS_INTERACTIVE,
               background: SLATE,
               color: IVORY,
-              display: "flex",
-              alignItems: "center",
+              display: 'flex',
+              alignItems: 'center',
               gap: 8,
-              cursor: "pointer",
+              cursor: 'pointer',
               fontFamily: GEIST,
               fontSize: 14,
               fontWeight: 600,
-              boxShadow: hoveredButton === "add" ? SHADOW_HOVER : "none",
-              transform: hoveredButton === "add" ? "translateY(-1px)" : "none",
-              transition: "all .2s ease",
+              boxShadow: hoveredButton === 'add' ? SHADOW_HOVER : 'none',
+              transform: hoveredButton === 'add' ? 'translateY(-1px)' : 'none',
+              transition: 'all .2s ease',
             }}
+            onClick={() => setShowAddDrawer(true)}
           >
             <Plus size={17} />
             Add Service
@@ -254,12 +349,12 @@ export default function Services() {
         <div
           style={{
             marginTop: 28,
-            display: "grid",
+            display: 'grid',
             gridTemplateColumns: bp.isDesktop
-              ? "1.6fr 1fr 1fr"
+              ? '1.6fr 1fr 1fr'
               : bp.isTablet
-              ? "repeat(2,1fr)"
-              : "1fr",
+                ? 'repeat(2,1fr)'
+                : '1fr',
             gap: 16,
           }}
         >
@@ -270,14 +365,22 @@ export default function Services() {
               color: IVORY,
               borderRadius: RADIUS_CARD,
               padding: 28,
-              position: "relative",
-              overflow: "hidden",
+              position: 'relative',
+              overflow: 'hidden',
               borderTop: `2px solid ${BRONZE}`,
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+              }}
+            >
               <div>
-                <div style={{ ...labelSm, opacity: 0.65, letterSpacing: "0.1em" }}>
+                <div
+                  style={{ ...labelSm, opacity: 0.65, letterSpacing: '0.1em' }}
+                >
                   Revenue · This Month
                 </div>
                 <h2
@@ -286,7 +389,7 @@ export default function Services() {
                     fontSize: 40,
                     fontFamily: GEIST,
                     fontWeight: 600,
-                    letterSpacing: "-0.02em",
+                    letterSpacing: '-0.02em',
                   }}
                 >
                   ₹48,320
@@ -294,10 +397,10 @@ export default function Services() {
                 <div
                   style={{
                     marginTop: 12,
-                    display: "inline-flex",
-                    alignItems: "center",
+                    display: 'inline-flex',
+                    alignItems: 'center',
                     gap: 6,
-                    color: "#D9C4A6",
+                    color: '#D9C4A6',
                     fontFamily: INTER,
                     fontSize: 13,
                     fontWeight: 500,
@@ -309,7 +412,12 @@ export default function Services() {
               </div>
 
               {/* sparkline */}
-              <svg width="96" height="40" viewBox="0 0 96 40" style={{ opacity: 0.9 }}>
+              <svg
+                width="96"
+                height="40"
+                viewBox="0 0 96 40"
+                style={{ opacity: 0.9 }}
+              >
                 <polyline
                   points="0,32 14,28 28,30 42,20 56,22 70,10 84,14 96,4"
                   fill="none"
@@ -325,20 +433,42 @@ export default function Services() {
               style={{
                 marginTop: 24,
                 paddingTop: 20,
-                borderTop: "1px solid rgba(255,255,255,0.12)",
-                display: "flex",
+                borderTop: '1px solid rgba(255,255,255,0.12)',
+                display: 'flex',
                 gap: 28,
               }}
             >
               <div>
-                <div style={{ fontFamily: GEIST, fontSize: 20, fontWeight: 600 }}>428</div>
-                <div style={{ fontSize: 12, opacity: 0.6, marginTop: 2, fontFamily: INTER }}>
+                <div
+                  style={{ fontFamily: GEIST, fontSize: 20, fontWeight: 600 }}
+                >
+                  428
+                </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    opacity: 0.6,
+                    marginTop: 2,
+                    fontFamily: INTER,
+                  }}
+                >
                   Bookings
                 </div>
               </div>
               <div>
-                <div style={{ fontFamily: GEIST, fontSize: 20, fontWeight: 600 }}>18%</div>
-                <div style={{ fontSize: 12, opacity: 0.6, marginTop: 2, fontFamily: INTER }}>
+                <div
+                  style={{ fontFamily: GEIST, fontSize: 20, fontWeight: 600 }}
+                >
+                  18%
+                </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    opacity: 0.6,
+                    marginTop: 2,
+                    fontFamily: INTER,
+                  }}
+                >
                   Conversion
                 </div>
               </div>
@@ -346,8 +476,8 @@ export default function Services() {
           </div>
 
           {[
-            { title: "Active Services", value: "12", icon: Package },
-            { title: "Average Rating", value: "4.9", icon: Star },
+            { title: 'Active Services', value: '12', icon: Package },
+            { title: 'Average Rating', value: '4.9', icon: Star },
           ].map((item) => {
             const Icon = item.icon;
             const isHovered = hoveredCard === item.title;
@@ -361,8 +491,8 @@ export default function Services() {
                   border: `1px solid ${BORDER}`,
                   borderRadius: RADIUS_CARD,
                   padding: 24,
-                  boxShadow: isHovered ? SHADOW_HOVER : "none",
-                  transition: "box-shadow .2s ease",
+                  boxShadow: isHovered ? SHADOW_HOVER : 'none',
+                  transition: 'box-shadow .2s ease',
                 }}
               >
                 <div
@@ -371,9 +501,9 @@ export default function Services() {
                     height: 40,
                     borderRadius: RADIUS_INTERACTIVE,
                     background: IVORY,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
                   <Icon size={18} color={BRONZE} />
@@ -386,13 +516,20 @@ export default function Services() {
                     fontWeight: 600,
                     fontFamily: GEIST,
                     color: SLATE,
-                    letterSpacing: "-0.02em",
+                    letterSpacing: '-0.02em',
                   }}
                 >
                   {item.value}
                 </div>
 
-                <div style={{ marginTop: 6, color: SLATE_GRAY, fontSize: 13, fontFamily: INTER }}>
+                <div
+                  style={{
+                    marginTop: 6,
+                    color: SLATE_GRAY,
+                    fontSize: 13,
+                    fontFamily: INTER,
+                  }}
+                >
                   {item.title}
                 </div>
               </div>
@@ -406,17 +543,22 @@ export default function Services() {
         <div
           style={{
             marginTop: 28,
-            display: "flex",
+            display: 'flex',
             gap: 12,
-            flexWrap: "wrap",
-            alignItems: "center",
+            flexWrap: 'wrap',
+            alignItems: 'center',
           }}
         >
-          <div style={{ flex: 1, minWidth: 240, position: "relative" }}>
+          <div style={{ flex: 1, minWidth: 240, position: 'relative' }}>
             <Search
               size={17}
               color={SLATE_GRAY}
-              style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)" }}
+              style={{
+                position: 'absolute',
+                left: 16,
+                top: '50%',
+                transform: 'translateY(-50%)',
+              }}
             />
             <input
               placeholder="Search services or categories..."
@@ -425,18 +567,20 @@ export default function Services() {
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
               style={{
-                width: "100%",
+                width: '100%',
                 height: 46,
                 paddingLeft: 46,
                 paddingRight: 16,
-                border: searchFocused ? `1px solid ${SLATE}` : `1px solid ${BORDER}`,
+                border: searchFocused
+                  ? `1px solid ${SLATE}`
+                  : `1px solid ${BORDER}`,
                 borderRadius: RADIUS_INTERACTIVE,
                 background: WHITE,
-                outline: "none",
+                outline: 'none',
                 fontFamily: INTER,
                 fontSize: 14,
                 color: SLATE,
-                transition: "border-color .15s ease",
+                transition: 'border-color .15s ease',
               }}
             />
           </div>
@@ -444,14 +588,14 @@ export default function Services() {
           <button
             style={{
               height: 46,
-              padding: "0 18px",
+              padding: '0 18px',
               borderRadius: RADIUS_INTERACTIVE,
               border: `1px solid ${SLATE_GRAY}`,
-              background: "transparent",
-              display: "flex",
-              alignItems: "center",
+              background: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
               gap: 8,
-              cursor: "pointer",
+              cursor: 'pointer',
               fontFamily: GEIST,
               fontSize: 13,
               fontWeight: 600,
@@ -459,16 +603,16 @@ export default function Services() {
             }}
           >
             <SlidersHorizontal size={15} />
-            {!bp.isMobile && "Filters"}
+            {!bp.isMobile && 'Filters'}
           </button>
 
           {!bp.isMobile && (
             <div
               style={{
-                display: "flex",
+                display: 'flex',
                 border: `1px solid ${BORDER}`,
                 borderRadius: RADIUS_INTERACTIVE,
-                overflow: "hidden",
+                overflow: 'hidden',
               }}
             >
               <button
@@ -476,11 +620,11 @@ export default function Services() {
                 style={{
                   width: 44,
                   height: 44,
-                  border: "none",
-                  cursor: "pointer",
+                  border: 'none',
+                  cursor: 'pointer',
                   background: gridView ? SLATE : WHITE,
                   color: gridView ? IVORY : SLATE_GRAY,
-                  transition: "all .15s ease",
+                  transition: 'all .15s ease',
                 }}
               >
                 <LayoutGrid size={16} />
@@ -490,11 +634,11 @@ export default function Services() {
                 style={{
                   width: 44,
                   height: 44,
-                  border: "none",
-                  cursor: "pointer",
+                  border: 'none',
+                  cursor: 'pointer',
                   background: !gridView ? SLATE : WHITE,
                   color: !gridView ? IVORY : SLATE_GRAY,
-                  transition: "all .15s ease",
+                  transition: 'all .15s ease',
                 }}
               >
                 <List size={16} />
@@ -508,9 +652,9 @@ export default function Services() {
       <Fade delay={0.16}>
         <div
           style={{
-            display: "flex",
+            display: 'flex',
             gap: 8,
-            overflowX: "auto",
+            overflowX: 'auto',
             paddingBottom: 4,
             marginTop: 20,
           }}
@@ -522,18 +666,18 @@ export default function Services() {
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
                 style={{
-                  whiteSpace: "nowrap",
+                  whiteSpace: 'nowrap',
                   height: 36,
-                  padding: "0 16px",
+                  padding: '0 16px',
                   borderRadius: 999,
-                  border: active ? "none" : `1px solid ${BORDER}`,
+                  border: active ? 'none' : `1px solid ${BORDER}`,
                   background: active ? SLATE : WHITE,
                   color: active ? IVORY : SLATE_GRAY,
                   fontFamily: GEIST,
                   fontSize: 12.5,
                   fontWeight: 600,
-                  cursor: "pointer",
-                  transition: ".15s ease",
+                  cursor: 'pointer',
+                  transition: '.15s ease',
                 }}
               >
                 {filter}
@@ -547,17 +691,19 @@ export default function Services() {
       <Fade delay={0.2}>
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: bp.isDesktop ? "repeat(4,1fr)" : "repeat(2,1fr)",
+            display: 'grid',
+            gridTemplateColumns: bp.isDesktop
+              ? 'repeat(4,1fr)'
+              : 'repeat(2,1fr)',
             gap: 12,
             marginTop: 20,
           }}
         >
           {[
-            { label: "Bookings", value: "428", icon: CalendarCheck },
-            { label: "Revenue", value: "₹48K", icon: IndianRupee },
-            { label: "Views", value: "3.2K", icon: Eye },
-            { label: "Conversion", value: "18%", icon: ArrowUpRight },
+            { label: 'Bookings', value: '428', icon: CalendarCheck },
+            { label: 'Revenue', value: '₹48K', icon: IndianRupee },
+            { label: 'Views', value: '3.2K', icon: Eye },
+            { label: 'Conversion', value: '18%', icon: ArrowUpRight },
           ].map((item) => {
             const Icon = item.icon;
             return (
@@ -568,8 +714,8 @@ export default function Services() {
                   borderRadius: RADIUS_CARD,
                   border: `1px solid ${BORDER}`,
                   padding: 16,
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 12,
                 }}
               >
@@ -579,9 +725,9 @@ export default function Services() {
                     height: 34,
                     borderRadius: RADIUS_INTERACTIVE,
                     background: IVORY,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     flexShrink: 0,
                   }}
                 >
@@ -594,12 +740,19 @@ export default function Services() {
                       fontWeight: 600,
                       color: SLATE,
                       fontFamily: GEIST,
-                      letterSpacing: "-0.01em",
+                      letterSpacing: '-0.01em',
                     }}
                   >
                     {item.value}
                   </div>
-                  <div style={{ fontSize: 11.5, color: SLATE_GRAY, fontFamily: INTER, marginTop: 1 }}>
+                  <div
+                    style={{
+                      fontSize: 11.5,
+                      color: SLATE_GRAY,
+                      fontFamily: INTER,
+                      marginTop: 1,
+                    }}
+                  >
                     {item.label}
                   </div>
                 </div>
@@ -613,30 +766,28 @@ export default function Services() {
       <Fade delay={0.25}>
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: bp.isDesktop ? "2fr 320px" : "1fr",
+            display: 'grid',
+            gridTemplateColumns: bp.isDesktop ? '2fr 320px' : '1fr',
             gap: 24,
-            alignItems: "start", 
+            alignItems: 'start',
             marginTop: 32,
           }}
         >
           {/* ================= Left: Service Cards ================= */}
           <div
             style={{
-              display: "grid",
+              display: 'grid',
               gridTemplateColumns:
-                bp.isDesktop && gridView ? "repeat(2,minmax(0,1fr))" : "1fr",
+                bp.isDesktop && gridView ? 'repeat(2,minmax(0,1fr))' : '1fr',
               gap: 16,
             }}
           >
-            
             {filteredServices.map((service) => {
-             
-             const statusKey = service.isActive ? "active" : "paused";
+              const statusKey = service.isActive ? 'active' : 'paused';
 
-const meta = STATUS_META[statusKey];
+              const meta = STATUS_META[statusKey];
 
-const isHovered = hoveredCard === service._id;
+              const isHovered = hoveredCard === service._id;
               return (
                 <div
                   key={service._id}
@@ -646,10 +797,10 @@ const isHovered = hoveredCard === service._id;
                     background: WHITE,
                     border: `1px solid ${BORDER}`,
                     borderRadius: RADIUS_CARD,
-                    overflow: "hidden",
-                    boxShadow: isHovered ? SHADOW_HOVER : "none",
-                    transform: isHovered ? "translateY(-2px)" : "none",
-                    transition: "all .25s ease",
+                    overflow: 'hidden',
+                    boxShadow: isHovered ? SHADOW_HOVER : 'none',
+                    transform: isHovered ? 'translateY(-2px)' : 'none',
+                    transition: 'all .25s ease',
                   }}
                 >
                   {/* Media */}
@@ -657,27 +808,27 @@ const isHovered = hoveredCard === service._id;
                     style={{
                       height: 140,
                       background: IVORY,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       fontSize: 44,
-                      filter: isHovered ? "grayscale(0%)" : "grayscale(35%)",
-                      transition: "filter .3s ease",
-                      position: "relative",
+                      filter: isHovered ? 'grayscale(0%)' : 'grayscale(35%)',
+                      transition: 'filter .3s ease',
+                      position: 'relative',
                     }}
                   >
                     🛠️
                     <div
                       style={{
-                        position: "absolute",
+                        position: 'absolute',
                         top: 14,
                         right: 14,
                         ...labelSm,
                         color: meta.color,
                         background: meta.bg,
-                        padding: "5px 10px",
+                        padding: '5px 10px',
                         borderRadius: 999,
-                        letterSpacing: "0.06em",
+                        letterSpacing: '0.06em',
                       }}
                     >
                       {meta.label}
@@ -686,7 +837,13 @@ const isHovered = hoveredCard === service._id;
 
                   {/* Body */}
                   <div style={{ padding: 22 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 14 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 14,
+                      }}
+                    >
                       <div>
                         <h3
                           style={{
@@ -694,7 +851,7 @@ const isHovered = hoveredCard === service._id;
                             fontSize: 19,
                             fontWeight: 600,
                             color: SLATE,
-                            letterSpacing: "-0.01em",
+                            letterSpacing: '-0.01em',
                           }}
                         >
                           {service.serviceName}
@@ -702,12 +859,12 @@ const isHovered = hoveredCard === service._id;
                         <div
                           style={{
                             marginTop: 8,
-                            display: "inline-block",
+                            display: 'inline-block',
                             background: IVORY,
                             color: SLATE,
                             fontFamily: INTER,
                             fontSize: 12,
-                            padding: "3px 10px",
+                            padding: '3px 10px',
                             borderRadius: RADIUS_INTERACTIVE,
                           }}
                         >
@@ -719,15 +876,21 @@ const isHovered = hoveredCard === service._id;
                     {/* Price + Duration */}
                     <div
                       style={{
-                        display: "flex",
-                        justifyContent: "space-between",
+                        display: 'flex',
+                        justifyContent: 'space-between',
                         marginTop: 22,
                         paddingTop: 18,
                         borderTop: `1px solid ${BORDER}`,
                       }}
                     >
                       <div>
-                        <div style={{ ...labelSm, color: SLATE_GRAY, letterSpacing: "0.06em" }}>
+                        <div
+                          style={{
+                            ...labelSm,
+                            color: SLATE_GRAY,
+                            letterSpacing: '0.06em',
+                          }}
+                        >
                           Starting From
                         </div>
                         <div
@@ -739,11 +902,17 @@ const isHovered = hoveredCard === service._id;
                             color: SLATE,
                           }}
                         >
-                         ₹{service.startingPrice}
+                          ₹{service.startingPrice}
                         </div>
                       </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{ ...labelSm, color: SLATE_GRAY, letterSpacing: "0.06em" }}>
+                      <div style={{ textAlign: 'right' }}>
+                        <div
+                          style={{
+                            ...labelSm,
+                            color: SLATE_GRAY,
+                            letterSpacing: '0.06em',
+                          }}
+                        >
                           Duration
                         </div>
                         <div
@@ -764,23 +933,23 @@ const isHovered = hoveredCard === service._id;
                     <div
                       style={{
                         marginTop: 20,
-                        display: "grid",
-                        gridTemplateColumns: "repeat(3,1fr)",
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3,1fr)',
                         gap: 8,
                       }}
                     >
                       {[
-                        { value: service.totalBookings, label: "Bookings" },
-                        { value: 0, label: "Views" },
-                        { value: "₹" + (0).toFixed(1) + "K", label: "Revenue" },
+                        { value: service.totalBookings, label: 'Bookings' },
+                        { value: 0, label: 'Views' },
+                        { value: '₹' + (0).toFixed(1) + 'K', label: 'Revenue' },
                       ].map((item) => (
                         <div
                           key={item.label}
                           style={{
                             background: IVORY,
                             borderRadius: RADIUS_INTERACTIVE,
-                            padding: "10px 6px",
-                            textAlign: "center",
+                            padding: '10px 6px',
+                            textAlign: 'center',
                           }}
                         >
                           <div
@@ -793,7 +962,14 @@ const isHovered = hoveredCard === service._id;
                           >
                             {item.value}
                           </div>
-                          <div style={{ marginTop: 2, fontSize: 10.5, color: SLATE_GRAY, fontFamily: INTER }}>
+                          <div
+                            style={{
+                              marginTop: 2,
+                              fontSize: 10.5,
+                              color: SLATE_GRAY,
+                              fontFamily: INTER,
+                            }}
+                          >
                             {item.label}
                           </div>
                         </div>
@@ -802,12 +978,31 @@ const isHovered = hoveredCard === service._id;
 
                     {/* Performance */}
                     <div style={{ marginTop: 22 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                        <span style={{ fontSize: 12.5, color: SLATE_GRAY, fontFamily: INTER }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: 8,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 12.5,
+                            color: SLATE_GRAY,
+                            fontFamily: INTER,
+                          }}
+                        >
                           Performance
                         </span>
-                        <span style={{ fontWeight: 600, color: SLATE, fontFamily: GEIST, fontSize: 13 }}>
-                        --
+                        <span
+                          style={{
+                            fontWeight: 600,
+                            color: SLATE,
+                            fontFamily: GEIST,
+                            fontSize: 13,
+                          }}
+                        >
+                          --
                         </span>
                       </div>
                       <div
@@ -815,13 +1010,13 @@ const isHovered = hoveredCard === service._id;
                           height: 6,
                           background: IVORY,
                           borderRadius: 999,
-                          overflow: "hidden",
+                          overflow: 'hidden',
                         }}
                       >
                         <div
                           style={{
-                            width: 0 + "%",
-                            height: "100%",
+                            width: 0 + '%',
+                            height: '100%',
                             background: BRONZE,
                             borderRadius: 999,
                           }}
@@ -831,18 +1026,38 @@ const isHovered = hoveredCard === service._id;
                       <div
                         style={{
                           marginTop: 12,
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
                         }}
                       >
-                        <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: 5,
+                            alignItems: 'center',
+                          }}
+                        >
                           <Star size={14} fill={BRONZE} color={BRONZE} />
-                          <span style={{ fontFamily: GEIST, fontWeight: 600, color: SLATE, fontSize: 13 }}>
+                          <span
+                            style={{
+                              fontFamily: GEIST,
+                              fontWeight: 600,
+                              color: SLATE,
+                              fontSize: 13,
+                            }}
+                          >
                             {(service.rating || 0).toFixed(1)}
                           </span>
                         </div>
-                        <div style={{ color: "#3F7A52", fontSize: 12, fontWeight: 600, fontFamily: INTER }}>
+                        <div
+                          style={{
+                            color: '#3F7A52',
+                            fontSize: 12,
+                            fontWeight: 600,
+                            fontFamily: INTER,
+                          }}
+                        >
                           Excellent
                         </div>
                       </div>
@@ -850,23 +1065,23 @@ const isHovered = hoveredCard === service._id;
 
                     {/* Buttons */}
                     <div
-  style={{
-    display: "flex",
-    gap: 8,
-    marginTop: 22,
-    alignItems: "center",
-  }}
->
+                      style={{
+                        display: 'flex',
+                        gap: 8,
+                        marginTop: 22,
+                        alignItems: 'center',
+                      }}
+                    >
                       <button
                         style={{
                           flex: 1,
-minWidth: 0,
+                          minWidth: 0,
                           height: 40,
-                          border: "none",
+                          border: 'none',
                           borderRadius: RADIUS_INTERACTIVE,
                           background: SLATE,
                           color: IVORY,
-                          cursor: "pointer",
+                          cursor: 'pointer',
                           fontFamily: GEIST,
                           fontWeight: 600,
                           fontSize: 13,
@@ -881,10 +1096,10 @@ minWidth: 0,
                           borderRadius: RADIUS_INTERACTIVE,
                           border: `1px solid ${BORDER}`,
                           background: WHITE,
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           color: SLATE_GRAY,
                         }}
                       >
@@ -899,7 +1114,7 @@ minWidth: 0,
 
           {/* ================= Right Panel ================= */}
           {bp.isDesktop && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {/* Performance */}
               <div
                 style={{
@@ -910,14 +1125,16 @@ minWidth: 0,
                   borderTop: `2px solid ${BRONZE}`,
                 }}
               >
-                <div style={{ ...labelSm, opacity: 0.65 }}>Overall Performance</div>
+                <div style={{ ...labelSm, opacity: 0.65 }}>
+                  Overall Performance
+                </div>
                 <div
                   style={{
                     fontSize: 38,
                     fontWeight: 600,
                     marginTop: 12,
                     fontFamily: GEIST,
-                    letterSpacing: "-0.02em",
+                    letterSpacing: '-0.02em',
                   }}
                 >
                   92%
@@ -926,12 +1143,19 @@ minWidth: 0,
                   style={{
                     marginTop: 14,
                     height: 6,
-                    background: "rgba(255,255,255,0.15)",
+                    background: 'rgba(255,255,255,0.15)',
                     borderRadius: 100,
-                    overflow: "hidden",
+                    overflow: 'hidden',
                   }}
                 >
-                  <div style={{ width: "92%", height: "100%", background: BRONZE, borderRadius: 100 }} />
+                  <div
+                    style={{
+                      width: '92%',
+                      height: '100%',
+                      background: BRONZE,
+                      borderRadius: 100,
+                    }}
+                  />
                 </div>
                 <div
                   style={{
@@ -942,7 +1166,8 @@ minWidth: 0,
                     fontFamily: INTER,
                   }}
                 >
-                  Your services are performing better than 81% of vendors this month.
+                  Your services are performing better than 81% of vendors this
+                  month.
                 </div>
               </div>
 
@@ -968,19 +1193,19 @@ minWidth: 0,
                 </h3>
 
                 {[
-                  "Add at least 5 photos",
-                  "Keep response time under 15 mins",
-                  "Offer weekend discounts",
-                  "Update pricing monthly",
-                  "Maintain 4.8★ rating",
+                  'Add at least 5 photos',
+                  'Keep response time under 15 mins',
+                  'Offer weekend discounts',
+                  'Update pricing monthly',
+                  'Maintain 4.8★ rating',
                 ].map((tip, i) => (
                   <div
                     key={tip}
                     style={{
-                      display: "flex",
+                      display: 'flex',
                       gap: 12,
                       marginBottom: 14,
-                      alignItems: "flex-start",
+                      alignItems: 'flex-start',
                     }}
                   >
                     <div
@@ -988,19 +1213,26 @@ minWidth: 0,
                         ...labelSm,
                         width: 20,
                         height: 20,
-                        borderRadius: "50%",
+                        borderRadius: '50%',
                         background: IVORY,
                         color: BRONZE,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         flexShrink: 0,
                         fontSize: 10,
                       }}
                     >
                       {i + 1}
                     </div>
-                    <div style={{ color: SLATE_GRAY, fontSize: 13, lineHeight: 1.6, fontFamily: INTER }}>
+                    <div
+                      style={{
+                        color: SLATE_GRAY,
+                        fontSize: 13,
+                        lineHeight: 1.6,
+                        fontFamily: INTER,
+                      }}
+                    >
                       {tip}
                     </div>
                   </div>
@@ -1029,16 +1261,17 @@ minWidth: 0,
                 </h3>
 
                 {[
-                  "New 5-star review received",
-                  "Interior Painting booked",
-                  "Cleaning viewed 43 times",
-                  "₹8,500 payment received",
+                  'New 5-star review received',
+                  'Interior Painting booked',
+                  'Cleaning viewed 43 times',
+                  '₹8,500 payment received',
                 ].map((item, i, arr) => (
                   <div
                     key={item}
                     style={{
-                      padding: "12px 0",
-                      borderBottom: i < arr.length - 1 ? `1px solid ${BORDER}` : "none",
+                      padding: '12px 0',
+                      borderBottom:
+                        i < arr.length - 1 ? `1px solid ${BORDER}` : 'none',
                       color: SLATE_GRAY,
                       fontSize: 13,
                       fontFamily: INTER,
@@ -1063,19 +1296,19 @@ minWidth: 0,
               border: `1px solid ${BORDER}`,
               borderRadius: RADIUS_CARD,
               padding: 60,
-              textAlign: "center",
+              textAlign: 'center',
             }}
           >
             <div
               style={{
                 width: 56,
                 height: 56,
-                margin: "0 auto",
-                borderRadius: "50%",
+                margin: '0 auto',
+                borderRadius: '50%',
                 background: IVORY,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               <Package size={24} color={BRONZE} />
@@ -1091,7 +1324,14 @@ minWidth: 0,
             >
               No services found
             </h2>
-            <p style={{ marginTop: 8, color: SLATE_GRAY, fontFamily: INTER, fontSize: 14 }}>
+            <p
+              style={{
+                marginTop: 8,
+                color: SLATE_GRAY,
+                fontFamily: INTER,
+                fontSize: 14,
+              }}
+            >
               Try a different search, or add your first professional service.
             </p>
           </div>
@@ -1102,25 +1342,420 @@ minWidth: 0,
       {bp.isMobile && (
         <button
           style={{
-            position: "fixed",
+            position: 'fixed',
             right: 18,
             bottom: MOBILE_BOTTOM_NAV_HEIGHT + 18,
             width: 54,
             height: 54,
-            borderRadius: "50%",
-            border: "none",
+            borderRadius: '50%',
+            border: 'none',
             background: BRONZE,
             color: WHITE,
-            cursor: "pointer",
+            cursor: 'pointer',
             boxShadow: SHADOW_MODAL,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             zIndex: 50,
           }}
         >
           <Plus size={24} />
         </button>
+      )}
+
+      {showAddDrawer && (
+        <>
+          {/* Overlay */}
+
+          <div
+            onClick={() => setShowAddDrawer(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,.45)',
+              zIndex: 999,
+            }}
+          />
+
+          {/* Drawer */}
+
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              width: 420,
+              maxWidth: '100%',
+              height: '100vh',
+              background: T.white,
+              zIndex: 1000,
+              overflowY: 'auto',
+              padding: 28,
+              boxShadow: '-10px 0 40px rgba(0,0,0,.12)',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: 24,
+                fontFamily: 'Geist,sans-serif',
+                marginBottom: 24,
+              }}
+            >
+              Add New Service
+            </h2>
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  display: 'block',
+                  marginBottom: 8,
+                  fontWeight: 600,
+                }}
+              >
+                Category
+              </label>
+
+              <select
+                value={formData.categoryId}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+
+                    categoryId: e.target.value,
+                  }))
+                }
+                style={{
+                  width: '100%',
+                  height: 46,
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 10,
+                  padding: '0 14px',
+                }}
+              >
+                <option value="">Select Category</option>
+
+                {categories.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <label
+                style={{
+                  display: 'block',
+                  marginBottom: 10,
+                  fontWeight: 600,
+                }}
+              >
+                Service Scope
+              </label>
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 12,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+
+                      serviceScope: 'all',
+
+                      serviceName: '',
+                    }))
+                  }
+                  style={{
+                    flex: 1,
+                    height: 46,
+                    border: 'none',
+                    cursor: 'pointer',
+                    borderRadius: 10,
+                    background:
+                      formData.serviceScope === 'all' ? T.slate : T.surfaceLow,
+
+                    color: formData.serviceScope === 'all' ? T.white : T.slate,
+                  }}
+                >
+                  All Services
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+
+                      serviceScope: 'custom',
+                    }))
+                  }
+                  style={{
+                    flex: 1,
+                    height: 46,
+                    border: 'none',
+                    cursor: 'pointer',
+                    borderRadius: 10,
+                    background:
+                      formData.serviceScope === 'custom'
+                        ? T.slate
+                        : T.surfaceLow,
+
+                    color:
+                      formData.serviceScope === 'custom' ? T.white : T.slate,
+                  }}
+                >
+                  Custom
+                </button>
+              </div>
+            </div>
+
+            {formData.serviceScope === 'custom' && (
+              <div style={{ marginBottom: 20 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    marginBottom: 8,
+                    fontWeight: 600,
+                  }}
+                >
+                  Service Name
+                </label>
+
+                <input
+                  type="text"
+                  value={formData.serviceName}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+
+                      serviceName: e.target.value,
+                    }))
+                  }
+                  style={{
+                    width: '100%',
+                    height: 46,
+                    padding: '0 14px',
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 10,
+                  }}
+                />
+              </div>
+            )}
+
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  display: 'block',
+                  marginBottom: 8,
+                  fontWeight: 600,
+                }}
+              >
+                Description
+              </label>
+
+              <textarea
+                rows={4}
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+                placeholder="Describe your service..."
+                style={{
+                  width: '100%',
+                  padding: 14,
+                  resize: 'vertical',
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 10,
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  display: 'block',
+                  marginBottom: 10,
+                  fontWeight: 600,
+                }}
+              >
+                Price Type
+              </label>
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 12,
+                }}
+              >
+                {['fixed', 'variable'].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        priceType: type,
+                      }))
+                    }
+                    style={{
+                      flex: 1,
+                      height: 46,
+                      border: 'none',
+                      borderRadius: 10,
+                      cursor: 'pointer',
+                      background:
+                        formData.priceType === type ? T.slate : T.surfaceLow,
+
+                      color: formData.priceType === type ? T.white : T.slate,
+                    }}
+                  >
+                    {type === 'fixed' ? 'Fixed Price' : 'Variable Price'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 16,
+                marginBottom: 20,
+              }}
+            >
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    marginBottom: 8,
+                    fontWeight: 600,
+                  }}
+                >
+                  Starting Price
+                </label>
+
+                <input
+                  type="number"
+                  value={formData.startingPrice}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      startingPrice: e.target.value,
+                    }))
+                  }
+                  placeholder="₹499"
+                  style={{
+                    width: '100%',
+                    height: 46,
+                    padding: '0 14px',
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 10,
+                  }}
+                />
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    marginBottom: 8,
+                    fontWeight: 600,
+                  }}
+                >
+                  Duration
+                </label>
+
+                <input
+                  type="number"
+                  value={formData.duration}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      duration: e.target.value,
+                    }))
+                  }
+                  placeholder="45 min"
+                  style={{
+                    width: '100%',
+                    height: 46,
+                    padding: '0 14px',
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 10,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <label
+                style={{
+                  display: 'block',
+                  marginBottom: 10,
+                  fontWeight: 600,
+                }}
+              >
+                Service Images
+              </label>
+
+              <ImageUploader
+    id="serviceImages"
+    previews={previewImages}
+    maxImages={8}
+    onChange={handleImageChange}
+    onRemove={removeImage}
+/>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 12,
+                marginTop: 30,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => { resetServiceForm();
+                  setShowAddDrawer(false);}}
+                style={{
+                  height: 44,
+                  padding: '0 22px',
+                  borderRadius: 10,
+                  border: `1px solid ${T.border}`,
+                  background: T.white,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAddService}
+                style={{
+                  height: 44,
+                  padding: '0 22px',
+                  border: 'none',
+                  borderRadius: 10,
+                  background: T.slate,
+                  color: T.white,
+                  cursor: 'pointer',
+                }}
+              >
+                Save Service
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

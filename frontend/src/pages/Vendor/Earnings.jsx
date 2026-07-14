@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import Fade from "@/components/vendor/common/Fade";
+import Fade from "@/components/common/Fade";
 
 import {
   T,

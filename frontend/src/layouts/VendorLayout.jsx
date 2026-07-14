@@ -3,6 +3,9 @@ import { Outlet } from 'react-router-dom';
 
 import Sidebar from '@/components/vendor/sidebar';
 import Topbar from '@/components/vendor/topbar';
+import { useEffect } from "react";
+import { useVendor } from "@/context/vendorContext";
+import { getVendorProfile } from "@/services/vendorService";
 
 import { T } from '@/utils/vendorTheme';
 
@@ -12,6 +15,30 @@ const VendorLayout = () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const isMobile = window.innerWidth <= 768;
+
+  const { vendorData, updateVendorData } = useVendor();
+  useEffect(() => {
+
+  const fetchVendorData = async () => {
+
+    try {
+
+      const response = await getVendorProfile();
+
+      updateVendorData(response.data);
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  };
+
+  fetchVendorData();
+
+}, []);
+
 
   return (
 

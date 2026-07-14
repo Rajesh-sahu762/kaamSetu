@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
-import Fade from "@/components/vendor/common/Fade";
-import Avatar from "@/components/vendor/common/Avatar";
+import Fade from "@/components/common/Fade";
+import Avatar from "@/components/common/Avatar";
 
 import { T, MOBILE_BOTTOM_NAV_HEIGHT } from "@/utils/vendorTheme";
 import useBreakpoint from "@/utils/useBreakpoint";

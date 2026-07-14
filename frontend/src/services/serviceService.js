@@ -13,9 +13,20 @@ export const getVendorServices = async () => {
 // Add Service
 // ==========================
 
-export const addService = async (data) => {
-  const response = await api.post("/vendor/services", data);
-  return response.data;
+export const addService = async (formData) => {
+
+    const response = await api.post(
+        "/vendor/services",
+        formData,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
+
+    return response.data;
+
 };
 
 // ==========================
@@ -44,3 +55,12 @@ export const toggleServiceStatus = async (id) => {
   const response = await api.patch(`/vendor/services/${id}/status`);
   return response.data;
 };
+
+export const getCategories = async () => {
+
+    const response = await api.get("/vendor/categories");
+
+    return response.data;
+
+};
+

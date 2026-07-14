@@ -4,9 +4,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { T } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
-import ConfirmModal from './common/ConfirmModal';
+import ConfirmModal from '../common/ConfirmModal';
 import { useVendor } from '@/context/vendorContext';
-import Avatar from "./common/Avatar";
+import Avatar from "../common/Avatar";
 
 
 const NAV_ITEMS = [

@@ -1,8 +1,8 @@
 import Sidebar from '@/components/vendor/sidebar';
 import Topbar from '@/components/vendor/topbar';
-import Fade from '@/components/vendor/common/Fade';
-import Avatar from '@/components/vendor/common/Avatar';
-import StatusPill from '@/components/vendor/common/StatusPill';
+import Fade from '@/components/common/Fade';
+import Avatar from '@/components/common/Avatar';
+import StatusPill from '@/components/common/StatusPill';
 
 import { T } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';

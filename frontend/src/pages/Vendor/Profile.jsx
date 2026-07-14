@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getVendorProfile, updateProfileImage, updateVendorProfile } from "@/services/vendorService";
-import Fade from '@/components/vendor/common/Fade';
-import Avatar from '@/components/vendor/common/Avatar';
+import Fade from '@/components/common/Fade';
+import Avatar from '@/components/common/Avatar';
 import { deactivateAccount } from '@/services/authService';
 import { T, MOBILE_BOTTOM_NAV_HEIGHT } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import ConfirmModal from '@/components/vendor/common/ConfirmModal';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 
 export default function Profile() {
@@ -218,7 +218,6 @@ const fetchProfile = async () => {
     const response = await getVendorProfile();
 
 setProfile(response.data);
-updateVendorData(response.data);
 
     setFormData({
       fullName: response.data.user.fullName || "",
