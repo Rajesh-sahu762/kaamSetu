@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 
 import { toast } from 'react-toastify';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 /* ============================================================
    Design tokens — Artisan Precision system
@@ -80,7 +81,8 @@ export default function Services() {
   const [previewImages, setPreviewImages] = useState([]);
   const [editingService, setEditingService] = useState(null);
   const [menuOpen,setMenuOpen]=useState(null);
-  const menuRef = useRef(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  
 
   const [formData, setFormData] = useState({
     categoryId: '',
@@ -100,38 +102,6 @@ export default function Services() {
   const [hoveredButton, setHoveredButton] = useState(null);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-
-    const handleClickOutside = (e) => {
-
-        if (
-            menuRef.current &&
-            !menuRef.current.contains(e.target)
-        ) {
-
-            setMenuOpen(null);
-
-        }
-
-    };
-
-    document.addEventListener(
-        "mousedown",
-        handleClickOutside
-    );
-
-    return () => {
-
-        document.removeEventListener(
-            "mousedown",
-            handleClickOutside
-        );
-
-    };
-
-}, []);
-
 
   const filterCounts = useMemo(() => ({
 
@@ -173,7 +143,6 @@ export default function Services() {
 
   const handleDeleteService = async(id)=>{
 
-    if(!window.confirm("Delete this service?")) return;
 
     try{
 
@@ -183,7 +152,9 @@ export default function Services() {
 
             toast.success(response.message);
 
+            setShowDeleteModal(false);
             await fetchServices();
+
 
         }
 
@@ -1363,11 +1334,24 @@ const menuItemStyle = {
                         Edit Service
                       </button>
                       <div
-                      ref={menuRef}
+                      
     style={{
         position: "relative",
     }}
 >
+{menuOpen === service._id && (
+
+    <div
+        onClick={() => setMenuOpen(null)}
+        style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 90,
+            background: "transparent",
+        }}
+    />
+
+)}
 
     <button
         onClick={() =>
@@ -1407,7 +1391,7 @@ const menuItemStyle = {
                 borderRadius: 10,
                 boxShadow: SHADOW_MODAL,
                 overflow: "hidden",
-                zIndex: 100,
+                zIndex: 101,
             }}
         >
 
@@ -1431,11 +1415,11 @@ const menuItemStyle = {
             </button>
 
             <button
-                onClick={async () => {
+                onClick={() => {
 
-    await handleDeleteService(service._id);
+    setEditingService(service);
 
-    setMenuOpen(null);
+    setShowDeleteModal(true);
 
 }}
                 style={{
@@ -2116,6 +2100,19 @@ handleAddService
           </div>
         </>
       )}
+
+
+        <ConfirmModal
+  open={showDeleteModal}
+  title="Delete Service"
+  message="Are you sure you want to delete your service?"
+  confirmText="Delete"
+  cancelText="Cancel"
+  danger={true}
+  onCancel={() => setShowDeleteModal(false)}
+  onConfirm={() => handleDeleteService(editingService._id)}
+/>
+
     </div>
   );
 }
