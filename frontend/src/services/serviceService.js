@@ -33,10 +33,18 @@ export const addService = async (formData) => {
 // Update Service
 // ==========================
 
-export const updateService = async (id, data) => {
-  const response = await api.put(`/vendor/services/${id}`, data);
-  return response.data;
-};
+export const updateService = async(id,formData)=>{
+    const response=await api.put(
+        `/vendor/services/${id}`,
+        formData,
+        {
+            headers:{
+                "Content-Type":"multipart/form-data"
+            }
+        }
+    );
+    return response.data;
+}
 
 // ==========================
 // Delete Service

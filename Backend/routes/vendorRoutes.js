@@ -25,7 +25,7 @@ router.post("/services", verifyToken, upload("services").array("images", 8), add
 
 router.get("/services", verifyToken, getVendorServices);
 
-router.put("/services/:id", verifyToken , updateService);
+router.put("/services/:id", verifyToken , upload("services").array("images", 8), updateService);
 
 router.delete("/services/:id" , verifyToken, deleteService);
 

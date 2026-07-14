@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   getVendorServices,
   getCategories,
   addService,
+  deleteService,
+  toggleServiceStatus,
+  updateService,
 } from '@/services/serviceService';
 import Fade from '@/components/common/Fade';
 import ImageUploader from "@/components/common/ImageUploader";
@@ -23,6 +26,9 @@ import {
   CalendarCheck,
   IndianRupee,
   ChevronDown,
+  Pencil,
+  Trash2,
+  Power,
   MoreHorizontal,
 } from 'lucide-react';
 
@@ -66,13 +72,15 @@ const STATUS_META = {
 };
 
 export default function Services() {
-  
+
   const bp = useBreakpoint();
   const [showAddDrawer, setShowAddDrawer] = useState(false);
   const [categories, setCategories] = useState([]);
   const [serviceImages, setServiceImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
   const [editingService, setEditingService] = useState(null);
+  const [menuOpen,setMenuOpen]=useState(null);
+  const menuRef = useRef(null);
 
   const [formData, setFormData] = useState({
     categoryId: '',
@@ -92,6 +100,50 @@ export default function Services() {
   const [hoveredButton, setHoveredButton] = useState(null);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+    const handleClickOutside = (e) => {
+
+        if (
+            menuRef.current &&
+            !menuRef.current.contains(e.target)
+        ) {
+
+            setMenuOpen(null);
+
+        }
+
+    };
+
+    document.addEventListener(
+        "mousedown",
+        handleClickOutside
+    );
+
+    return () => {
+
+        document.removeEventListener(
+            "mousedown",
+            handleClickOutside
+        );
+
+    };
+
+}, []);
+
+
+  const filterCounts = useMemo(() => ({
+
+    All: services.length,
+
+    Active: services.filter(s => s.isActive).length,
+
+    Paused: services.filter(s => !s.isActive).length,
+
+    Pending: 0,
+
+}), [services]);
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -118,6 +170,62 @@ export default function Services() {
 
     setPreviewImages((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const handleDeleteService = async(id)=>{
+
+    if(!window.confirm("Delete this service?")) return;
+
+    try{
+
+        const response=await deleteService(id);
+
+        if(response.success){
+
+            toast.success(response.message);
+
+            await fetchServices();
+
+        }
+
+    }catch(error){
+
+        toast.error(error.response?.data?.message);
+
+    }
+
+}
+
+const handleToggleStatus = async(id)=>{
+
+    try{
+
+        const response=await toggleServiceStatus(id);
+
+        if(response.success){
+
+            toast.success(response.message);
+
+            await fetchServices();
+
+        }
+
+    }catch(error){
+
+        toast.error(error.response?.data?.message);
+
+    }
+
+}
+
+  const closeDrawer = () => {
+
+    resetServiceForm();
+
+    setEditingService(null);
+
+    setShowAddDrawer(false);
+
+};
 
   const handleAddService = async () => {
     try {
@@ -194,6 +302,58 @@ setShowAddDrawer(false);
     }
   };
 
+  const handleUpdateService = async () => {
+
+    try {
+
+        const data = new FormData();
+
+        data.append("categoryId", formData.categoryId);
+
+        data.append("serviceScope", formData.serviceScope);
+
+        data.append("serviceName", formData.serviceName);
+
+        data.append("description", formData.description);
+
+        data.append("priceType", formData.priceType);
+
+        data.append("startingPrice", Number(formData.startingPrice));
+
+        data.append("duration", Number(formData.duration));
+
+        serviceImages.forEach((image) => {
+            data.append("images", image);
+        });
+
+        const response = await updateService(
+            editingService._id,
+            data
+        );
+
+        if (response.success) {
+
+            toast.success(response.message);
+
+            await fetchServices();
+
+            closeDrawer();
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+        toast.error(
+            error.response?.data?.message ||
+            "Failed to update service."
+        );
+
+    }
+
+};
+
   const resetServiceForm = () => {
 
     setFormData({
@@ -249,11 +409,23 @@ setShowAddDrawer(false);
 
   const filteredServices = useMemo(() => {
     return services.filter((service) => {
-      const searchMatch =
-        service.serviceName.toLowerCase().includes(search.toLowerCase()) ||
-        (service.categoryId?.name || '')
-          .toLowerCase()
-          .includes(search.toLowerCase());
+      const keyword = search.toLowerCase();
+
+const searchMatch =
+
+    service.serviceName.toLowerCase().includes(keyword) ||
+
+    service.description.toLowerCase().includes(keyword) ||
+
+    (service.categoryId?.name || "")
+        .toLowerCase()
+        .includes(keyword) ||
+
+    service.priceType.toLowerCase().includes(keyword) ||
+
+    (service.serviceScope || "")
+        .toLowerCase()
+        .includes(keyword);
 
       const filterMatch =
         activeFilter === 'All'
@@ -265,6 +437,82 @@ setShowAddDrawer(false);
       return searchMatch && filterMatch;
     });
   }, [search, services, activeFilter]);
+
+  const serviceStats = useMemo(() => {
+
+    const activeServices = services.filter(s => s.isActive);
+
+    const totalServices = services.length;
+
+    const totalBookings = services.reduce(
+        (sum, service) => sum + (service.totalBookings || 0),
+        0
+    );
+
+    const totalRevenue = services.reduce(
+        (sum, service) =>
+            sum +
+            ((service.totalBookings || 0) *
+                (service.startingPrice || 0)),
+        0
+    );
+
+    const avgRating =
+        totalServices === 0
+            ? 0
+            : (
+                  services.reduce(
+                      (sum, service) =>
+                          sum + (service.rating || 0),
+                      0
+                  ) / totalServices
+              ).toFixed(1);
+
+    return {
+
+        totalServices,
+
+        activeServices: activeServices.length,
+
+        totalBookings,
+
+        totalRevenue,
+
+        avgRating,
+
+    };
+
+}, [services]);
+
+const menuItemStyle = {
+
+    width: "100%",
+
+    height: 46,
+
+    border: "none",
+
+    background: WHITE,
+
+    display: "flex",
+
+    alignItems: "center",
+
+    gap: 12,
+
+    padding: "0 16px",
+
+    cursor: "pointer",
+
+    fontFamily: GEIST,
+
+    fontSize: 13,
+
+    color: SLATE,
+
+    borderBottom: `1px solid ${BORDER}`,
+
+};
 
   return (
     <div
@@ -392,7 +640,7 @@ setShowAddDrawer(false);
                     letterSpacing: '-0.02em',
                   }}
                 >
-                  ₹48,320
+                  ₹{serviceStats.totalRevenue.toLocaleString()}
                 </h2>
                 <div
                   style={{
@@ -442,7 +690,7 @@ setShowAddDrawer(false);
                 <div
                   style={{ fontFamily: GEIST, fontSize: 20, fontWeight: 600 }}
                 >
-                  428
+                  {serviceStats.totalBookings}
                 </div>
                 <div
                   style={{
@@ -476,8 +724,8 @@ setShowAddDrawer(false);
           </div>
 
           {[
-            { title: 'Active Services', value: '12', icon: Package },
-            { title: 'Average Rating', value: '4.9', icon: Star },
+            { title: 'Active Services', value: serviceStats.activeServices, icon: Package },
+            { title: 'Average Rating', value: serviceStats.avgRating, icon: Star },
           ].map((item) => {
             const Icon = item.icon;
             const isHovered = hoveredCard === item.title;
@@ -680,7 +928,7 @@ setShowAddDrawer(false);
                   transition: '.15s ease',
                 }}
               >
-                {filter}
+                {filter} ({filterCounts[filter]})
               </button>
             );
           })}
@@ -700,8 +948,8 @@ setShowAddDrawer(false);
           }}
         >
           {[
-            { label: 'Bookings', value: '428', icon: CalendarCheck },
-            { label: 'Revenue', value: '₹48K', icon: IndianRupee },
+            { label: 'Bookings', value: serviceStats.totalBookings, icon: CalendarCheck },
+            { label: 'Revenue', value: "₹" + serviceStats.totalRevenue.toLocaleString(), icon: IndianRupee },
             { label: 'Views', value: '3.2K', icon: Eye },
             { label: 'Conversion', value: '18%', icon: ArrowUpRight },
           ].map((item) => {
@@ -1086,25 +1334,127 @@ setShowAddDrawer(false);
                           fontWeight: 600,
                           fontSize: 13,
                         }}
+                        onClick={() => {
+
+    setEditingService(service);
+
+    setShowAddDrawer(true);
+
+    setFormData({
+
+        categoryId: service.categoryId._id,
+
+        serviceScope: service.serviceScope,
+
+        serviceName: service.serviceName,
+
+        description: service.description,
+
+        priceType: service.priceType,
+
+        startingPrice: service.startingPrice,
+
+        duration: service.duration,
+
+    });
+
+}}
                       >
                         Edit Service
                       </button>
-                      <button
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: RADIUS_INTERACTIVE,
-                          border: `1px solid ${BORDER}`,
-                          background: WHITE,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: SLATE_GRAY,
-                        }}
-                      >
-                        <MoreHorizontal size={16} />
-                      </button>
+                      <div
+                      ref={menuRef}
+    style={{
+        position: "relative",
+    }}
+>
+
+    <button
+        onClick={() =>
+            setMenuOpen(
+                menuOpen === service._id
+                    ? null
+                    : service._id
+            )
+        }
+        style={{
+            width: 40,
+            height: 40,
+            borderRadius: RADIUS_INTERACTIVE,
+            border: `1px solid ${BORDER}`,
+            background: WHITE,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: SLATE_GRAY,
+        }}
+    >
+        <MoreHorizontal size={16} />
+    </button>
+
+    {menuOpen === service._id && (
+
+        <div
+            style={{
+                position: "absolute",
+                right: -30,
+
+                top: -30,
+                width: 190,
+                background: WHITE,
+                border: `1px solid ${BORDER}`,
+                borderRadius: 10,
+                boxShadow: SHADOW_MODAL,
+                overflow: "hidden",
+                zIndex: 100,
+            }}
+        >
+
+            <button
+                onClick={async()=>{
+
+    await handleToggleStatus(service._id);
+
+    setMenuOpen(null);
+
+}}
+                style={menuItemStyle}
+            >
+
+                <Power size={15} />
+
+                {service.isActive
+                    ? "Pause Service"
+                    : "Activate Service"}
+
+            </button>
+
+            <button
+                onClick={async () => {
+
+    await handleDeleteService(service._id);
+
+    setMenuOpen(null);
+
+}}
+                style={{
+                    ...menuItemStyle,
+                    color: "#DC2626",
+                }}
+            >
+
+                <Trash2 size={15} />
+
+                Delete Service
+
+            </button>
+
+        </div>
+
+    )}
+
+</div>
                     </div>
                   </div>
                 </div>
@@ -1401,7 +1751,7 @@ setShowAddDrawer(false);
                 marginBottom: 24,
               }}
             >
-              Add New Service
+              {editingService ? "Edit Service" : "Add New Service"}
             </h2>
             <div style={{ marginBottom: 20 }}>
               <label
@@ -1645,6 +1995,8 @@ setShowAddDrawer(false);
                 <input
                   type="number"
                   value={formData.startingPrice}
+                  onWheel={(e) => e.target.blur()}
+                  min="0"
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
@@ -1676,6 +2028,8 @@ setShowAddDrawer(false);
                 <input
                   type="number"
                   value={formData.duration}
+                  min="1"
+                  onWheel={(e) => e.target.blur()}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
@@ -1724,8 +2078,7 @@ setShowAddDrawer(false);
             >
               <button
                 type="button"
-                onClick={() => { resetServiceForm();
-                  setShowAddDrawer(false);}}
+                onClick={closeDrawer}
                 style={{
                   height: 44,
                   padding: '0 22px',
@@ -1740,7 +2093,13 @@ setShowAddDrawer(false);
 
               <button
                 type="button"
-                onClick={handleAddService}
+                onClick={
+editingService
+?
+handleUpdateService
+:
+handleAddService
+}
                 style={{
                   height: 44,
                   padding: '0 22px',
@@ -1751,7 +2110,7 @@ setShowAddDrawer(false);
                   cursor: 'pointer',
                 }}
               >
-                Save Service
+                {editingService ? "Update Service" : "Save Service"}
               </button>
             </div>
           </div>
