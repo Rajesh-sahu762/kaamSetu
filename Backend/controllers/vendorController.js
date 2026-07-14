@@ -850,6 +850,486 @@ const toggleServiceStatus = async (req, res) => {
   }
 };
 
+
+// =======================================
+// Booking Controllers
+// =======================================
+
+const getVendorBookings = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    const {
+      page = 1,
+      limit = 10,
+      status,
+      search = "",
+      sort = "newest",
+    } = req.query;
+
+    // ==========================
+    // Find Vendor
+    // ==========================
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    // ==========================
+    // Filters
+    // ==========================
+
+    const filter = {
+      vendorId: vendor._id,
+    };
+
+    if (status && status !== "all") {
+      filter.status = status;
+    }
+
+    // ==========================
+    // Search
+    // ==========================
+
+    if (search.trim()) {
+      const customers = await User.find({
+        fullName: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      }).select("_id");
+
+      filter.$or = [
+        {
+          bookingNumber: {
+            $regex: search.trim(),
+            $options: "i",
+          },
+        },
+        {
+          customerId: {
+            $in: customers.map((c) => c._id),
+          },
+        },
+      ];
+    }
+
+    // ==========================
+    // Sorting
+    // ==========================
+
+    let sortOption = {
+      createdAt: -1,
+    };
+
+    if (sort === "oldest") {
+      sortOption = {
+        createdAt: 1,
+      };
+    }
+
+    if (sort === "amountHigh") {
+      sortOption = {
+        totalAmount: -1,
+      };
+    }
+
+    if (sort === "amountLow") {
+      sortOption = {
+        totalAmount: 1,
+      };
+    }
+
+    // ==========================
+    // Pagination
+    // ==========================
+
+    const currentPage = Number(page);
+
+    const pageSize = Number(limit);
+
+    const skip = (currentPage - 1) * pageSize;
+
+    // ==========================
+    // Fetch Bookings
+    // ==========================
+
+    const bookings = await Booking.find(filter)
+      .populate(
+        "customerId",
+        "fullName mobile profileImage"
+      )
+      .populate(
+        "serviceId",
+        "serviceName coverImage startingPrice duration"
+      )
+      .sort(sortOption)
+      .skip(skip)
+      .limit(pageSize);
+
+    const totalBookings =
+      await Booking.countDocuments(filter);
+
+    // ==========================
+    // Response
+    // ==========================
+
+    return res.status(200).json({
+      success: true,
+      message: "Bookings fetched successfully",
+
+      data: bookings,
+
+      pagination: {
+        currentPage,
+
+        totalPages: Math.ceil(
+          totalBookings / pageSize
+        ),
+
+        totalBookings,
+
+        pageSize,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+const getVendorBookingById = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { bookingId } = req.params;
+
+    // ==========================
+    // Find Vendor
+    // ==========================
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    // ==========================
+    // Find Booking
+    // ==========================
+
+    const booking = await Booking.findOne({
+      _id: bookingId,
+      vendorId: vendor._id,
+    })
+      .populate(
+        "customerId",
+        "fullName email mobile profileImage"
+      )
+      .populate(
+        "serviceId",
+        `
+        serviceName
+        description
+        startingPrice
+        duration
+        priceType
+        coverImage
+        images
+        `
+      );
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
+    }
+
+    // ==========================
+    // Response
+    // ==========================
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking fetched successfully",
+      data: booking,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+const updateBookingStatus = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { bookingId } = req.params;
+    const { status } = req.body;
+
+    // ==========================
+    // Validation
+    // ==========================
+
+    const allowedStatus = [
+      "accepted",
+      "in_progress",
+      "completed",
+      "cancelled",
+      "rejected",
+    ];
+
+    if (!status || !allowedStatus.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid booking status.",
+      });
+    }
+
+    // ==========================
+    // Find Vendor
+    // ==========================
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    // ==========================
+    // Find Booking
+    // ==========================
+
+    const booking = await Booking.findOne({
+      _id: bookingId,
+      vendorId: vendor._id,
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
+    }
+
+    // ==========================
+    // Status Flow Validation
+    // ==========================
+
+    if (booking.status === "completed") {
+
+      await Service.findByIdAndUpdate(
+  booking.serviceId,
+  {
+    $inc: {
+      totalBookings: 1,
+    },
+  }
+);
+
+      return res.status(400).json({
+        success: false,
+        message: "Completed booking cannot be updated.",
+      });
+    }
+
+    if (booking.status === "cancelled") {
+      return res.status(400).json({
+        success: false,
+        message: "Cancelled booking cannot be updated.",
+      });
+    }
+
+    if (booking.status === "rejected") {
+      return res.status(400).json({
+        success: false,
+        message: "Rejected booking cannot be updated.",
+      });
+    }
+
+    const validTransitions = {
+      pending: ["accepted", "cancelled", "rejected"],
+
+      accepted: ["in_progress", "cancelled"],
+
+      in_progress: ["completed"],
+    };
+
+    if (
+      validTransitions[booking.status] &&
+      !validTransitions[booking.status].includes(status)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot change booking from ${booking.status} to ${status}.`,
+      });
+    }
+
+    // ==========================
+    // Update Status
+    // ==========================
+
+    booking.status = status;
+
+    if (status === "cancelled") {
+      booking.cancelledBy = "vendor";
+    }
+
+    await booking.save();
+
+    // ==========================
+    // Response
+    // ==========================
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking status updated successfully.",
+      data: booking,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+
+const getBookingStats = async (req, res) => {
+  try {
+
+    const { userId } = req.user;
+
+    // ==========================
+    // Find Vendor
+    // ==========================
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    // ==========================
+    // Booking Stats
+    // ==========================
+
+    const [
+      total,
+      pending,
+      accepted,
+      inProgress,
+      completed,
+      cancelled,
+      rejected,
+      todayBookings,
+    ] = await Promise.all([
+
+      Booking.countDocuments({
+        vendorId: vendor._id,
+      }),
+
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "pending",
+      }),
+
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "accepted",
+      }),
+
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "in_progress",
+      }),
+
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "completed",
+      }),
+
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "cancelled",
+      }),
+
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "rejected",
+      }),
+
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        bookingDate: {
+          $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+          $lte: new Date(new Date().setHours(23, 59, 59, 999)),
+        },
+      }),
+
+    ]);
+
+    // ==========================
+    // Response
+    // ==========================
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking statistics fetched successfully.",
+
+      data: {
+        total,
+        pending,
+        accepted,
+        inProgress,
+        completed,
+        cancelled,
+        rejected,
+        todayBookings,
+      },
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
 // =======================================
 // Categories Controllers
 // =======================================
@@ -885,6 +1365,9 @@ const getCategories = async (req, res) => {
 };
 
 
+
+
+
 module.exports = {
   getVendorProfile,
   updateVendorProfile,
@@ -895,5 +1378,10 @@ module.exports = {
   deleteService,
   toggleServiceStatus,
   getCategories,
+  getVendorBookings,
+  getVendorBookingById,
+  updateBookingStatus,
+
+
   
 };

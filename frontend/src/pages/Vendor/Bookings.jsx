@@ -58,7 +58,6 @@ const BOOKINGS = [
 const tabs = ['All', 'Confirmed', 'In Progress', 'Pending'];
 
 export default function Bookings() {
-  
   const bp = useBreakpoint();
 
   const [activeTab, setActiveTab] = useState('All');
@@ -82,499 +81,318 @@ export default function Bookings() {
   }, [activeTab, search]);
 
   return (
-   
     <>
-    
-        <div
-          style={{
-            background: 'transparent',
-            padding: bp.isMobile ? 16 : 24,
-paddingBottom: bp.isMobile ? 90 : 24,
-          }}
-        >
-          {/* Header */}
+      <div
+        style={{
+          background: 'transparent',
+          padding: bp.isMobile ? 16 : 24,
+          paddingBottom: bp.isMobile ? 90 : 24,
+        }}
+      >
+        {/* Header */}
 
-          <Fade>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: 16,
-              }}
-            >
-              <div>
-                <h1
-                  style={{
-                    fontFamily: "Geist,sans-serif",
-fontSize: bp.isMobile ? 28 : 30,
-fontWeight: 600,
-letterSpacing: "-0.02em",
-color: T.slate,
-margin: 0,
-                  }}
-                >
-                  Bookings
-                </h1>
-
-                <p
-                  style={{
-                    fontFamily: "Inter,sans-serif",
-fontSize: 14,
-fontWeight: 400,
-lineHeight: 1.6,
-color: T.slateGray,
-marginTop: 4,
-                  }}
-                >
-                  Manage all your upcoming jobs.
-                </p>
-              </div>
-
-              <button
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-
-                  border: 'none',
-
-                  background: T.slate,
-
-                  color: T.white,
-height:44,
-padding:"0 18px",
-borderRadius:8,
-fontSize:13,
-fontWeight:600,
-fontFamily:"Geist,sans-serif",
-
-                  cursor: 'pointer',
-                }}
-              >
-                <Plus size={18} />
-                New Booking
-              </button>
-            </div>
-          </Fade>
-
-          {/* Search */}
-
-          <Fade delay={0.1}>
-            <div
-              style={{
-                marginTop: 20,
-                position: 'relative',
-              }}
-            >
-              <Search
-                size={18}
-                style={{
-                  position: 'absolute',
-                  left: 14,
-                  top: 13,
-                  color: T.slateGray,
-                }}
-              />
-
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search bookings..."
-                style={{
-                  width: '100%',
-
-                  border: `1px solid ${T.border}`,
-
-                  height:44,
-padding:"0 14px 0 42px",
-borderRadius:8,
-fontSize:13,
-fontFamily:"Inter,sans-serif",
-
-                  outline: 'none',
-
-                  background: T.white,
-                }}
-              />
-            </div>
-          </Fade>
-
-          {/* Tabs */}
-
-          <Fade delay={0.15}>
-            <div
-              style={{
-                display: 'flex',
-                gap: 10,
-                overflowX: 'auto',
-
-                marginTop: 20,
-                paddingBottom: 6,
-              }}
-            >
-              {tabs.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  style={{
-                    border:
-                      activeTab === tab ? 'none' : `1px solid ${T.border}`,
-
-                    background: activeTab === tab ? T.bronze : T.white,
-
-                    color: activeTab === tab ? T.white : T.slate,
-
-                    borderRadius: 8,
-
-                    height:36,
-padding:"0 16px",
-fontSize:12,
-fontWeight:500,
-fontFamily:"Geist,sans-serif",
-
-                    cursor: 'pointer',
-
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          </Fade>
-
-          {/* Main Grid */}
-
+        <Fade>
           <div
             style={{
-              display: 'grid',
-
-              gridTemplateColumns: bp.isDesktop ? '1fr 320px' : '1fr',
-
-              gap: 24,
-
-              marginTop: 24,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 16,
             }}
           >
-            {/* Left */}
-
             <div>
-              {filteredBookings.map((booking, index) => (
-                <Fade key={booking.id} delay={index * 0.08}>
-                  <div
-                    style={{
-                      background: T.white,
+              <h1
+                style={{
+                  fontFamily: 'Geist,sans-serif',
+                  fontSize: bp.isMobile ? 28 : 30,
+                  fontWeight: 600,
+                  letterSpacing: '-0.02em',
+                  color: T.slate,
+                  margin: 0,
+                }}
+              >
+                Bookings
+              </h1>
 
-                      border: `1px solid ${T.border}`,
-
-                      borderRadius:12,
-padding:18,
-boxShadow:"0 2px 8px rgba(15,23,42,.04)",
-
-                      marginBottom: 16,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-
-                        justifyContent: 'space-between',
-
-                        gap: 16,
-
-                        flexWrap: 'wrap',
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-
-                          gap: 14,
-                        }}
-                      >
-                        <Avatar initials={booking.avatar} size={52} />
-
-                        <div>
-                          <h3
-                            style={{
-                              margin: 0,
-
-                              fontFamily:"Geist,sans-serif",
-fontSize:18,
-fontWeight:600,
-
-                              color: T.slate,
-                            }}
-                          >
-                            {booking.client}
-                          </h3>
-
-                          <p
-                            style={{
-
-                              fontSize:13,
-fontFamily:"Inter,sans-serif",
-fontWeight:500,
-                              color: T.slateGray,
-                              margin: '4px 0',
-                            }}
-                          >
-                            {booking.service}
-                          </p>
-
-                          <small
-                            style={{
-                              fontSize:12,
-fontFamily:"Inter,sans-serif",
-                              color: T.slateGray,
-                            }}
-                          >
-                            {booking.date}
-                          </small>
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          textAlign: 'right',
-                        }}
-                      >
-                        <h3
-                          style={{
-                            fontFamily:"Geist,sans-serif",
-fontSize:18,
-fontWeight:700,
-                            color: T.slate,
-                            margin: 0,
-                          }}
-                        >
-                          {booking.amount}
-                        </h3>
-
-                        <div
-                          style={{
-                            marginTop: 8,
-                          }}
-                        >
-                          <StatusPill status={booking.status} />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: 'flex',
-
-                        gap: 10,
-
-                        marginTop: 18,
-
-                        flexWrap: 'wrap',
-                      }}
-                    >
-                      <button
-                        style={{
-
-                          height:38,
-padding:"0 16px",
-borderRadius:8,
-fontSize:12,
-fontWeight:600,
-                          border: 'none',
-
-                          background: T.slate,
-
-                          color: T.white,
-
-                          cursor: 'pointer',
-                        }}
-                      >
-                        View Details
-                      </button>
-
-                      <button
-                        style={{
-                          border: `1px solid ${T.border}`,
-
-                          height:38,
-padding:"0 16px",
-borderRadius:8,
-fontSize:12,
-                          background: T.white,
-
-                          display: 'flex',
-
-                          alignItems: 'center',
-
-                          gap: 6,
-
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <MessageCircle size={16} />
-                        Message
-                      </button>
-                    </div>
-                  </div>
-                </Fade>
-              ))}
+              <p
+                style={{
+                  fontFamily: 'Inter,sans-serif',
+                  fontSize: 14,
+                  fontWeight: 400,
+                  lineHeight: 1.6,
+                  color: T.slateGray,
+                  marginTop: 4,
+                }}
+              >
+                Manage all your upcoming jobs.
+              </p>
             </div>
+          </div>
+        </Fade>
 
-            {/* Right Sidebar */}
+        {/* Search */}
 
-            <div>
-              {/* Performance */}
+        <Fade delay={0.1}>
+          <div
+            style={{
+              marginTop: 20,
+              position: 'relative',
+            }}
+          >
+            <Search
+              size={18}
+              style={{
+                position: 'absolute',
+                left: 14,
+                top: 13,
+                color: T.slateGray,
+              }}
+            />
 
-              <Fade>
-                <div
-                  style={{
-                    background: T.slate,
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search bookings..."
+              style={{
+                width: '100%',
 
-                    color: T.white,
+                border: `1px solid ${T.border}`,
 
-                    borderRadius:12,
+                height: 44,
+                padding: '0 14px 0 42px',
+                borderRadius: 8,
+                fontSize: 13,
+                fontFamily: 'Inter,sans-serif',
 
-                    padding: 18,
-                  }}
-                >
-                  <h3 style={{
-                    fontSize:11,
-letterSpacing:"0.08em",
-textTransform:"uppercase",
-                  }}>Weekly Performance</h3>
+                outline: 'none',
 
-                  <h1
-                    style={{
-                      margin: '12px 0',
-                      fontSize:34,
-fontWeight:700,
-                    }}
-                  >
-                    ₹32,500
-                  </h1>
+                background: T.white,
+              }}
+            />
+          </div>
+        </Fade>
 
-                  <p>+18% from last week</p>
-                </div>
-              </Fade>
+        {/* Tabs */}
 
-              {/* Calendar */}
+        <Fade delay={0.15}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 10,
+              overflowX: 'auto',
 
-              <Fade delay={0.1}>
+              marginTop: 20,
+              paddingBottom: 6,
+            }}
+          >
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  border: activeTab === tab ? 'none' : `1px solid ${T.border}`,
+
+                  background: activeTab === tab ? T.bronze : T.white,
+
+                  color: activeTab === tab ? T.white : T.slate,
+
+                  borderRadius: 8,
+
+                  height: 36,
+                  padding: '0 16px',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  fontFamily: 'Geist,sans-serif',
+
+                  cursor: 'pointer',
+
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </Fade>
+
+        {/* Main Grid */}
+
+        <div
+          style={{
+            display: 'grid',
+
+            gridTemplateColumns: bp.isDesktop ? '1fr' : '1fr',
+
+            gap: 24,
+
+            marginTop: 24,
+          }}
+        >
+          {/* Left */}
+
+          <div>
+            {filteredBookings.map((booking, index) => (
+              <Fade key={booking.id} delay={index * 0.08}>
                 <div
                   style={{
                     background: T.white,
 
                     border: `1px solid ${T.border}`,
 
-                    borderRadius: 18,
+                    borderRadius: 12,
+                    padding: 18,
+                    boxShadow: '0 2px 8px rgba(15,23,42,.04)',
 
-                    padding: 20,
-
-                    marginTop: 18,
+                    marginBottom: 16,
                   }}
                 >
                   <div
                     style={{
                       display: 'flex',
 
-                      alignItems: 'center',
+                      justifyContent: 'space-between',
 
-                      gap: 8,
+                      gap: 16,
+
+                      flexWrap: 'wrap',
                     }}
                   >
-                    <CalendarDays size={18} />
+                    <div
+                      style={{
+                        display: 'flex',
 
-                    <strong>Upcoming</strong>
+                        gap: 14,
+                      }}
+                    >
+                      <Avatar initials={booking.avatar} size={52} />
+
+                      <div>
+                        <h3
+                          style={{
+                            margin: 0,
+
+                            fontFamily: 'Geist,sans-serif',
+                            fontSize: 18,
+                            fontWeight: 600,
+
+                            color: T.slate,
+                          }}
+                        >
+                          {booking.client}
+                        </h3>
+
+                        <p
+                          style={{
+                            fontSize: 13,
+                            fontFamily: 'Inter,sans-serif',
+                            fontWeight: 500,
+                            color: T.slateGray,
+                            margin: '4px 0',
+                          }}
+                        >
+                          {booking.service}
+                        </p>
+
+                        <small
+                          style={{
+                            fontSize: 12,
+                            fontFamily: 'Inter,sans-serif',
+                            color: T.slateGray,
+                          }}
+                        >
+                          {booking.date}
+                        </small>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        textAlign: 'right',
+                      }}
+                    >
+                      <h3
+                        style={{
+                          fontFamily: 'Geist,sans-serif',
+                          fontSize: 18,
+                          fontWeight: 700,
+                          color: T.slate,
+                          margin: 0,
+                        }}
+                      >
+                        {booking.amount}
+                      </h3>
+
+                      <div
+                        style={{
+                          marginTop: 8,
+                        }}
+                      >
+                        <StatusPill status={booking.status} />
+                      </div>
+                    </div>
                   </div>
 
-                  <p
+                  <div
                     style={{
-                      color: T.slateGray,
-                      marginTop: 12,
-                    }}
-                  >
-                    4 Jobs scheduled this week.
-                  </p>
-                </div>
-              </Fade>
-
-              {/* Support */}
-
-              <Fade delay={0.2}>
-                <div
-                  style={{
-                    background: T.bronzeLight,
-
-                    borderRadius: 18,
-
-                    padding: 20,
-
-                    marginTop: 18,
-                  }}
-                >
-                  <CircleHelp size={22} />
-
-                  <h3>Need Help?</h3>
-
-                  <p>Contact support for booking issues.</p>
-
-                  <button
-                    style={{
-                      marginTop: 10,
-
-                      border: 'none',
-
-                      background: T.slate,
-
-                      color: T.white,
-
-                      padding: '10px 16px',
-
-                      borderRadius: 10,
-
                       display: 'flex',
 
-                      alignItems: 'center',
+                      gap: 10,
 
-                      gap: 6,
+                      marginTop: 18,
 
-                      cursor: 'pointer',
+                      flexWrap: 'wrap',
                     }}
                   >
-                    Contact Support
-                    <ArrowRight size={16} />
-                  </button>
+                    <button
+                      style={{
+                        height: 38,
+                        padding: '0 16px',
+                        borderRadius: 8,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        border: 'none',
+
+                        background: T.slate,
+
+                        color: T.white,
+
+                        cursor: 'pointer',
+                      }}
+                    >
+                      View Details
+                    </button>
+
+                    <button
+                      style={{
+                        border: `1px solid ${T.border}`,
+
+                        height: 38,
+                        padding: '0 16px',
+                        borderRadius: 8,
+                        fontSize: 12,
+                        background: T.white,
+
+                        display: 'flex',
+
+                        alignItems: 'center',
+
+                        gap: 6,
+
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <MessageCircle size={16} />
+                      Message
+                    </button>
+                  </div>
                 </div>
               </Fade>
-            </div>
+            ))}
           </div>
+          
         </div>
-
-        {/* Floating Action Button  */}
-
-        <button
-        style={{
-          position: 'fixed',
-          right: 24,
-          bottom: bp.isMobile ? 80 : 24,
-          width: 58,
-          height: 58,
-          borderRadius: '50%',
-          border: 'none',
-          background: T.bronze,
-          color: T.white,
-          boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Plus size={24} />
-      </button> 
-   
+      </div>
     </>
   );
 }
