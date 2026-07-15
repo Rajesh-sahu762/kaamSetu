@@ -1,5 +1,5 @@
 const express = require("express");
-const { getVendorProfile, updateVendorProfile, updateProfileImage, addService, getVendorServices, updateService, deleteService, toggleServiceStatus, getCategories, getVendorBookings, getVendorBookingById, updateBookingStatus} = require("../controllers/vendorController");
+const { getVendorProfile, updateVendorProfile, updateProfileImage, addService, getVendorServices, updateService, deleteService, toggleServiceStatus, getCategories, getVendorBookings, getVendorBookingById, updateBookingStatus, getVendorReviews, replyReview, reportReview} = require("../controllers/vendorController");
 const verifyToken = require("../middleware/verifyToken");
 const upload = require("../middleware/upload");
 const router = express.Router();
@@ -44,5 +44,13 @@ router.patch("/bookings/:bookingId/status", verifyToken, updateBookingStatus);
 // =======================================
 
 router.get("/categories", getCategories);
+
+// =======================================
+// Review Routes
+// =======================================
+
+router.get("/reviews", verifyToken, getVendorReviews);
+router.patch("/reviews/:id/reply", verifyToken, replyReview);
+router.patch("/reviews/:id/report", verifyToken, reportReview);
 
 module.exports = router;
