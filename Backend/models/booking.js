@@ -32,7 +32,9 @@ cancelledBy: {
   enum: ["customer", "vendor", "admin", ""],
   default: "",
 },
-
+responseDeadline:{
+    type:Date
+},
 cancelReason: {
   type: String,
   default: "",

@@ -5,6 +5,7 @@ const Review = require("../models/review");
 const Booking = require("../models/booking");
 const Transaction = require("../models/transaction");
 const Category = require("../models/category")
+const Notification = require("../models/notification")
 const path = require("path");
 const { deleteFile } = require("../utils/fileHelper");
 
@@ -856,9 +857,11 @@ const toggleServiceStatus = async (req, res) => {
 // =======================================
 
 const getVendorBookings = async (req, res) => {
+  
   try {
+  
     const { userId } = req.user;
-
+console.log(req.user);
     const {
       page = 1,
       limit = 10,
@@ -872,6 +875,7 @@ const getVendorBookings = async (req, res) => {
     // ==========================
 
     const vendor = await Vendor.findOne({ userId });
+    console.log(vendor);
 
     if (!vendor) {
       return res.status(404).json({
@@ -955,6 +959,8 @@ const getVendorBookings = async (req, res) => {
 
     const skip = (currentPage - 1) * pageSize;
 
+    console.log(filter);
+
     // ==========================
     // Fetch Bookings
     // ==========================
@@ -975,6 +981,51 @@ const getVendorBookings = async (req, res) => {
     const totalBookings =
       await Booking.countDocuments(filter);
 
+      console.log(bookings);
+
+      const [
+  total,
+  pending,
+  accepted,
+  inProgress,
+  completed,
+  cancelled,
+  rejected,
+] = await Promise.all([
+  Booking.countDocuments({
+    vendorId: vendor._id,
+  }),
+
+  Booking.countDocuments({
+    vendorId: vendor._id,
+    status: "pending",
+  }),
+
+  Booking.countDocuments({
+    vendorId: vendor._id,
+    status: "accepted",
+  }),
+
+  Booking.countDocuments({
+    vendorId: vendor._id,
+    status: "in_progress",
+  }),
+
+  Booking.countDocuments({
+    vendorId: vendor._id,
+    status: "completed",
+  }),
+
+  Booking.countDocuments({
+    vendorId: vendor._id,
+    status: "cancelled",
+  }),
+
+  Booking.countDocuments({
+    vendorId: vendor._id,
+    status: "rejected",
+  }),
+]);
     // ==========================
     // Response
     // ==========================
@@ -984,6 +1035,24 @@ const getVendorBookings = async (req, res) => {
       message: "Bookings fetched successfully",
 
       data: bookings,
+
+      stats:{
+
+total,
+
+pending,
+
+accepted,
+
+inProgress,
+
+completed,
+
+cancelled,
+
+rejected
+
+},
 
       pagination: {
         currentPage,
@@ -1198,6 +1267,50 @@ const updateBookingStatus = async (req, res) => {
 
     await booking.save();
 
+
+    // ==========================
+// Create Notification
+// ==========================
+
+const statusMessages = {
+  accepted: {
+    title: "Booking Accepted",
+    message: `Your booking ${booking.bookingNumber} has been accepted by the vendor.`,
+  },
+
+  rejected: {
+    title: "Booking Rejected",
+    message: `Unfortunately your booking ${booking.bookingNumber} was rejected.`,
+  },
+
+  in_progress: {
+    title: "Service Started",
+    message: `Your service for booking ${booking.bookingNumber} is now in progress.`,
+  },
+
+  completed: {
+    title: "Service Completed",
+    message: `Your booking ${booking.bookingNumber} has been completed successfully.`,
+  },
+
+  cancelled: {
+    title: "Booking Cancelled",
+    message: `Your booking ${booking.bookingNumber} has been cancelled.`,
+  },
+};
+
+const notification = statusMessages[status];
+
+if (notification) {
+  await Notification.create({
+    userId: booking.customerId,
+    title: notification.title,
+    message: notification.message,
+    type: "booking",
+    referenceId: booking._id,
+  });
+}
+
     // ==========================
     // Response
     // ==========================
@@ -1206,116 +1319,6 @@ const updateBookingStatus = async (req, res) => {
       success: true,
       message: "Booking status updated successfully.",
       data: booking,
-    });
-
-  } catch (error) {
-
-    console.log(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-
-  }
-};
-
-
-const getBookingStats = async (req, res) => {
-  try {
-
-    const { userId } = req.user;
-
-    // ==========================
-    // Find Vendor
-    // ==========================
-
-    const vendor = await Vendor.findOne({ userId });
-
-    if (!vendor) {
-      return res.status(404).json({
-        success: false,
-        message: "Vendor not found",
-      });
-    }
-
-    // ==========================
-    // Booking Stats
-    // ==========================
-
-    const [
-      total,
-      pending,
-      accepted,
-      inProgress,
-      completed,
-      cancelled,
-      rejected,
-      todayBookings,
-    ] = await Promise.all([
-
-      Booking.countDocuments({
-        vendorId: vendor._id,
-      }),
-
-      Booking.countDocuments({
-        vendorId: vendor._id,
-        status: "pending",
-      }),
-
-      Booking.countDocuments({
-        vendorId: vendor._id,
-        status: "accepted",
-      }),
-
-      Booking.countDocuments({
-        vendorId: vendor._id,
-        status: "in_progress",
-      }),
-
-      Booking.countDocuments({
-        vendorId: vendor._id,
-        status: "completed",
-      }),
-
-      Booking.countDocuments({
-        vendorId: vendor._id,
-        status: "cancelled",
-      }),
-
-      Booking.countDocuments({
-        vendorId: vendor._id,
-        status: "rejected",
-      }),
-
-      Booking.countDocuments({
-        vendorId: vendor._id,
-        bookingDate: {
-          $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          $lte: new Date(new Date().setHours(23, 59, 59, 999)),
-        },
-      }),
-
-    ]);
-
-    // ==========================
-    // Response
-    // ==========================
-
-    return res.status(200).json({
-      success: true,
-      message: "Booking statistics fetched successfully.",
-
-      data: {
-        total,
-        pending,
-        accepted,
-        inProgress,
-        completed,
-        cancelled,
-        rejected,
-        todayBookings,
-      },
     });
 
   } catch (error) {
@@ -1365,6 +1368,312 @@ const getCategories = async (req, res) => {
 };
 
 
+// =======================================
+// Get Vendor Reviews
+// =======================================
+
+const getVendorReviews = async (req, res) => {
+  try {
+
+    const { userId } = req.user;
+
+    const page = Number(req.query.page) || 1;
+
+    const limit = Number(req.query.limit) || 10;
+
+    const search = req.query.search?.trim() || "";
+
+    const rating = req.query.rating || "all";
+
+    const skip = (page - 1) * limit;
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor profile not found.",
+      });
+    }
+
+    const query = {
+      vendorId: vendor._id,
+    };
+
+    if (rating !== "all") {
+      query.rating = Number(rating);
+    }
+
+    let reviews = await Review.find(query)
+
+      .populate("customerId", "fullName profileImage")
+
+      .populate("serviceId", "serviceName")
+
+      .sort({ createdAt: -1 });
+
+    if (search) {
+
+      const keyword = search.toLowerCase();
+
+      reviews = reviews.filter((review) => {
+
+        const customerName =
+          review.customerId?.fullName?.toLowerCase() || "";
+
+        const serviceName =
+          review.serviceId?.serviceName?.toLowerCase() || "";
+
+        return (
+          customerName.includes(keyword) ||
+          serviceName.includes(keyword)
+        );
+
+      });
+
+    }
+
+    const totalReviews = reviews.length;
+
+    const paginatedReviews = reviews.slice(skip, skip + limit);
+
+    const averageRating =
+      totalReviews > 0
+        ? (
+            reviews.reduce((sum, item) => sum + item.rating, 0) /
+            totalReviews
+          ).toFixed(1)
+        : 0;
+
+    const pendingReplies = reviews.filter(
+      (item) => !item.vendorReply
+    ).length;
+
+    const ratingDistribution = {
+
+      5: reviews.filter((item) => item.rating === 5).length,
+
+      4: reviews.filter((item) => item.rating === 4).length,
+
+      3: reviews.filter((item) => item.rating === 3).length,
+
+      2: reviews.filter((item) => item.rating === 2).length,
+
+      1: reviews.filter((item) => item.rating === 1).length,
+
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Reviews fetched successfully.",
+
+      data: paginatedReviews,
+
+      stats: {
+
+        totalReviews,
+
+        averageRating,
+
+        pendingReplies,
+
+        ratingDistribution,
+
+      },
+
+      pagination: {
+
+        currentPage: page,
+
+        totalPages: Math.ceil(totalReviews / limit),
+
+        totalReviews,
+
+        hasNextPage: page * limit < totalReviews,
+
+        hasPrevPage: page > 1,
+
+      },
+
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+// =======================================
+// Reply Review
+// =======================================
+
+const replyReview = async (req, res) => {
+  try {
+
+    const { userId } = req.user;
+
+    const { id } = req.params;
+
+    const { vendorReply } = req.body;
+
+    if (!vendorReply?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Reply is required.",
+      });
+    }
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor profile not found.",
+      });
+    }
+
+    const review = await Review.findOne({
+      _id: id,
+      vendorId: vendor._id,
+    });
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found.",
+      });
+    }
+
+    review.vendorReply = vendorReply.trim();
+
+    review.vendorRepliedAt = new Date();
+
+    await review.save();
+
+    await Notification.create({
+      userId: review.customerId,
+      title: "Vendor Replied",
+      message: "The vendor has replied to your review.",
+      type: "review",
+      referenceId: review._id,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Reply saved successfully.",
+      data: review,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+// =======================================
+// Report Review
+// =======================================
+
+const reportReview = async (req, res) => {
+  try {
+
+    const { userId } = req.user;
+
+    const { id } = req.params;
+
+    const { reason } = req.body;
+
+    if (!reason?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Report reason is required.",
+      });
+    }
+
+    const vendor = await Vendor.findOne({
+      userId,
+    });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor profile not found.",
+      });
+    }
+
+    const review = await Review.findOne({
+      _id: id,
+      vendorId: vendor._id,
+    });
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found.",
+      });
+    }
+
+    if (review.isReported) {
+      return res.status(400).json({
+        success: false,
+        message: "This review has already been reported.",
+      });
+    }
+
+
+    const allowedReasons = [
+  "Spam",
+  "Fake Review",
+  "Abusive Language",
+  "Wrong Information",
+  "Other",
+];
+
+if (!allowedReasons.includes(reason)) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid report reason.",
+  });
+}
+
+    review.isReported = true;
+
+    review.reportReason = reason.trim();
+
+    review.reportedAt = new Date();
+
+    await review.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Review reported successfully.",
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+
 
 
 
@@ -1381,7 +1690,8 @@ module.exports = {
   getVendorBookings,
   getVendorBookingById,
   updateBookingStatus,
-
-
+  getVendorReviews,
+  replyReview,
+  reportReview,
   
 };
