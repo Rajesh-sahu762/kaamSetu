@@ -1,84 +1,183 @@
-import { useMemo, useState } from 'react';
-
+import { useMemo, useState, useEffect } from 'react';
 import Avatar from '@/components/common/Avatar';
 import StatusPill from '@/components/common/StatusPill';
 import Fade from '@/components/common/Fade';
-
+import { getVendorBookings, getVendorBookingById } from '@/services/vendorService';
+import BookingDetailsModal from "@/components/vendor/bookings/BookingDetailsModal";
 import { T } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
 
 import {
   Search,
-  Plus,
   CalendarDays,
   CircleHelp,
   MessageCircle,
   ArrowRight,
+  ChevronDown,
 } from 'lucide-react';
 
-const BOOKINGS = [
-  {
-    id: 'KS-4821',
-    client: 'Meera Joshi',
-    service: 'Interior Painting',
-    date: 'Today • 10:00 AM',
-    amount: '₹8,500',
-    status: 'confirmed',
-    avatar: 'MJ',
-  },
-  {
-    id: 'KS-4820',
-    client: 'Arjun Kapoor',
-    service: 'Plumbing Repair',
-    date: 'Today • 2:00 PM',
-    amount: '₹3,200',
-    status: 'in-progress',
-    avatar: 'AK',
-  },
-  {
-    id: 'KS-4818',
-    client: 'Sunita Rao',
-    service: 'Electrical Wiring',
-    date: 'Tomorrow • 9:00 AM',
-    amount: '₹12,000',
-    status: 'confirmed',
-    avatar: 'SR',
-  },
-  {
-    id: 'KS-4815',
-    client: 'Ravi Malhotra',
-    service: 'Carpentry Work',
-    date: '19 Jun • 11:00 AM',
-    amount: '₹6,800',
-    status: 'pending',
-    avatar: 'RM',
-  },
-];
+import ConfirmModal from "@/components/common/ConfirmModal";
+import { updateBookingStatus } from "@/services/vendorService";
+import { toast } from "react-toastify";
 
-const tabs = ['All', 'Confirmed', 'In Progress', 'Pending'];
+
+const tabs = [
+  'All',
+
+  'Pending',
+
+  'Accepted',
+
+  'In Progress',
+
+  'Completed',
+
+  'Cancelled',
+
+  'Rejected',
+];
 
 export default function Bookings() {
   const bp = useBreakpoint();
 
   const [activeTab, setActiveTab] = useState('All');
+  const [bookings, setBookings] = useState([]);
+
+  const [showBookingModal, setShowBookingModal] = useState(false);
+
+  const [bookingDetails, setBookingDetails] = useState(null);
+
+  const [detailsLoading, setDetailsLoading] = useState(false);
+
+  const [stats, setStats] = useState({});
+
+  const [loading, setLoading] = useState(false);
+
+  const [page, setPage] = useState(1);
+
+  const [pagination, setPagination] = useState({});
 
   const [search, setSearch] = useState('');
 
-  const filteredBookings = useMemo(() => {
-    return BOOKINGS.filter((booking) => {
-      const matchesSearch =
-        booking.client.toLowerCase().includes(search.toLowerCase()) ||
-        booking.service.toLowerCase().includes(search.toLowerCase());
+  const [showStatusModal, setShowStatusModal] = useState(false);
 
-      const matchesTab =
-        activeTab === 'All'
-          ? true
-          : booking.status.toLowerCase() ===
-            activeTab.toLowerCase().replace(' ', '-');
+const [selectedBooking, setSelectedBooking] = useState(null);
 
-      return matchesSearch && matchesTab;
+const [selectedStatus, setSelectedStatus] = useState("");
+
+const [statusLoading, setStatusLoading] = useState(false);
+
+const handleStatusClick = (booking, status) => {
+
+  setSelectedBooking(booking);
+
+  setSelectedStatus(status);
+
+  setShowStatusModal(true);
+
+};
+
+const handleConfirmStatus = async () => {
+
+  setStatusLoading(true);
+
+  const response = await updateBookingStatus(
+    selectedBooking._id,
+    selectedStatus
+  );
+
+  if (response.success) {
+
+    toast.success(response.message);
+
+    fetchBookings();
+
+    if (
+      bookingDetails &&
+      bookingDetails._id === selectedBooking._id
+    ) {
+      handleViewDetails(selectedBooking._id);
+    }
+
+    setShowStatusModal(false);
+
+  } else {
+
+    toast.error(response.message);
+
+  }
+
+  setStatusLoading(false);
+
+};
+
+  const fetchBookings = async () => {
+    setLoading(true);
+
+    const response = await getVendorBookings({
+      page,
+
+      status:
+        activeTab === 'All' ? 'all' : activeTab.toLowerCase().replace(' ', '_'),
+
+      search,
     });
-  }, [activeTab, search]);
+
+    if (response.success) {
+      setBookings(response.data);
+
+      setStats(response.stats);
+
+      setPagination(response.pagination);
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, [page, activeTab, search]);
+
+  const handleViewDetails = async (bookingId) => {
+
+    setShowBookingModal(true);
+
+    setDetailsLoading(true);
+
+    const response = await getVendorBookingById(bookingId);
+
+    if (response.success) {
+
+        setBookingDetails(response.data);
+
+    }
+
+    setDetailsLoading(false);
+
+};
+
+const getStatusOptions = (status) => {
+  switch (status) {
+    case "pending":
+      return [
+        { label: "Accept Booking", value: "accepted" },
+        { label: "Reject Booking", value: "rejected" },
+      ];
+
+    case "accepted":
+      return [
+        { label: "Start Service", value: "in_progress" },
+      ];
+
+    case "in_progress":
+      return [
+        { label: "Complete Service", value: "completed" },
+      ];
+
+    default:
+      return [];
+  }
+};
 
   return (
     <>
@@ -232,8 +331,8 @@ export default function Bookings() {
           {/* Left */}
 
           <div>
-            {filteredBookings.map((booking, index) => (
-              <Fade key={booking.id} delay={index * 0.08}>
+            {bookings.map((booking, index) => (
+              <Fade key={booking._id} delay={index * 0.08}>
                 <div
                   style={{
                     background: T.white,
@@ -265,7 +364,13 @@ export default function Bookings() {
                         gap: 14,
                       }}
                     >
-                      <Avatar initials={booking.avatar} size={52} />
+                      <Avatar
+                        initials={booking.customerId.fullName
+                          .split(' ')
+                          .map((name) => name[0])
+                          .join('')}
+                        size={52}
+                      />
 
                       <div>
                         <h3
@@ -279,7 +384,7 @@ export default function Bookings() {
                             color: T.slate,
                           }}
                         >
-                          {booking.client}
+                          {booking.customerId.fullName}
                         </h3>
 
                         <p
@@ -291,7 +396,7 @@ export default function Bookings() {
                             margin: '4px 0',
                           }}
                         >
-                          {booking.service}
+                          {booking.serviceId.serviceName}
                         </p>
 
                         <small
@@ -301,7 +406,8 @@ export default function Bookings() {
                             color: T.slateGray,
                           }}
                         >
-                          {booking.date}
+                          {new Date(booking.bookingDate).toLocaleDateString()}{' '}
+                          {booking.bookingTime}
                         </small>
                       </div>
                     </div>
@@ -320,7 +426,7 @@ export default function Bookings() {
                           margin: 0,
                         }}
                       >
-                        {booking.amount}
+                        ₹{booking.totalAmount}
                       </h3>
 
                       <div
@@ -359,40 +465,146 @@ export default function Bookings() {
 
                         cursor: 'pointer',
                       }}
+                      onClick={() => handleViewDetails(booking._id)}
                     >
                       View Details
                     </button>
 
-                    <button
-                      style={{
-                        border: `1px solid ${T.border}`,
+                      {
+  getStatusOptions(booking.status).length > 0 ? (
 
-                        height: 38,
-                        padding: '0 16px',
-                        borderRadius: 8,
-                        fontSize: 12,
-                        background: T.white,
+    <select
 
-                        display: 'flex',
+      defaultValue=""
 
-                        alignItems: 'center',
+      onChange={(e) => {
 
-                        gap: 6,
+        if (!e.target.value) return;
 
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <MessageCircle size={16} />
-                      Message
-                    </button>
+        handleStatusClick(
+          booking,
+          e.target.value
+        );
+
+        e.target.selectedIndex = 0;
+
+      }}
+
+      style={{
+        height: 38,
+        padding: "0 14px",
+        borderRadius: 8,
+        border: `1px solid ${T.border}`,
+        background: T.white,
+        cursor: "pointer",
+        fontSize: 12,
+      }}
+
+    >
+
+      <option value="">
+        Update Status
+      </option>
+
+      {
+
+        getStatusOptions(
+          booking.status
+        ).map(option => (
+
+          <option
+            key={option.value}
+            value={option.value}
+          >
+            {option.label}
+          </option>
+
+        ))
+
+      }
+
+    </select>
+
+  ) : (
+
+    <button
+
+      disabled
+
+      style={{
+
+        height: 38,
+
+        padding: "0 16px",
+
+        borderRadius: 8,
+
+        border: `1px solid ${T.border}`,
+
+        background: "#F8FAFC",
+
+        color: "#94A3B8",
+
+      }}
+
+    >
+
+      {booking.status.replace("_", " ")}
+
+    </button>
+
+  )
+}
                   </div>
                 </div>
               </Fade>
             ))}
           </div>
-          
         </div>
       </div>
+
+      
+  <BookingDetailsModal
+
+open={showBookingModal}
+
+onClose={() => {
+
+setShowBookingModal(false);
+
+setBookingDetails(null);
+
+}}
+
+booking={bookingDetails}
+
+loading={detailsLoading}
+
+refreshBookings={fetchBookings}
+/>
+
+<ConfirmModal
+
+  open={showStatusModal}
+
+  title="Update Booking Status"
+
+  message={`Are you sure you want to change booking status to "${selectedStatus.replace("_", " ")}"?`}
+
+  confirmText="Update"
+
+  cancelText="Cancel"
+
+  loading={statusLoading}
+
+  danger={selectedStatus === "rejected"}
+
+  onCancel={() => setShowStatusModal(false)}
+
+  onConfirm={handleConfirmStatus}
+
+/>
+
     </>
   );
 }

@@ -10,6 +10,7 @@ const ConfirmModal = ({
   onCancel,
   loading = false,
   danger = false,
+   children,
 }) => {
   if (!open) return null;
 
@@ -104,6 +105,20 @@ const ConfirmModal = ({
           }}
         >
           {message}
+
+          {children && (
+
+<div
+style={{
+marginTop:20,
+}}
+>
+
+{children}
+
+</div>
+
+)}
         </p>
 
         {/* Buttons */}
