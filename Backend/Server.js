@@ -4,6 +4,7 @@ const app = express()
 const connectDB = require('./config/db')
 const authRoutes = require('./routes/authRoutes')
 const vendorRoutes = require('./routes/vendorRoutes')
+const adminRoutes = require("./routes/adminRoutes");
 const notificationRoutes = require('./routes/notificationRoutes')
 const cors = require('cors')
 const transporter = require('./config/mail');
@@ -30,6 +31,8 @@ app.use('/api/vendor', vendorRoutes)
 app.use("/uploads", express.static("uploads"));
 
 app.use("/api/notifications", notificationRoutes);
+
+app.use("/api/admin", adminRoutes);
 
 
 app.listen(PORT, () => {
