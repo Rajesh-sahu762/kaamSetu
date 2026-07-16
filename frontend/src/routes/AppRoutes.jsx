@@ -29,6 +29,7 @@ import SupportPage from '@/pages/client/SupportPage';
 import NotFound from '@/pages/client/NotFound';
 import ProtectedRoute from './ProtectedRoute';
 import VendorRoutes from './VendorRoutes';
+import adminRoutes from './AdminRoutes'
 
 
 const AppRoutes = () => {
@@ -61,6 +62,7 @@ const AppRoutes = () => {
 
           {/* Vendor */}
       {VendorRoutes()}
+      {adminRoutes()}
 
       {/* Auth Routes */}
       <Route path="/login" element={<LoginView />} />
