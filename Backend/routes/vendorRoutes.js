@@ -60,4 +60,5 @@ router.patch("/reviews/:id/report", verifyToken, reportReview);
 router.get("/earnings", verifyToken, getVendorEarnings);
 router.get("/transactions", verifyToken, getVendorTransactions);
 
+
 module.exports = router;

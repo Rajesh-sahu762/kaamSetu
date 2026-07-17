@@ -81,4 +81,13 @@ const transactionSchema = new mongoose.Schema(
   },
 );
 
+transactionSchema.index(
+  { gatewayTransactionId: 1 },
+  { unique: true }
+);
+
+transactionSchema.index(
+  { gatewayOrderId: 1 }
+);
+
 module.exports = mongoose.model("Transaction", transactionSchema);
