@@ -14,6 +14,24 @@ const transactionSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    currency: {
+      type: String,
+      default: "INR",
+    },
+    paymentGateway: {
+      type: String,
+      enum: ["cash", "razorpay", "phonepe", "cashfree"],
+      default: "cash",
+    },
+    commissionRate: {
+      type: Number,
+      default: 10,
+    },
+    remarks: {
+      type: String,
+      default: "",
+    },
+
     vendorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",
@@ -54,7 +72,7 @@ const transactionSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "completed", "failed"],
+      enum: ["pending", "completed", "failed", "refunded"],
       default: "pending",
     },
   },

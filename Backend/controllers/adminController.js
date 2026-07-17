@@ -1,9 +1,9 @@
-const User = require("../models/User");
-const Vendor = require("../models/Vendor");
-const Booking = require("../models/Booking");
-const Transaction = require("../models/Transaction");
-const Service = require("../models/Service");
-const Review = require("../models/Review");
+const User = require("../models/user");
+const Vendor = require("../models/vendor");
+const Booking = require("../models/booking");
+const Transaction = require("../models/transaction");
+const Service = require("../models/service");
+const Review = require("../models/review");
 
 // =======================================
 // Helpers

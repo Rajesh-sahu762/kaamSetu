@@ -106,6 +106,10 @@ serviceAreas: {
     type: String,
     default: "",
   },
+  isBankVerified: {
+    type: Boolean,
+    default: false
+},
   accountHolder: {
     type: String,
     default: "",

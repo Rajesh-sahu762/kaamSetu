@@ -1674,7 +1674,337 @@ if (!allowedReasons.includes(reason)) {
 };
 
 
+// =======================================
+// Vendor Earnings
+// =======================================
 
+const getVendorEarnings = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    // ==========================
+    // Find Vendor
+    // ==========================
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found.",
+      });
+    }
+
+    // ==========================
+    // Earnings Summary
+    // ==========================
+
+    const startOfMonth = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      1
+    );
+
+    const [
+      summary,
+      monthly,
+      pendingSettlement,
+      completedSettlement,
+    ] = await Promise.all([
+
+      Transaction.aggregate([
+        {
+          $match: {
+            vendorId: vendor._id,
+            status: "completed",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalEarnings: {
+              $sum: "$vendorAmount",
+            },
+            totalCommission: {
+              $sum: "$commission",
+            },
+            totalTransactions: {
+              $sum: 1,
+            },
+          },
+        },
+      ]),
+
+      Transaction.aggregate([
+        {
+          $match: {
+            vendorId: vendor._id,
+            status: "completed",
+            createdAt: {
+              $gte: startOfMonth,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            thisMonthEarnings: {
+              $sum: "$vendorAmount",
+            },
+          },
+        },
+      ]),
+
+      Transaction.aggregate([
+        {
+          $match: {
+            vendorId: vendor._id,
+            status: "completed",
+            settlementStatus: "pending",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            pendingSettlement: {
+              $sum: "$vendorAmount",
+            },
+          },
+        },
+      ]),
+
+      Transaction.aggregate([
+        {
+          $match: {
+            vendorId: vendor._id,
+            status: "completed",
+            settlementStatus: "settled",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            completedSettlement: {
+              $sum: "$vendorAmount",
+            },
+          },
+        },
+      ]),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Vendor earnings fetched successfully.",
+      data: {
+        totalEarnings:
+          summary[0]?.totalEarnings || 0,
+
+        thisMonthEarnings:
+          monthly[0]?.thisMonthEarnings || 0,
+
+        pendingSettlement:
+          pendingSettlement[0]?.pendingSettlement || 0,
+
+        completedSettlement:
+          completedSettlement[0]?.completedSettlement || 0,
+
+        totalCommission:
+          summary[0]?.totalCommission || 0,
+
+        totalTransactions:
+          summary[0]?.totalTransactions || 0,
+      },
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+
+// =======================================
+// Vendor Transactions
+// =======================================
+
+const getVendorTransactions = async (req, res) => {
+  try {
+
+    const { userId } = req.user;
+
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      status = "all",
+      settlement = "all",
+      paymentMethod = "all",
+      sort = "newest",
+    } = req.query;
+
+    // ==========================
+    // Find Vendor
+    // ==========================
+
+    const vendor = await Vendor.findOne({ userId });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found.",
+      });
+    }
+
+    // ==========================
+    // Filters
+    // ==========================
+
+    const filter = {
+      vendorId: vendor._id,
+    };
+
+    if (status !== "all") {
+      filter.status = status;
+    }
+
+    if (settlement !== "all") {
+      filter.settlementStatus = settlement;
+    }
+
+    if (paymentMethod !== "all") {
+      filter.paymentMethod = paymentMethod;
+    }
+
+    // ==========================
+    // Search Customer
+    // ==========================
+
+    if (search.trim()) {
+
+      const customers = await User.find({
+        fullName: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      }).select("_id");
+
+      filter.customerId = {
+        $in: customers.map((item) => item._id),
+      };
+    }
+
+    // ==========================
+    // Sorting
+    // ==========================
+
+    let sortOption = {
+      createdAt: -1,
+    };
+
+    if (sort === "oldest") {
+
+      sortOption = {
+        createdAt: 1,
+      };
+
+    }
+
+    if (sort === "amountHigh") {
+
+      sortOption = {
+        amount: -1,
+      };
+
+    }
+
+    if (sort === "amountLow") {
+
+      sortOption = {
+        amount: 1,
+      };
+
+    }
+
+    // ==========================
+    // Pagination
+    // ==========================
+
+    const currentPage = Number(page);
+
+    const pageSize = Number(limit);
+
+    const skip = (currentPage - 1) * pageSize;
+
+    // ==========================
+    // Transactions
+    // ==========================
+
+    const transactions = await Transaction.find(filter)
+
+      .populate(
+        "customerId",
+        "fullName profileImage mobile"
+      )
+
+      .populate(
+        "bookingId",
+        "bookingNumber bookingDate"
+      )
+
+      .sort(sortOption)
+
+      .skip(skip)
+
+      .limit(pageSize);
+
+    const totalTransactions =
+      await Transaction.countDocuments(filter);
+
+    // ==========================
+    // Response
+    // ==========================
+
+    return res.status(200).json({
+
+      success: true,
+
+      message: "Transactions fetched successfully.",
+
+      data: transactions,
+
+      pagination: {
+
+        currentPage,
+
+        totalPages: Math.ceil(
+          totalTransactions / pageSize
+        ),
+
+        totalTransactions,
+
+        pageSize,
+
+      },
+
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
 
 
 module.exports = {
@@ -1693,5 +2023,7 @@ module.exports = {
   getVendorReviews,
   replyReview,
   reportReview,
+  getVendorEarnings,
+  getVendorTransactions,
   
 };
