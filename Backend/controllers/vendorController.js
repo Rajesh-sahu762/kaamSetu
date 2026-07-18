@@ -1809,7 +1809,16 @@ const getVendorEarnings = async (req, res) => {
 
         netEarnings:
           (summary[0]?.totalEarnings || 0) - (summary[0]?.totalCommission || 0),
+
+            transferDetails: {
+          bankName: vendor.bankDetails?.bankName || "Not Added",
+          accountNumber: vendor.bankDetails?.accountNumber || "",
+          accountHolder: vendor.bankDetails?.accountHolder || "", 
+          ifscCode: vendor.bankDetails?.ifscCode || "", 
+          upiId: vendor.bankDetails?.upiId || "", 
       },
+
+      }
     });
   } catch (error) {
     console.log(error);

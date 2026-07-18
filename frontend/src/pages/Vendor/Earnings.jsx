@@ -33,6 +33,28 @@ const [transactions, setTransactions] = useState([]);
 
 const [loading, setLoading] = useState(true);
 
+const monthlyAnalytics = earnings?.monthlyAnalytics || [];
+
+const maxEarnings = Math.max(
+  ...monthlyAnalytics.map((item) => item.earnings),
+  1
+);
+
+const monthNames = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
 useEffect(() => {
 
   const fetchDashboard = async () => {
@@ -91,6 +113,12 @@ if (!earnings) {
     </div>
   );
 }
+
+const account = earnings?.transferDetails?.accountNumber;
+
+const maskedAccount = account
+  ? `******${account.slice(-4)}`
+  : "Not Added";
 
 
 return (
@@ -275,10 +303,8 @@ marginTop:24,
   },
 
   {
-    title: "Settled Amount",
-    value: `₹${(
-      earnings?.completedSettlement || 0
-    ).toLocaleString("en-IN")}`,
+    title: "Total Commission",
+    value: `₹${earnings?.totalCommission?.toLocaleString() || 0}`,
     icon: CircleCheckBig,
     color: T.green,
   },
@@ -501,31 +527,7 @@ gap:18,
 }}
 >
 
-<div>
 
-<div
-style={{
-fontSize:12,
-opacity:.65,
-}}
->
-
-Settlement Date
-
-</div>
-
-<div
-style={{
-marginTop:4,
-fontWeight:600,
-}}
->
-
-Pending
-
-</div>
-
-</div>
 
 <div>
 
@@ -547,7 +549,7 @@ fontWeight:600,
 }}
 >
 
-{Vendor.bankDetails.bankName}
+{earnings?.transferDetails?.bankName}
 
 </div>
 
@@ -572,11 +574,33 @@ marginTop:4,
 fontWeight:600,
 }}
 >
+{maskedAccount}
 
-const maskedAccount =
-accountNumber
-? `******${accountNumber.slice(-4)}`
-: "Not Added";
+</div>
+
+</div>
+
+<div>
+
+<div
+style={{
+fontSize:12,
+opacity:.65,
+}}
+>
+
+IFSC code
+
+</div>
+
+<div
+style={{
+marginTop:4,
+fontWeight:600,
+}}
+>
+
+{earnings?.transferDetails?.ifscCode}
 
 </div>
 
@@ -590,7 +614,7 @@ accountNumber
 
 </Fade>
 
-
+{/* 
 <Fade delay={0.22}>
 
 <div
@@ -716,7 +740,7 @@ Waiting...
 
 </div>
 
-</Fade>
+</Fade> */}
 
 {/* part 3 */}
 <Fade delay={0.28}>
@@ -766,7 +790,7 @@ color:T.slateGray,
 }}
 >
 
-2 Pending
+{earnings?.pendingSettlements?.length || 0} Pending
 
 </div>
 
@@ -779,25 +803,14 @@ gap:16,
 }}
 >
 
-{[
-{
-id:"KS-2041",
-service:"Interior Painting",
-amount:"₹8,500",
-status:"Tomorrow",
-},
 
 {
-id:"KS-2037",
-service:"Electrical Repair",
-amount:"₹9,700",
-status:"Waiting Customer Confirmation",
-},
+  earnings?.pendingSettlements?.length > 0 ? (
 
-].map((item)=>(
+    earnings?.pendingSettlements.map((item)=>(
 
 <div
-key={item.id}
+key={item.transactionId}
 style={{
 display:"flex",
 
@@ -826,8 +839,7 @@ color:T.slate,
 }}
 >
 
-{item.id}
-
+{item.bookingNumber}
 </div>
 
 <div
@@ -838,7 +850,7 @@ color:T.slateGray,
 }}
 >
 
-{item.service}
+{item.serviceName}
 
 </div>
 
@@ -858,9 +870,7 @@ fontSize:20,
 color:T.slate,
 }}
 >
-
-{item.amount}
-
+₹{item.amount?.toLocaleString("en-IN")}
 </div>
 
 <div
@@ -871,7 +881,7 @@ color:T.amber,
 }}
 >
 
-{item.status}
+{item.settlementStatus}
 
 </div>
 
@@ -879,8 +889,25 @@ color:T.amber,
 
 </div>
 
-))}
 
+
+))
+
+
+  ) : (
+
+    <div
+      style={{
+        textAlign: "center",
+        padding: "30px 0",
+        color: T.slateGray,
+      }}
+    >
+      No pending settlements found.
+    </div>
+
+  )
+}
 </div>
 
 </div>
@@ -933,7 +960,7 @@ Monthly earnings overview
 </p>
 
 </div>
-
+{/* 
 <div
 style={{
 display:"flex",
@@ -967,7 +994,7 @@ cursor:"pointer",
 
 ))}
 
-</div>
+</div> */}
 
 </div>
 
@@ -981,53 +1008,84 @@ gap:12,
 }}
 >
 
-{[
-45,
-62,
-58,
-80,
-74,
-96,
-].map((value,index)=>(
+{monthlyAnalytics.length > 0 ? (
 
-<div
-key={index}
-style={{
-flex:1,
-display:"flex",
-flexDirection:"column",
-alignItems:"center",
-}}
->
+  monthlyAnalytics.map((item) => (
 
-<div
-style={{
-height:`${value}%`,
-width:"100%",
-maxWidth:42,
-background:index===5
-? T.bronze
-:T.surfaceLow,
-borderRadius:"10px 10px 0 0",
-transition:".3s",
-}}
-></div>
+    <div
+      key={`${item.year}-${item.month}`}
+      style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
 
-<div
-style={{
-marginTop:10,
-fontSize:12,
-color:T.slateGray,
-}}
->
+      <div
+        style={{
+          height: `${Math.max(
+            (item.earnings / maxEarnings) * 100,
+            8
+          )}%`,
 
-{["Jan","Feb","Mar","Apr","May","Jun"][index]}
+          width: "100%",
 
-</div>
+          maxWidth: 42,
 
-</div>
+          background: T.bronze,
 
-))}
+          borderRadius: "10px 10px 0 0",
+
+          transition: ".3s",
+        }}
+      />
+
+      <div
+        style={{
+          marginTop: 8,
+          fontWeight: 600,
+          fontSize: 12,
+          color: T.slate,
+        }}
+      >
+
+        ₹{item.earnings.toLocaleString("en-IN")}
+
+      </div>
+
+      <div
+        style={{
+          marginTop: 6,
+          fontSize: 12,
+          color: T.slateGray,
+        }}
+      >
+
+        {monthNames[item.month - 1]}
+
+      </div>
+
+    </div>
+
+  ))
+
+) : (
+
+  <div
+    style={{
+      width: "100%",
+      textAlign: "center",
+      color: T.slateGray,
+      padding: "50px 0",
+    }}
+  >
+
+    No analytics available.
+
+  </div>
+
+)}
 
 </div>
 
@@ -1036,161 +1094,7 @@ color:T.slateGray,
 </Fade>
 {/* part 4 */}
 
-<Fade delay={0.42}>
 
-<div
-style={{
-background:T.white,
-border:`1px solid ${T.border}`,
-borderRadius:20,
-padding:24,
-marginTop:28,
-}}
->
-
-<div
-style={{
-display:"flex",
-justifyContent:"space-between",
-alignItems:"center",
-marginBottom:24,
-}}
->
-
-<h2
-style={{
-fontFamily:"Geist,sans-serif",
-fontSize:22,
-}}
->
-
-Settlement History
-
-</h2>
-
-<button
-style={{
-border:"none",
-background:T.surfaceLow,
-padding:"10px 16px",
-borderRadius:10,
-cursor:"pointer",
-}}
->
-
-View All
-
-</button>
-
-</div>
-
-<div
-style={{
-overflowX:"auto",
-}}
->
-
-<table
-style={{
-width:"100%",
-borderCollapse:"collapse",
-minWidth:760,
-}}
->
-
-<thead>
-
-<tr>
-
-{[
-"Booking",
-
-"Gross",
-
-"Commission",
-
-"GST",
-
-"Net",
-
-"Status",
-
-].map((item)=>(
-
-<th
-key={item}
-style={{
-padding:"14px",
-textAlign:"left",
-borderBottom:`1px solid ${T.border}`,
-fontSize:13,
-color:T.slateGray,
-}}
->
-
-{item}
-
-</th>
-
-))}
-
-</tr>
-
-</thead>
-
-<tbody>
-
-{[
-["KS2041","₹8500","₹850","₹153","₹7497","Completed"],
-
-["KS2040","₹9700","₹970","₹175","₹8555","Processing"],
-
-["KS2038","₹6200","₹620","₹112","₹5468","Completed"],
-
-].map((row,index)=>(
-
-<tr key={index}>
-
-{row.map((cell,i)=>(
-
-<td
-key={i}
-style={{
-padding:"16px 14px",
-borderBottom:`1px solid ${T.border}`,
-fontSize:14,
-color:
-i===5
-? cell==="Completed"
-? T.green
-:T.amber
-:T.slate,
-fontWeight:
-i===5
-?600
-:500,
-}}
->
-
-{cell}
-
-</td>
-
-))}
-
-</tr>
-
-))}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</Fade>
 
 <Fade delay={0.48}>
 
@@ -1234,10 +1138,12 @@ gap:14,
 >
 
 {
-transactions?.map((transaction) => (
+earnings?.recentTransactions?.length>0
+?(
+earnings?.recentTransactions?.map((transaction) => (
 
 <div
-key={item.title}
+key={transaction.transactionId}
 style={{
 display:"flex",
 justifyContent:"space-between",
@@ -1257,7 +1163,7 @@ color:T.slate,
 }}
 >
 
-{item.title}
+{transaction.bookingNumber}
 
 </div>
 
@@ -1269,7 +1175,7 @@ color:T.slateGray,
 }}
 >
 
-{item.type}
+{transaction.serviceName}
 
 </div>
 
@@ -1280,23 +1186,41 @@ style={{
 fontFamily:"Geist,sans-serif",
 fontWeight:700,
 fontSize:18,
-color:item.color,
+color:
+transaction.paymentStatus==="completed"
+?T.green
+:T.amber
 }}
 >
 
-{item.amount}
+₹{transaction.amount.toLocaleString("en-IN")}
 
 </div>
 
 </div>
 
-))}
+))
+) :(
+<div
+style={{
+textAlign:"center",
+padding:"30px",
+color:T.slateGray,
+}}
+>
+No transactions found.
+</div>
+)}
+
 
 </div>
 
 </div>
 
 </Fade>
+
+{/* part 5 */}
+
 
 <Fade delay={0.55}>
 
@@ -1527,7 +1451,7 @@ Statements
 
 </h2>
 
-<div
+{/* <div
 style={{
 display:"grid",
 gap:14,
@@ -1561,7 +1485,7 @@ fontWeight:600,
 
 ))}
 
-</div>
+</div> */}
 
 </div>
 

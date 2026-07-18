@@ -83,7 +83,14 @@ const transactionSchema = new mongoose.Schema(
 
 transactionSchema.index(
   { gatewayTransactionId: 1 },
-  { unique: true }
+  {
+    unique: true,
+    partialFilterExpression: {
+      gatewayTransactionId: {
+        $type: "string",
+      },
+    },
+  }
 );
 
 transactionSchema.index(

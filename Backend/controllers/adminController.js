@@ -22,6 +22,20 @@ const paginate = (query) => {
   return { page, limit, skip };
 };
 
+const setAccountActivation = async ({ userId, isActive, role }) =>
+  User.findOneAndUpdate(
+    {
+      _id: userId,
+      ...(role ? { role } : {}),
+      isDeleted: { $ne: true },
+    },
+    {
+      isActive,
+      deactivatedAt: isActive ? null : new Date(),
+    },
+    { new: true }
+  ).select("-password -otp -otpExpiresAt");
+
 // =======================================
 // DASHBOARD
 // =======================================
@@ -431,7 +445,7 @@ exports.getUsers = async (req, res) => {
     const { search, status } = req.query;
     const { page, limit, skip } = paginate(req.query);
 
-    const filter = { role: "customer" };
+    const filter = { role: "customer", isDeleted: { $ne: true } };
     if (status === "active") filter.isActive = true;
     if (status === "suspended") filter.isActive = false;
 
@@ -463,7 +477,11 @@ exports.getUsers = async (req, res) => {
 // GET /admin/users/:id
 exports.getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select(
+    const user = await User.findOne({
+      _id: req.params.id,
+      role: "customer",
+      isDeleted: { $ne: true },
+    }).select(
       "-password -otp -otpExpiresAt"
     );
 
@@ -487,11 +505,11 @@ exports.getUserById = async (req, res) => {
 // PATCH /admin/users/:id/suspend
 exports.suspendUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { isActive: false, deactivatedAt: new Date() },
-      { new: true }
-    ).select("-password");
+    const user = await setAccountActivation({
+      userId: req.params.id,
+      isActive: false,
+      role: "customer",
+    });
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -507,11 +525,11 @@ exports.suspendUser = async (req, res) => {
 // PATCH /admin/users/:id/activate
 exports.activateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { isActive: true, deactivatedAt: null },
-      { new: true }
-    ).select("-password");
+    const user = await setAccountActivation({
+      userId: req.params.id,
+      isActive: true,
+      role: "customer",
+    });
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -525,17 +543,17 @@ exports.activateUser = async (req, res) => {
 };
 
 // DELETE /admin/users/:id  (soft delete)
-// NOTE: your User schema does not yet have an `isDeleted` field.
-// Add this to models/User.js before using this endpoint:
-//   isDeleted: { type: Boolean, default: false },
-//   deletedAt: { type: Date, default: null },
 exports.deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
+    const user = await User.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        role: "customer",
+        isDeleted: { $ne: true },
+      },
       { isDeleted: true, deletedAt: new Date(), isActive: false },
       { new: true }
-    ).select("-password");
+    ).select("-password -otp -otpExpiresAt");
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });

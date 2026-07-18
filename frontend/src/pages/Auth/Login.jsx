@@ -74,18 +74,16 @@ const Login = () => {
 
       localStorage.setItem('user', JSON.stringify(response.user));
 
-      const vendorProfile = await getVendorProfile();
-
-updateVendorData(vendorProfile.data);
-
       toast.success(response.message);
       const user = response.user;
 
        if (user.role === 'customer') {
         navigate(from || '/');
       } else if (user.role === 'vendor') {
+        const vendorProfile = await getVendorProfile();
+        updateVendorData(vendorProfile.data);
         navigate('/vendor/dashboard');
-      } else if (user.role === 'Admin') {
+      } else if (user.role === 'admin') {
         navigate('/admin/dashboard');
       }
     } catch (error) {
@@ -163,10 +161,6 @@ updateVendorData(vendorProfile.data);
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
 
-      const vendorProfile = await getVendorProfile();
-
-updateVendorData(vendorProfile.data);
-
       toast.success(response.message);
 
       const user = response.user;
@@ -176,8 +170,10 @@ updateVendorData(vendorProfile.data);
       if (user.role === 'customer') {
         navigate(from || '/');
       } else if (user.role === 'vendor') {
+        const vendorProfile = await getVendorProfile();
+        updateVendorData(vendorProfile.data);
         navigate('/vendor/dashboard');
-      } else if (user.role === 'Admin') {
+      } else if (user.role === 'admin') {
         navigate('/admin/dashboard');
       }
     } catch (error) {
