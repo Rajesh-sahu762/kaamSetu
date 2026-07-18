@@ -28,6 +28,7 @@ const makeSlug = (value) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+
 const formatDate = (value) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime())
@@ -309,6 +310,7 @@ const Categories = () => {
       const response = await api.get('/admin/categories', {
         params: { page, limit: 10, status, search },
       });
+
       setCategories(response.data.data || []);
       setPagination(response.data.pagination || null);
     } catch (requestError) {
@@ -673,11 +675,7 @@ const Categories = () => {
                           fontSize: 11,
                         }}
                       >
-                        {new Intl.DateTimeFormat('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        }).format(new Date(category.updatedAt))}
+                          {formatDate(category.updatedAt)}
                       </td>
                       <td
                         style={{
