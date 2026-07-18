@@ -20,6 +20,10 @@ const {
   suspendUser,
   activateUser,
   deleteUser,
+  getCategories,
+  createCategory,
+  updateCategory,
+  updateCategoryStatus,
 } = require("../controllers/adminController");
 
 // Every route below requires a valid token AND role === "admin"
@@ -51,5 +55,13 @@ router.get("/users/:id", getUserById);
 router.patch("/users/:id/suspend", suspendUser);
 router.patch("/users/:id/activate", activateUser);
 router.delete("/users/:id", deleteUser);
+
+// =======================================
+// Category Management
+// =======================================
+router.get("/categories", getCategories);
+router.post("/categories", createCategory);
+router.put("/categories/:id", updateCategory);
+router.patch("/categories/:id/status", updateCategoryStatus);
 
 module.exports = router;

@@ -10,6 +10,7 @@ const PAGE_TITLES = {
   "/admin/dashboard": "Marketplace overview",
   "/admin/customers": "Customer management",
   "/admin/vendors": "Vendor management",
+  "/admin/categories": "Category management",
 };
 
 const relativeTime = (date) => {

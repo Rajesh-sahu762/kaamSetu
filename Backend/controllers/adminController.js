@@ -4,6 +4,7 @@ const Booking = require("../models/booking");
 const Transaction = require("../models/transaction");
 const Service = require("../models/service");
 const Review = require("../models/review");
+const Category = require("../models/category");
 
 // =======================================
 // Helpers
@@ -35,6 +36,15 @@ const setAccountActivation = async ({ userId, isActive, role }) =>
     },
     { new: true }
   ).select("-password -otp -otpExpiresAt");
+
+const toSlug = (value = "") =>
+  String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+const isValidId = (id) => /^[a-f\d]{24}$/i.test(id);
 
 // =======================================
 // DASHBOARD
@@ -562,6 +572,141 @@ exports.deleteUser = async (req, res) => {
     return res.status(200).json({ success: true, message: "User deleted (soft)", data: user });
   } catch (error) {
     console.error("deleteUser error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// =======================================
+// CATEGORY MANAGEMENT
+// =======================================
+
+// GET /admin/categories?status=all&search=&page=1&limit=20
+exports.getCategories = async (req, res) => {
+  try {
+    const { status = "all", search = "" } = req.query;
+    const { page, limit, skip } = paginate(req.query);
+    const filter = {};
+
+    if (status === "active") filter.isActive = true;
+    if (status === "inactive") filter.isActive = false;
+
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [{ name: regex }, { slug: regex }, { description: regex }];
+    }
+
+    const [categories, total] = await Promise.all([
+      Category.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Category.countDocuments(filter),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: categories,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    console.error("getCategories error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// POST /admin/categories
+exports.createCategory = async (req, res) => {
+  try {
+    const name = req.body.name?.trim();
+    const slug = toSlug(req.body.slug || name);
+
+    if (!name || !slug) {
+      return res.status(400).json({ success: false, message: "A category name is required." });
+    }
+
+    const existingCategory = await Category.findOne({
+      $or: [{ name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") }, { slug }],
+    });
+
+    if (existingCategory) {
+      return res.status(409).json({ success: false, message: "A category with this name or slug already exists." });
+    }
+
+    const category = await Category.create({
+      name,
+      slug,
+      description: req.body.description?.trim() || "",
+      image: req.body.image?.trim() || "",
+    });
+
+    return res.status(201).json({ success: true, message: "Category created successfully.", data: category });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ success: false, message: "A category with this name or slug already exists." });
+    }
+    console.error("createCategory error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// PUT /admin/categories/:id
+exports.updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ success: false, message: "Invalid category ID." });
+
+    const updates = {};
+    if (typeof req.body.name === "string") {
+      const name = req.body.name.trim();
+      if (!name) return res.status(400).json({ success: false, message: "A category name is required." });
+      updates.name = name;
+    }
+    if (typeof req.body.slug === "string") {
+      const slug = toSlug(req.body.slug);
+      if (!slug) return res.status(400).json({ success: false, message: "A valid category slug is required." });
+      updates.slug = slug;
+    }
+    if (typeof req.body.description === "string") updates.description = req.body.description.trim();
+    if (typeof req.body.image === "string") updates.image = req.body.image.trim();
+
+    if (!Object.keys(updates).length) {
+      return res.status(400).json({ success: false, message: "Provide at least one category field to update." });
+    }
+
+    const duplicateFilter = { _id: { $ne: id }, $or: [] };
+    if (updates.name) duplicateFilter.$or.push({ name: new RegExp(`^${updates.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") });
+    if (updates.slug) duplicateFilter.$or.push({ slug: updates.slug });
+    if (duplicateFilter.$or.length && await Category.exists(duplicateFilter)) {
+      return res.status(409).json({ success: false, message: "A category with this name or slug already exists." });
+    }
+
+    const category = await Category.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
+    if (!category) return res.status(404).json({ success: false, message: "Category not found." });
+
+    return res.status(200).json({ success: true, message: "Category updated successfully.", data: category });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).json({ success: false, message: "A category with this name or slug already exists." });
+    console.error("updateCategory error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// PATCH /admin/categories/:id/status
+exports.updateCategoryStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ success: false, message: "Invalid category ID." });
+    if (typeof req.body.isActive !== "boolean") {
+      return res.status(400).json({ success: false, message: "isActive must be a boolean." });
+    }
+
+    const category = await Category.findByIdAndUpdate(id, { isActive: req.body.isActive }, { new: true });
+    if (!category) return res.status(404).json({ success: false, message: "Category not found." });
+
+    return res.status(200).json({
+      success: true,
+      message: `Category ${category.isActive ? "activated" : "deactivated"} successfully.`,
+      data: category,
+    });
+  } catch (error) {
+    console.error("updateCategoryStatus error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
