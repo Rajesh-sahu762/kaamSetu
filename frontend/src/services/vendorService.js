@@ -196,3 +196,50 @@ export const reportReview = async (reviewId, reason) => {
 
   }
 };
+
+
+// =======================================
+// Earnings
+// =======================================
+
+export const getVendorEarnings = async () => {
+  try {
+    const response = await api.get("/vendor/earnings");
+
+    return response.data;
+
+  } catch (error) {
+
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+
+  }
+};
+
+export const getVendorTransactions = async (params = {}) => {
+  try {
+
+    const response = await api.get(
+      "/vendor/transactions",
+      {
+        params,
+      }
+    );
+
+    return response.data;
+
+  } catch (error) {
+
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+
+  }
+};

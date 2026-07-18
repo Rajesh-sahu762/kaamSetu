@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import Fade from "@/components/common/Fade";
+
+import {
+  getVendorEarnings,
+  getVendorTransactions,
+} from "@/services/vendorService";
 
 import {
   T,
@@ -17,38 +22,76 @@ import {
 } from "lucide-react";
 
 
-const EARNINGS = {
-
-  total: "₹12,48,650",
-
-  thisMonth: "₹82,450",
-
-  pending: "₹18,200",
-
-  completed: "₹10,96,400",
-
-  growth: "+18%",
-
-};
-
-const NEXT_SETTLEMENT = {
-
-  amount: "₹18,200",
-
-  date: "Tomorrow",
-
-  bank: "HDFC Bank",
-
-  account: "****4532",
-
-};
-
 
 export default function Earnings() {
 
 const bp = useBreakpoint();
 
-const [earnings] = useState(EARNINGS);
+const [earnings, setEarnings] = useState(null);
+
+const [transactions, setTransactions] = useState([]);
+
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+
+  const fetchDashboard = async () => {
+  try {
+    setLoading(true);
+
+    const [earningsRes, transactionRes] = await Promise.all([
+      getVendorEarnings(),
+      getVendorTransactions({
+        page: 1,
+        limit: 5,
+      }),
+    ]);
+
+    if (earningsRes.success) {
+      setEarnings(earningsRes.data);
+    }
+
+    if (transactionRes.success) {
+      setTransactions(transactionRes.data);
+    }
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  fetchDashboard();
+
+}, []);
+
+if (loading) {
+
+  return (
+
+    <div
+      style={{
+        padding: 30,
+      }}
+    >
+
+      Loading Earnings...
+
+    </div>
+
+  );
+
+}
+
+if (!earnings) {
+  return (
+    <div style={{ padding: 30 }}>
+      Unable to load earnings.
+    </div>
+  );
+}
+
 
 return (
 
@@ -131,47 +174,10 @@ fontWeight:700,
 
 >
 
-{earnings.thisMonth}
+₹{earnings?.thisMonthEarnings?.toLocaleString("en-IN") || 0}
 
 </h1>
 
-<div
-
-style={{
-
-marginTop:14,
-
-display:"inline-flex",
-
-alignItems:"center",
-
-gap:8,
-
-padding:"7px 12px",
-
-background:"rgba(255,255,255,.08)",
-
-borderRadius:999,
-
-}}
-
->
-
-<TrendingUp
-
-size={17}
-
-color={T.green}
-
-/>
-
-<span>
-
-{earnings.growth} Compared to last month
-
-</span>
-
-</div>
 
 </div>
 
@@ -239,56 +245,43 @@ marginTop:24,
 }}
 
 >
-    {[
+    {
+ [
+  {
+    title: "Lifetime Earnings",
+    value: `₹${(
+      earnings?.totalEarnings || 0
+    ).toLocaleString("en-IN")}`,
+    icon: Wallet,
+    color: T.bronze,
+  },
 
-{
+  {
+    title: "This Month",
+    value: `₹${(
+      earnings?.thisMonthEarnings || 0
+    ).toLocaleString("en-IN")}`,
+    icon: TrendingUp,
+    color: T.green,
+  },
 
-title:"Lifetime Earnings",
+  {
+    title: "Pending Settlement",
+    value: `₹${(
+      earnings?.pendingSettlement || 0
+    ).toLocaleString("en-IN")}`,
+    icon: CalendarClock,
+    color: T.amber,
+  },
 
-value:earnings.total,
-
-icon:Wallet,
-
-color:T.bronze,
-
-},
-
-{
-
-title:"This Month",
-
-value:earnings.thisMonth,
-
-icon:TrendingUp,
-
-color:T.green,
-
-},
-
-{
-
-title:"Pending",
-
-value:earnings.pending,
-
-icon:CalendarClock,
-
-color:T.amber,
-
-},
-
-{
-
-title:"Completed",
-
-value:earnings.completed,
-
-icon:CircleCheckBig,
-
-color:T.green,
-
-},
-
+  {
+    title: "Settled Amount",
+    value: `₹${(
+      earnings?.completedSettlement || 0
+    ).toLocaleString("en-IN")}`,
+    icon: CircleCheckBig,
+    color: T.green,
+  },
 ].map((card)=>(
 
 <div
@@ -428,7 +421,9 @@ fontWeight:700,
 }}
 >
 
-{NEXT_SETTLEMENT.amount}
+₹{(
+  earnings?.pendingSettlement || 0
+).toLocaleString("en-IN")}
 
 </h1>
 
@@ -440,8 +435,7 @@ lineHeight:1.7,
 }}
 >
 
-Your next automatic bank settlement is scheduled for tomorrow.
-
+Your pending settlements will be transferred after the settlement process is completed.
 </p>
 
 <div
@@ -467,8 +461,11 @@ size={18}
 color={T.green}
 />
 
-Auto Settlement Enabled
-
+{
+  earnings?.pendingSettlement > 0
+    ? "Settlement Processing"
+    : "No Pending Settlement"
+}
 </div>
 
 </div>
@@ -524,7 +521,7 @@ fontWeight:600,
 }}
 >
 
-{NEXT_SETTLEMENT.date}
+Pending
 
 </div>
 
@@ -550,7 +547,7 @@ fontWeight:600,
 }}
 >
 
-{NEXT_SETTLEMENT.bank}
+{Vendor.bankDetails.bankName}
 
 </div>
 
@@ -576,7 +573,10 @@ fontWeight:600,
 }}
 >
 
-{NEXT_SETTLEMENT.account}
+const maskedAccount =
+accountNumber
+? `******${accountNumber.slice(-4)}`
+: "Not Added";
 
 </div>
 
@@ -718,7 +718,7 @@ Waiting...
 
 </Fade>
 
-
+{/* part 3 */}
 <Fade delay={0.28}>
 
 <div
@@ -1034,6 +1034,7 @@ color:T.slateGray,
 </div>
 
 </Fade>
+{/* part 4 */}
 
 <Fade delay={0.42}>
 
@@ -1232,29 +1233,8 @@ gap:14,
 }}
 >
 
-{[
 {
-title:"Settlement Received",
-amount:"+ ₹18,200",
-type:"Credit",
-color:T.green,
-},
-
-{
-title:"Platform Commission",
-amount:"- ₹1,820",
-type:"Debit",
-color:T.red,
-},
-
-{
-title:"GST Deduction",
-amount:"- ₹327",
-type:"Tax",
-color:T.amber,
-},
-
-].map((item)=>(
+transactions?.map((transaction) => (
 
 <div
 key={item.title}
@@ -1482,14 +1462,11 @@ gap:18,
 >
 
 {[
-["Gross Revenue","₹12,48,650"],
+  ["Gross Revenue", `₹${earnings?.grossRevenue?.toLocaleString() || 0}`],
 
-["Platform Commission","₹1,24,865"],
+  ["Platform Commission", `₹${earnings?.totalCommission?.toLocaleString() || 0}`],
 
-["GST","₹22,475"],
-
-["Net Earnings","₹11,01,310"],
-
+  ["Net Earnings", `₹${earnings?.netEarnings?.toLocaleString() || 0}`],
 ].map(([label,value])=>(
 
 <div

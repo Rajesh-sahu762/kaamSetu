@@ -4,8 +4,8 @@ const Service = require("../models/service");
 const Review = require("../models/review");
 const Booking = require("../models/booking");
 const Transaction = require("../models/transaction");
-const Category = require("../models/category")
-const Notification = require("../models/notification")
+const Category = require("../models/category");
+const Notification = require("../models/notification");
 const path = require("path");
 const { deleteFile } = require("../utils/fileHelper");
 
@@ -20,7 +20,7 @@ const getVendorProfile = async (req, res) => {
     // User Details
     // ==========================
     const user = await User.findById(userId).select(
-      "-password -otp -otpExpiresAt -googleId -facebookId -__v"
+      "-password -otp -otpExpiresAt -googleId -facebookId -__v",
     );
 
     if (!user) {
@@ -47,129 +47,119 @@ const getVendorProfile = async (req, res) => {
     // ==========================
 
     const [
-  totalServices,
-  totalReviews,
-  completedBookings,
-  pendingBookings,
-  ratingResult,
-  earnings,
-   portfolio,
-] = await Promise.all([
-  Service.countDocuments({
-    vendorId: vendor._id,
-  }),
-  
-
-  Review.countDocuments({
-    vendorId: vendor._id,
-  }),
-
-  Booking.countDocuments({
-    vendorId: vendor._id,
-    status: "completed",
-  }),
-
-  Booking.countDocuments({
-    vendorId: vendor._id,
-    status: "pending",
-  }),
-
-  Review.aggregate([
-    {
-      $match: {
+      totalServices,
+      totalReviews,
+      completedBookings,
+      pendingBookings,
+      ratingResult,
+      earnings,
+      portfolio,
+    ] = await Promise.all([
+      Service.countDocuments({
         vendorId: vendor._id,
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        averageRating: {
-          $avg: "$rating",
-        },
-      },
-    },
-  ]),
+      }),
 
-  Transaction.aggregate([
-    {
-      $match: {
+      Review.countDocuments({
+        vendorId: vendor._id,
+      }),
+
+      Booking.countDocuments({
         vendorId: vendor._id,
         status: "completed",
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        totalEarnings: {
-          $sum: "$amount", // future me vendorAmount kar denge
+      }),
+
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "pending",
+      }),
+
+      Review.aggregate([
+        {
+          $match: {
+            vendorId: vendor._id,
+          },
         },
-      },
-    },
-  ]),
+        {
+          $group: {
+            _id: null,
+            averageRating: {
+              $avg: "$rating",
+            },
+          },
+        },
+      ]),
 
-  Service.find(
-  { vendorId: vendor._id },
-  {
-    serviceName: 1,
-    coverImage: 1,
-    images: 1,
-    rating: 1,
-    totalBookings: 1,
-  }
-),
+      Transaction.aggregate([
+        {
+          $match: {
+            vendorId: vendor._id,
+            status: "completed",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalEarnings: {
+              $sum: "$amount", // future me vendorAmount kar denge
+            },
+          },
+        },
+      ]),
 
+      Service.find(
+        { vendorId: vendor._id },
+        {
+          serviceName: 1,
+          coverImage: 1,
+          images: 1,
+          rating: 1,
+          totalBookings: 1,
+        },
+      ),
+    ]);
 
-]);
+    const averageRating =
+      ratingResult.length > 0
+        ? Number(ratingResult[0].averageRating.toFixed(1))
+        : 0;
 
+    const totalEarnings = earnings.length > 0 ? earnings[0].totalEarnings : 0;
 
+    const profileCompletion =
+      ([
+        user.profileImage,
+        vendor.bio,
+        vendor.skills?.length,
+        vendor.serviceAreas?.length,
+        vendor.bankDetails?.bankName,
+        vendor.aadhaarImage,
+        vendor.panImage,
+      ].filter(Boolean).length /
+        7) *
+      100;
 
-const averageRating =
-  ratingResult.length > 0
-    ? Number(ratingResult[0].averageRating.toFixed(1))
-    : 0;
+    const businessHealth = Math.round(
+      (profileCompletion +
+        averageRating * 20 +
+        (portfolio.length > 0 ? 100 : 40)) /
+        3,
+    );
 
-const totalEarnings =
-  earnings.length > 0
-    ? earnings[0].totalEarnings
-    : 0;
+    const aiSuggestions = [];
 
-const profileCompletion =
-  (
-    [
-      user.profileImage,
-      vendor.bio,
-      vendor.skills?.length,
-      vendor.serviceAreas?.length,
-      vendor.bankDetails?.bankName,
-      vendor.aadhaarImage,
-      vendor.panImage,
-    ].filter(Boolean).length / 7
-  ) * 100;
+    if (!user.profileImage) aiSuggestions.push("Upload a profile photo.");
 
-const businessHealth = Math.round(
-  (
-    profileCompletion +
-    averageRating * 20 +
-    (portfolio.length > 0 ? 100 : 40)
-  ) / 3
-);
+    if (!vendor.skills?.length)
+      aiSuggestions.push("Add your professional skills.");
 
-const aiSuggestions = [];
+    if (!vendor.bankDetails?.bankName)
+      aiSuggestions.push("Complete your bank details.");
 
-if (!user.profileImage)
-  aiSuggestions.push("Upload a profile photo.");
+    if (!portfolio.length)
+      aiSuggestions.push("Add service images to your portfolio.");
 
-if (!vendor.skills?.length)
-  aiSuggestions.push("Add your professional skills.");
-
-if (!vendor.bankDetails?.bankName)
-  aiSuggestions.push("Complete your bank details.");
-
-if (!portfolio.length)
-  aiSuggestions.push("Add service images to your portfolio.");
-
-if (!vendor.serviceAreas?.length)
-  aiSuggestions.push("Add your service areas.");
+    if (!vendor.serviceAreas?.length)
+      aiSuggestions.push("Add your service areas.");
 
     // ==========================
     // Response
@@ -179,26 +169,25 @@ if (!vendor.serviceAreas?.length)
       success: true,
       message: "Vendor profile fetched successfully",
 
-     data: {
-  user,
+      data: {
+        user,
 
-  vendor,
+        vendor,
 
-  stats: {
-    averageRating,
-    totalReviews,
-    totalServices,
-    completedBookings,
-    pendingBookings,
-    totalEarnings,
-    businessHealth,
-    aiSuggestions,
-  },
-  profileCompletion,
+        stats: {
+          averageRating,
+          totalReviews,
+          totalServices,
+          completedBookings,
+          pendingBookings,
+          totalEarnings,
+          businessHealth,
+          aiSuggestions,
+        },
+        profileCompletion,
 
-  portfolio,
-}
-
+        portfolio,
+      },
     });
   } catch (error) {
     console.log(error);
@@ -209,7 +198,6 @@ if (!vendor.serviceAreas?.length)
     });
   }
 };
-
 
 const updateProfileImage = async (req, res) => {
   try {
@@ -249,7 +237,7 @@ const updateProfileImage = async (req, res) => {
         "..",
         "uploads",
         "profile",
-        user.profileImage
+        user.profileImage,
       );
 
       deleteFile(oldImagePath);
@@ -272,16 +260,13 @@ const updateProfileImage = async (req, res) => {
       message: "Profile image updated successfully.",
       profileImage: user.profileImage,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
 
@@ -315,7 +300,7 @@ const updateVendorProfile = async (req, res) => {
     // ===========================
 
     const user = await User.findById(userId).select(
-      "-password -otp -otpExpiresAt -googleId -facebookId -__v"
+      "-password -otp -otpExpiresAt -googleId -facebookId -__v",
     );
 
     if (!user) {
@@ -352,38 +337,27 @@ const updateVendorProfile = async (req, res) => {
     // Vendor Update
     // ===========================
 
-    if (businessName !== undefined)
-      vendor.businessName = businessName;
+    if (businessName !== undefined) vendor.businessName = businessName;
 
-    if (businessType !== undefined)
-      vendor.businessType = businessType;
+    if (businessType !== undefined) vendor.businessType = businessType;
 
-    if (experience !== undefined)
-      vendor.experience = experience;
+    if (experience !== undefined) vendor.experience = experience;
 
-    if (bio !== undefined)
-      vendor.bio = bio;
+    if (bio !== undefined) vendor.bio = bio;
 
-    if (address !== undefined)
-      vendor.address = address;
+    if (address !== undefined) vendor.address = address;
 
-    if (city !== undefined)
-      vendor.city = city;
+    if (city !== undefined) vendor.city = city;
 
-    if (state !== undefined)
-      vendor.state = state;
+    if (state !== undefined) vendor.state = state;
 
-    if (pincode !== undefined)
-      vendor.pincode = pincode;
+    if (pincode !== undefined) vendor.pincode = pincode;
 
-    if (radius !== undefined)
-      vendor.radius = radius;
+    if (radius !== undefined) vendor.radius = radius;
 
-    if (skills !== undefined)
-      vendor.skills = skills;
+    if (skills !== undefined) vendor.skills = skills;
 
-    if (bankDetails !== undefined)
-      vendor.bankDetails = bankDetails;
+    if (bankDetails !== undefined) vendor.bankDetails = bankDetails;
 
     await vendor.save();
 
@@ -400,29 +374,24 @@ const updateVendorProfile = async (req, res) => {
         vendor,
       },
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
-
 
 // =======================================
 // Services Controllers
 // =======================================
 
-
 const addService = async (req, res) => {
   try {
     const { userId } = req.user;
-    const images = req.files?.map(file => file.filename) || [];
+    const images = req.files?.map((file) => file.filename) || [];
     const {
       categoryId,
       serviceScope,
@@ -431,7 +400,6 @@ const addService = async (req, res) => {
       priceType,
       startingPrice,
       duration,
-      
     } = req.body;
 
     // ==========================
@@ -482,17 +450,15 @@ const addService = async (req, res) => {
     // Duplicate Service
     // ==========================
 
-const existingService = await Service.findOne({
+    const existingService = await Service.findOne({
+      vendorId: vendor._id,
 
-vendorId:vendor._id,
+      categoryId,
 
-categoryId,
-
-serviceName:{
-    $regex:new RegExp(`^${serviceName.trim()}$`,"i")
-}
-
-});
+      serviceName: {
+        $regex: new RegExp(`^${serviceName.trim()}$`, "i"),
+      },
+    });
     if (existingService) {
       return res.status(400).json({
         success: false,
@@ -501,67 +467,63 @@ serviceName:{
     }
 
     // ==========================
-// Generate Unique Slug
-// ==========================
+    // Generate Unique Slug
+    // ==========================
 
-let slug = serviceName
-  .trim()
-  .toLowerCase()
-  .replace(/[^a-z0-9\s-]/g, "")
-  .replace(/\s+/g, "-");
+    let slug = serviceName
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-");
 
-const slugExists = await Service.findOne({ slug });
+    const slugExists = await Service.findOne({ slug });
 
-if (slugExists) {
-  slug = `${slug}-${Date.now().toString().slice(-6)}`;
-}
+    if (slugExists) {
+      slug = `${slug}-${Date.now().toString().slice(-6)}`;
+    }
 
     // ==========================
     // Create Service
     // ==========================
 
-   const service = await Service.create({
-  vendorId: vendor._id,
+    const service = await Service.create({
+      vendorId: vendor._id,
 
-  categoryId,
-  
-  serviceScope,
+      categoryId,
 
-  serviceName: serviceName.trim(),
+      serviceScope,
 
-  slug,
+      serviceName: serviceName.trim(),
 
-  description,
+      slug,
 
-  images,
+      description,
 
-coverImage: images[0] || "",
+      images,
 
-  priceType,
+      coverImage: images[0] || "",
 
-  startingPrice,
+      priceType,
 
-  duration,
-});
+      startingPrice,
+
+      duration,
+    });
 
     return res.status(201).json({
       success: true,
       message: "Service added successfully",
       data: service,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
-
 
 const getVendorServices = async (req, res) => {
   try {
@@ -589,16 +551,13 @@ const getVendorServices = async (req, res) => {
       message: "Services fetched successfully",
       data: services,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
 
@@ -667,72 +626,66 @@ const updateService = async (req, res) => {
     // Duplicate Service Check
     // ==========================
 
-if (serviceName) {
+    if (serviceName) {
+      const existingService = await Service.findOne({
+        vendorId: vendor._id,
+        serviceName: serviceName.trim(),
+        _id: { $ne: id },
+      });
 
-  const existingService = await Service.findOne({
-    vendorId: vendor._id,
-    serviceName: serviceName.trim(),
-    _id: { $ne: id },
-  });
+      if (existingService) {
+        return res.status(400).json({
+          success: false,
+          message: "Service already exists",
+        });
+      }
 
-  if (existingService) {
-    return res.status(400).json({
-      success: false,
-      message: "Service already exists",
-    });
-  }
+      service.serviceName = serviceName.trim();
 
-  service.serviceName = serviceName.trim();
+      let slug = serviceName
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-");
 
-  let slug = serviceName
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-");
+      const slugExists = await Service.findOne({
+        slug,
+        _id: { $ne: id },
+      });
 
-  const slugExists = await Service.findOne({
-    slug,
-    _id: { $ne: id },
-  });
+      if (slugExists) {
+        slug = `${slug}-${Date.now().toString().slice(-6)}`;
+      }
 
-  if (slugExists) {
-    slug = `${slug}-${Date.now().toString().slice(-6)}`;
-  }
+      service.slug = slug;
+    }
+    if (description !== undefined) service.description = description;
 
-  service.slug = slug;
-}
-    if (description !== undefined)
-      service.description = description;
+    if (priceType !== undefined) service.priceType = priceType;
 
-    if (priceType !== undefined)
-      service.priceType = priceType;
+    if (startingPrice !== undefined) service.startingPrice = startingPrice;
 
-    if (startingPrice !== undefined)
-      service.startingPrice = startingPrice;
-
-    if (duration !== undefined)
-      service.duration = duration;
+    if (duration !== undefined) service.duration = duration;
 
     await service.save();
 
-    const updatedService = await Service.findById(service._id)
-      .populate("categoryId", "name slug");
+    const updatedService = await Service.findById(service._id).populate(
+      "categoryId",
+      "name slug",
+    );
 
     return res.status(200).json({
       success: true,
       message: "Service updated successfully",
       data: updatedService,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
 
@@ -787,22 +740,18 @@ const deleteService = async (req, res) => {
       success: true,
       message: "Service deleted successfully",
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
 
 const toggleServiceStatus = async (req, res) => {
   try {
-
     const { userId } = req.user;
     const { id } = req.params;
 
@@ -838,30 +787,24 @@ const toggleServiceStatus = async (req, res) => {
       } successfully`,
       data: service,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
-
 
 // =======================================
 // Booking Controllers
 // =======================================
 
 const getVendorBookings = async (req, res) => {
-  
   try {
-  
     const { userId } = req.user;
-console.log(req.user);
+    console.log(req.user);
     const {
       page = 1,
       limit = 10,
@@ -966,66 +909,59 @@ console.log(req.user);
     // ==========================
 
     const bookings = await Booking.find(filter)
-      .populate(
-        "customerId",
-        "fullName mobile profileImage"
-      )
-      .populate(
-        "serviceId",
-        "serviceName coverImage startingPrice duration"
-      )
+      .populate("customerId", "fullName mobile profileImage")
+      .populate("serviceId", "serviceName coverImage startingPrice duration")
       .sort(sortOption)
       .skip(skip)
       .limit(pageSize);
 
-    const totalBookings =
-      await Booking.countDocuments(filter);
+    const totalBookings = await Booking.countDocuments(filter);
 
-      console.log(bookings);
+    console.log(bookings);
 
-      const [
-  total,
-  pending,
-  accepted,
-  inProgress,
-  completed,
-  cancelled,
-  rejected,
-] = await Promise.all([
-  Booking.countDocuments({
-    vendorId: vendor._id,
-  }),
+    const [
+      total,
+      pending,
+      accepted,
+      inProgress,
+      completed,
+      cancelled,
+      rejected,
+    ] = await Promise.all([
+      Booking.countDocuments({
+        vendorId: vendor._id,
+      }),
 
-  Booking.countDocuments({
-    vendorId: vendor._id,
-    status: "pending",
-  }),
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "pending",
+      }),
 
-  Booking.countDocuments({
-    vendorId: vendor._id,
-    status: "accepted",
-  }),
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "accepted",
+      }),
 
-  Booking.countDocuments({
-    vendorId: vendor._id,
-    status: "in_progress",
-  }),
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "in_progress",
+      }),
 
-  Booking.countDocuments({
-    vendorId: vendor._id,
-    status: "completed",
-  }),
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "completed",
+      }),
 
-  Booking.countDocuments({
-    vendorId: vendor._id,
-    status: "cancelled",
-  }),
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "cancelled",
+      }),
 
-  Booking.countDocuments({
-    vendorId: vendor._id,
-    status: "rejected",
-  }),
-]);
+      Booking.countDocuments({
+        vendorId: vendor._id,
+        status: "rejected",
+      }),
+    ]);
     // ==========================
     // Response
     // ==========================
@@ -1036,30 +972,26 @@ console.log(req.user);
 
       data: bookings,
 
-      stats:{
+      stats: {
+        total,
 
-total,
+        pending,
 
-pending,
+        accepted,
 
-accepted,
+        inProgress,
 
-inProgress,
+        completed,
 
-completed,
+        cancelled,
 
-cancelled,
-
-rejected
-
-},
+        rejected,
+      },
 
       pagination: {
         currentPage,
 
-        totalPages: Math.ceil(
-          totalBookings / pageSize
-        ),
+        totalPages: Math.ceil(totalBookings / pageSize),
 
         totalBookings,
 
@@ -1102,10 +1034,7 @@ const getVendorBookingById = async (req, res) => {
       _id: bookingId,
       vendorId: vendor._id,
     })
-      .populate(
-        "customerId",
-        "fullName email mobile profileImage"
-      )
+      .populate("customerId", "fullName email mobile profileImage")
       .populate(
         "serviceId",
         `
@@ -1116,7 +1045,7 @@ const getVendorBookingById = async (req, res) => {
         priceType
         coverImage
         images
-        `
+        `,
       );
 
     if (!booking) {
@@ -1135,16 +1064,13 @@ const getVendorBookingById = async (req, res) => {
       message: "Booking fetched successfully",
       data: booking,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
 
@@ -1207,15 +1133,11 @@ const updateBookingStatus = async (req, res) => {
     // ==========================
 
     if (booking.status === "completed") {
-
-      await Service.findByIdAndUpdate(
-  booking.serviceId,
-  {
-    $inc: {
-      totalBookings: 1,
-    },
-  }
-);
+      await Service.findByIdAndUpdate(booking.serviceId, {
+        $inc: {
+          totalBookings: 1,
+        },
+      });
 
       return res.status(400).json({
         success: false,
@@ -1267,49 +1189,48 @@ const updateBookingStatus = async (req, res) => {
 
     await booking.save();
 
-
     // ==========================
-// Create Notification
-// ==========================
+    // Create Notification
+    // ==========================
 
-const statusMessages = {
-  accepted: {
-    title: "Booking Accepted",
-    message: `Your booking ${booking.bookingNumber} has been accepted by the vendor.`,
-  },
+    const statusMessages = {
+      accepted: {
+        title: "Booking Accepted",
+        message: `Your booking ${booking.bookingNumber} has been accepted by the vendor.`,
+      },
 
-  rejected: {
-    title: "Booking Rejected",
-    message: `Unfortunately your booking ${booking.bookingNumber} was rejected.`,
-  },
+      rejected: {
+        title: "Booking Rejected",
+        message: `Unfortunately your booking ${booking.bookingNumber} was rejected.`,
+      },
 
-  in_progress: {
-    title: "Service Started",
-    message: `Your service for booking ${booking.bookingNumber} is now in progress.`,
-  },
+      in_progress: {
+        title: "Service Started",
+        message: `Your service for booking ${booking.bookingNumber} is now in progress.`,
+      },
 
-  completed: {
-    title: "Service Completed",
-    message: `Your booking ${booking.bookingNumber} has been completed successfully.`,
-  },
+      completed: {
+        title: "Service Completed",
+        message: `Your booking ${booking.bookingNumber} has been completed successfully.`,
+      },
 
-  cancelled: {
-    title: "Booking Cancelled",
-    message: `Your booking ${booking.bookingNumber} has been cancelled.`,
-  },
-};
+      cancelled: {
+        title: "Booking Cancelled",
+        message: `Your booking ${booking.bookingNumber} has been cancelled.`,
+      },
+    };
 
-const notification = statusMessages[status];
+    const notification = statusMessages[status];
 
-if (notification) {
-  await Notification.create({
-    userId: booking.customerId,
-    title: notification.title,
-    message: notification.message,
-    type: "booking",
-    referenceId: booking._id,
-  });
-}
+    if (notification) {
+      await Notification.create({
+        userId: booking.customerId,
+        title: notification.title,
+        message: notification.message,
+        type: "booking",
+        referenceId: booking._id,
+      });
+    }
 
     // ==========================
     // Response
@@ -1320,16 +1241,13 @@ if (notification) {
       message: "Booking status updated successfully.",
       data: booking,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
 
@@ -1339,14 +1257,13 @@ if (notification) {
 
 const getCategories = async (req, res) => {
   try {
-
     const categories = await Category.find(
       { isActive: true },
       {
         name: 1,
         slug: 1,
         image: 1,
-      }
+      },
     ).sort({ name: 1 });
 
     return res.status(200).json({
@@ -1354,19 +1271,15 @@ const getCategories = async (req, res) => {
       message: "Categories fetched successfully",
       data: categories,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
-
 
 // =======================================
 // Get Vendor Reviews
@@ -1374,7 +1287,6 @@ const getCategories = async (req, res) => {
 
 const getVendorReviews = async (req, res) => {
   try {
-
     const { userId } = req.user;
 
     const page = Number(req.query.page) || 1;
@@ -1413,24 +1325,15 @@ const getVendorReviews = async (req, res) => {
       .sort({ createdAt: -1 });
 
     if (search) {
-
       const keyword = search.toLowerCase();
 
       reviews = reviews.filter((review) => {
+        const customerName = review.customerId?.fullName?.toLowerCase() || "";
 
-        const customerName =
-          review.customerId?.fullName?.toLowerCase() || "";
+        const serviceName = review.serviceId?.serviceName?.toLowerCase() || "";
 
-        const serviceName =
-          review.serviceId?.serviceName?.toLowerCase() || "";
-
-        return (
-          customerName.includes(keyword) ||
-          serviceName.includes(keyword)
-        );
-
+        return customerName.includes(keyword) || serviceName.includes(keyword);
       });
-
     }
 
     const totalReviews = reviews.length;
@@ -1440,17 +1343,13 @@ const getVendorReviews = async (req, res) => {
     const averageRating =
       totalReviews > 0
         ? (
-            reviews.reduce((sum, item) => sum + item.rating, 0) /
-            totalReviews
+            reviews.reduce((sum, item) => sum + item.rating, 0) / totalReviews
           ).toFixed(1)
         : 0;
 
-    const pendingReplies = reviews.filter(
-      (item) => !item.vendorReply
-    ).length;
+    const pendingReplies = reviews.filter((item) => !item.vendorReply).length;
 
     const ratingDistribution = {
-
       5: reviews.filter((item) => item.rating === 5).length,
 
       4: reviews.filter((item) => item.rating === 4).length,
@@ -1460,7 +1359,6 @@ const getVendorReviews = async (req, res) => {
       2: reviews.filter((item) => item.rating === 2).length,
 
       1: reviews.filter((item) => item.rating === 1).length,
-
     };
 
     return res.status(200).json({
@@ -1470,7 +1368,6 @@ const getVendorReviews = async (req, res) => {
       data: paginatedReviews,
 
       stats: {
-
         totalReviews,
 
         averageRating,
@@ -1478,11 +1375,9 @@ const getVendorReviews = async (req, res) => {
         pendingReplies,
 
         ratingDistribution,
-
       },
 
       pagination: {
-
         currentPage: page,
 
         totalPages: Math.ceil(totalReviews / limit),
@@ -1492,20 +1387,15 @@ const getVendorReviews = async (req, res) => {
         hasNextPage: page * limit < totalReviews,
 
         hasPrevPage: page > 1,
-
       },
-
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
 
@@ -1515,7 +1405,6 @@ const getVendorReviews = async (req, res) => {
 
 const replyReview = async (req, res) => {
   try {
-
     const { userId } = req.user;
 
     const { id } = req.params;
@@ -1569,16 +1458,13 @@ const replyReview = async (req, res) => {
       message: "Reply saved successfully.",
       data: review,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
 
@@ -1588,7 +1474,6 @@ const replyReview = async (req, res) => {
 
 const reportReview = async (req, res) => {
   try {
-
     const { userId } = req.user;
 
     const { id } = req.params;
@@ -1632,21 +1517,20 @@ const reportReview = async (req, res) => {
       });
     }
 
-
     const allowedReasons = [
-  "Spam",
-  "Fake Review",
-  "Abusive Language",
-  "Wrong Information",
-  "Other",
-];
+      "Spam",
+      "Fake Review",
+      "Abusive Language",
+      "Wrong Information",
+      "Other",
+    ];
 
-if (!allowedReasons.includes(reason)) {
-  return res.status(400).json({
-    success: false,
-    message: "Invalid report reason.",
-  });
-}
+    if (!allowedReasons.includes(reason)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid report reason.",
+      });
+    }
 
     review.isReported = true;
 
@@ -1660,19 +1544,15 @@ if (!allowedReasons.includes(reason)) {
       success: true,
       message: "Review reported successfully.",
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
-
 
 // =======================================
 // Vendor Earnings
@@ -1702,7 +1582,7 @@ const getVendorEarnings = async (req, res) => {
     const startOfMonth = new Date(
       new Date().getFullYear(),
       new Date().getMonth(),
-      1
+      1,
     );
 
     const [
@@ -1710,8 +1590,10 @@ const getVendorEarnings = async (req, res) => {
       monthly,
       pendingSettlement,
       completedSettlement,
+      recentTransactions,
+      pendingSettlements,
+      monthlyAnalytics,
     ] = await Promise.all([
-
       Transaction.aggregate([
         {
           $match: {
@@ -1790,44 +1672,154 @@ const getVendorEarnings = async (req, res) => {
           },
         },
       ]),
+
+      Transaction.find({
+        vendorId: vendor._id,
+        status: "completed",
+      })
+        .populate({
+          path: "bookingId",
+          select: "bookingNumber bookingDate serviceId",
+          populate: {
+            path: "serviceId",
+            select: "serviceName",
+          },
+        })
+        .populate("customerId", "fullName profileImage")
+        .sort({
+          createdAt: -1,
+        })
+        .limit(5),
+
+      Transaction.find({
+        vendorId: vendor._id,
+        status: "completed",
+        settlementStatus: {
+          $in: ["pending", "processing"],
+        },
+      })
+        .populate({
+          path: "bookingId",
+          select: "bookingNumber serviceId",
+          populate: {
+            path: "serviceId",
+            select: "serviceName",
+          },
+        })
+        .sort({
+          createdAt: -1,
+        }),
+
+      Transaction.aggregate([
+        {
+          $match: {
+            vendorId: vendor._id,
+            status: "completed",
+          },
+        },
+        {
+          $group: {
+            _id: {
+              year: {
+                $year: "$createdAt",
+              },
+              month: {
+                $month: "$createdAt",
+              },
+            },
+            earnings: {
+              $sum: "$vendorAmount",
+            },
+            transactions: {
+              $sum: 1,
+            },
+          },
+        },
+        {
+          $sort: {
+            "_id.year": 1,
+            "_id.month": 1,
+          },
+        },
+      ]),
     ]);
 
     return res.status(200).json({
       success: true,
       message: "Vendor earnings fetched successfully.",
       data: {
-        totalEarnings:
-          summary[0]?.totalEarnings || 0,
+        totalEarnings: summary[0]?.totalEarnings || 0,
 
-        thisMonthEarnings:
-          monthly[0]?.thisMonthEarnings || 0,
+        thisMonthEarnings: monthly[0]?.thisMonthEarnings || 0,
 
-        pendingSettlement:
-          pendingSettlement[0]?.pendingSettlement || 0,
+        pendingSettlement: pendingSettlement[0]?.pendingSettlement || 0,
 
-        completedSettlement:
-          completedSettlement[0]?.completedSettlement || 0,
+        completedSettlement: completedSettlement[0]?.completedSettlement || 0,
 
-        totalCommission:
-          summary[0]?.totalCommission || 0,
+        totalCommission: summary[0]?.totalCommission || 0,
 
-        totalTransactions:
-          summary[0]?.totalTransactions || 0,
+        totalTransactions: summary[0]?.totalTransactions || 0,
+
+        recentTransactions: recentTransactions.map((item) => ({
+          transactionId: item._id,
+
+          bookingNumber: item.bookingId?.bookingNumber || "-",
+
+          bookingDate: item.bookingId?.bookingDate || null,
+
+          customerName: item.customerId?.fullName || "-",
+
+          customerImage: item.customerId?.profileImage || "",
+
+          serviceName: item.bookingId?.serviceId?.serviceName || "-",
+
+          amount: item.vendorAmount,
+
+          paymentMethod: item.paymentMethod,
+
+          paymentStatus: item.status,
+
+          settlementStatus: item.settlementStatus,
+
+          createdAt: item.createdAt,
+        })),
+        pendingSettlements: pendingSettlements.map((item) => ({
+          transactionId: item._id,
+
+          bookingNumber: item.bookingId?.bookingNumber || "-",
+
+          serviceName: item.bookingId?.serviceId?.serviceName || "-",
+
+          amount: item.vendorAmount,
+
+          settlementStatus: item.settlementStatus,
+        })),
+
+        monthlyAnalytics: monthlyAnalytics.map((item) => ({
+          year: item._id.year,
+
+          monthName: item._id.month,
+
+          earnings: item.earnings,
+
+          transactions: item.transactions,
+        })),
+
+        grossRevenue: summary[0]?.totalEarnings || 0,
+
+        netEarnings:
+          (summary[0]?.totalEarnings || 0) - (summary[0]?.totalCommission || 0),
       },
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
-
 
 // =======================================
 // Vendor Transactions
@@ -1835,7 +1827,6 @@ const getVendorEarnings = async (req, res) => {
 
 const getVendorTransactions = async (req, res) => {
   try {
-
     const { userId } = req.user;
 
     const {
@@ -1886,7 +1877,6 @@ const getVendorTransactions = async (req, res) => {
     // ==========================
 
     if (search.trim()) {
-
       const customers = await User.find({
         fullName: {
           $regex: search.trim(),
@@ -1908,27 +1898,21 @@ const getVendorTransactions = async (req, res) => {
     };
 
     if (sort === "oldest") {
-
       sortOption = {
         createdAt: 1,
       };
-
     }
 
     if (sort === "amountHigh") {
-
       sortOption = {
         amount: -1,
       };
-
     }
 
     if (sort === "amountLow") {
-
       sortOption = {
         amount: 1,
       };
-
     }
 
     // ==========================
@@ -1947,15 +1931,9 @@ const getVendorTransactions = async (req, res) => {
 
     const transactions = await Transaction.find(filter)
 
-      .populate(
-        "customerId",
-        "fullName profileImage mobile"
-      )
+      .populate("customerId", "fullName profileImage mobile")
 
-      .populate(
-        "bookingId",
-        "bookingNumber bookingDate"
-      )
+      .populate("bookingId", "bookingNumber bookingDate")
 
       .sort(sortOption)
 
@@ -1963,15 +1941,13 @@ const getVendorTransactions = async (req, res) => {
 
       .limit(pageSize);
 
-    const totalTransactions =
-      await Transaction.countDocuments(filter);
+    const totalTransactions = await Transaction.countDocuments(filter);
 
     // ==========================
     // Response
     // ==========================
 
     return res.status(200).json({
-
       success: true,
 
       message: "Transactions fetched successfully.",
@@ -1979,33 +1955,24 @@ const getVendorTransactions = async (req, res) => {
       data: transactions,
 
       pagination: {
-
         currentPage,
 
-        totalPages: Math.ceil(
-          totalTransactions / pageSize
-        ),
+        totalPages: Math.ceil(totalTransactions / pageSize),
 
         totalTransactions,
 
         pageSize,
-
       },
-
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
-
   }
 };
-
 
 module.exports = {
   getVendorProfile,
@@ -2025,5 +1992,4 @@ module.exports = {
   reportReview,
   getVendorEarnings,
   getVendorTransactions,
-  
 };
