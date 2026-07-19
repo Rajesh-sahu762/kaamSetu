@@ -710,3 +710,85 @@ exports.updateCategoryStatus = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+// =======================================
+// SERVICE MANAGEMENT
+// =======================================
+
+// GET /admin/services?status=all&category=&search=&page=1&limit=20
+exports.getServices = async (req, res) => {
+  try {
+    const { status = "all", category = "", search = "" } = req.query;
+    const { page, limit, skip } = paginate(req.query);
+    const filter = {};
+
+    if (status === "active") filter.isActive = true;
+    if (status === "inactive") filter.isActive = false;
+    if (category && isValidId(category)) filter.categoryId = category;
+
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [{ serviceName: regex }, { slug: regex }, { description: regex }];
+    }
+
+    const [services, total] = await Promise.all([
+      Service.find(filter)
+        .populate("vendorId", "businessName city state")
+        .populate("categoryId", "name slug")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Service.countDocuments(filter),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: services,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    console.error("getServices error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// PATCH /admin/services/:id/status
+exports.updateServiceStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ success: false, message: "Invalid service ID." });
+    if (typeof req.body.isActive !== "boolean") {
+      return res.status(400).json({ success: false, message: "isActive must be a boolean." });
+    }
+
+    const service = await Service.findByIdAndUpdate(id, { isActive: req.body.isActive }, { new: true })
+      .populate("vendorId", "businessName city state")
+      .populate("categoryId", "name slug");
+    if (!service) return res.status(404).json({ success: false, message: "Service not found." });
+
+    return res.status(200).json({
+      success: true,
+      message: `Service ${service.isActive ? "activated" : "deactivated"} successfully.`,
+      data: service,
+    });
+  } catch (error) {
+    console.error("updateServiceStatus error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// DELETE /admin/services/:id
+exports.deleteServiceListing = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ success: false, message: "Invalid service ID." });
+
+    const service = await Service.findByIdAndDelete(id);
+    if (!service) return res.status(404).json({ success: false, message: "Service not found." });
+
+    return res.status(200).json({ success: true, message: "Service removed successfully." });
+  } catch (error) {
+    console.error("deleteServiceListing error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
