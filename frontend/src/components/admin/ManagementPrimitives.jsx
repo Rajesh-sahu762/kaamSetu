@@ -5,9 +5,9 @@ export const surface = { background: T.white, border: `1px solid ${T.border}`, b
 
 export const StatusBadge = ({ value }) => {
   const status = String(value || "pending").toLowerCase();
-  const config = ["active", "approved", "completed", "verified"].includes(status)
+  const config = ["active", "approved", "completed", "verified", "clean", "resolved"].includes(status)
     ? { color: T.green, background: T.greenDim }
-    : ["suspended", "rejected", "inactive"].includes(status)
+    : ["suspended", "rejected", "inactive", "reported", "flagged"].includes(status)
       ? { color: T.red, background: T.redDim }
       : { color: T.amber, background: T.amberDim };
   return <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 8px", borderRadius: 999, color: config.color, background: config.background, textTransform: "capitalize", fontSize: 10, fontWeight: 750, whiteSpace: "nowrap" }}><span style={{ width: 5, height: 5, borderRadius: "50%", background: config.color }} />{status}</span>;

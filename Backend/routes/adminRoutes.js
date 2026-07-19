@@ -27,6 +27,12 @@ const {
   getServices,
   updateServiceStatus,
   deleteServiceListing,
+  getReviews,
+  resolveReviewReport,
+  deleteReview,
+  getTransactions,
+  updateSettlementStatus,
+  updateTransactionStatus,
 } = require("../controllers/adminController");
 
 // Every route below requires a valid token AND role === "admin"
@@ -73,5 +79,19 @@ router.patch("/categories/:id/status", updateCategoryStatus);
 router.get("/services", getServices);
 router.patch("/services/:id/status", updateServiceStatus);
 router.delete("/services/:id", deleteServiceListing);
+
+// =======================================
+// Review Management
+// =======================================
+router.get("/reviews", getReviews);
+router.patch("/reviews/:id/resolve-report", resolveReviewReport);
+router.delete("/reviews/:id", deleteReview);
+
+// =======================================
+// Transaction / Payment Management
+// =======================================
+router.get("/transactions", getTransactions);
+router.patch("/transactions/:id/settlement", updateSettlementStatus);
+router.patch("/transactions/:id/status", updateTransactionStatus);
 
 module.exports = router;

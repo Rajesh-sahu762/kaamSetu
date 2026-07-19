@@ -792,3 +792,345 @@ exports.deleteServiceListing = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+// =======================================
+// REVIEW MANAGEMENT
+// =======================================
+
+// GET /admin/reviews?rating=all&reported=all&search=&page=1&limit=20
+exports.getReviews = async (req, res) => {
+  try {
+    const { rating = "all", reported = "all", search = "" } = req.query;
+    const { page, limit, skip } = paginate(req.query);
+
+    const match = {};
+    if (rating !== "all" && [1, 2, 3, 4, 5].includes(Number(rating))) {
+      match.rating = Number(rating);
+    }
+    if (reported === "reported") match.isReported = true;
+    if (reported === "clean") match.isReported = { $ne: true };
+
+    const pipeline = [
+      { $match: match },
+      {
+        $lookup: {
+          from: "users",
+          localField: "customerId",
+          foreignField: "_id",
+          as: "customer",
+        },
+      },
+      { $unwind: { path: "$customer", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "vendors",
+          localField: "vendorId",
+          foreignField: "_id",
+          as: "vendor",
+        },
+      },
+      { $unwind: { path: "$vendor", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "services",
+          localField: "serviceId",
+          foreignField: "_id",
+          as: "service",
+        },
+      },
+      { $unwind: { path: "$service", preserveNullAndEmptyArrays: true } },
+    ];
+
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+      pipeline.push({
+        $match: {
+          $or: [
+            { review: regex },
+            { reportReason: regex },
+            { "customer.fullName": regex },
+            { "vendor.businessName": regex },
+            { "service.serviceName": regex },
+          ],
+        },
+      });
+    }
+
+    pipeline.push({
+      $facet: {
+        data: [
+          { $sort: { createdAt: -1 } },
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              rating: 1,
+              review: 1,
+              vendorReply: 1,
+              vendorRepliedAt: 1,
+              isReported: 1,
+              reportReason: 1,
+              reportedAt: 1,
+              createdAt: 1,
+              "customer._id": 1,
+              "customer.fullName": 1,
+              "customer.email": 1,
+              "vendor._id": 1,
+              "vendor.businessName": 1,
+              "service._id": 1,
+              "service.serviceName": 1,
+            },
+          },
+        ],
+        total: [{ $count: "count" }],
+      },
+    });
+
+    const [result] = await Review.aggregate(pipeline);
+    const reviews = result?.data || [];
+    const total = result?.total?.[0]?.count || 0;
+
+    return res.status(200).json({
+      success: true,
+      data: reviews,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    console.error("getReviews error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// PATCH /admin/reviews/:id/resolve-report
+exports.resolveReviewReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ success: false, message: "Invalid review ID." });
+
+    const review = await Review.findByIdAndUpdate(
+      id,
+      { isReported: false, reportReason: "", reportedAt: null },
+      { new: true }
+    );
+    if (!review) return res.status(404).json({ success: false, message: "Review not found." });
+
+    return res.status(200).json({ success: true, message: "Report dismissed. The review remains published.", data: review });
+  } catch (error) {
+    console.error("resolveReviewReport error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// DELETE /admin/reviews/:id
+exports.deleteReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ success: false, message: "Invalid review ID." });
+
+    const review = await Review.findByIdAndDelete(id);
+    if (!review) return res.status(404).json({ success: false, message: "Review not found." });
+
+    return res.status(200).json({ success: true, message: "Review removed successfully." });
+  } catch (error) {
+    console.error("deleteReview error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// =======================================
+// TRANSACTION / PAYMENT MANAGEMENT
+// =======================================
+
+const TRANSACTION_STATUSES = ["pending", "completed", "failed", "refunded"];
+const SETTLEMENT_STATUSES = ["pending", "processing", "settled"];
+const PAYMENT_METHODS = ["cash", "card", "online"];
+
+// GET /admin/transactions?status=all&settlement=all&method=all&search=&page=1&limit=20
+exports.getTransactions = async (req, res) => {
+  try {
+    const { status = "all", settlement = "all", method = "all", search = "" } = req.query;
+    const { page, limit, skip } = paginate(req.query);
+
+    const match = {};
+    if (status !== "all" && TRANSACTION_STATUSES.includes(status)) match.status = status;
+    if (settlement !== "all" && SETTLEMENT_STATUSES.includes(settlement)) match.settlementStatus = settlement;
+    if (method !== "all" && PAYMENT_METHODS.includes(method)) match.paymentMethod = method;
+
+    const pipeline = [
+      { $match: match },
+      {
+        $lookup: {
+          from: "users",
+          localField: "customerId",
+          foreignField: "_id",
+          as: "customer",
+        },
+      },
+      { $unwind: { path: "$customer", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "vendors",
+          localField: "vendorId",
+          foreignField: "_id",
+          as: "vendor",
+        },
+      },
+      { $unwind: { path: "$vendor", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "bookings",
+          localField: "bookingId",
+          foreignField: "_id",
+          as: "booking",
+        },
+      },
+      { $unwind: { path: "$booking", preserveNullAndEmptyArrays: true } },
+    ];
+
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+      pipeline.push({
+        $match: {
+          $or: [
+            { gatewayTransactionId: regex },
+            { gatewayOrderId: regex },
+            { "customer.fullName": regex },
+            { "vendor.businessName": regex },
+            { "booking.bookingNumber": regex },
+          ],
+        },
+      });
+    }
+
+    pipeline.push({
+      $facet: {
+        data: [
+          { $sort: { createdAt: -1 } },
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              amount: 1,
+              vendorAmount: 1,
+              commission: 1,
+              commissionRate: 1,
+              currency: 1,
+              status: 1,
+              settlementStatus: 1,
+              paymentMethod: 1,
+              paymentGateway: 1,
+              gatewayTransactionId: 1,
+              gatewayOrderId: 1,
+              remarks: 1,
+              createdAt: 1,
+              "customer._id": 1,
+              "customer.fullName": 1,
+              "customer.mobile": 1,
+              "vendor._id": 1,
+              "vendor.businessName": 1,
+              "booking._id": 1,
+              "booking.bookingNumber": 1,
+              "booking.bookingDate": 1,
+            },
+          },
+        ],
+        summary: [
+          {
+            $group: {
+              _id: null,
+              totalAmount: { $sum: "$amount" },
+              totalCommission: { $sum: "$commission" },
+              totalVendorAmount: { $sum: "$vendorAmount" },
+              pendingSettlementAmount: {
+                $sum: { $cond: [{ $ne: ["$settlementStatus", "settled"] }, "$vendorAmount", 0] },
+              },
+              completedCount: { $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] } },
+              refundedCount: { $sum: { $cond: [{ $eq: ["$status", "refunded"] }, 1, 0] } },
+              failedCount: { $sum: { $cond: [{ $eq: ["$status", "failed"] }, 1, 0] } },
+            },
+          },
+        ],
+        total: [{ $count: "count" }],
+      },
+    });
+
+    const [result] = await Transaction.aggregate(pipeline);
+    const transactions = result?.data || [];
+    const total = result?.total?.[0]?.count || 0;
+    const summary = result?.summary?.[0] || {
+      totalAmount: 0,
+      totalCommission: 0,
+      totalVendorAmount: 0,
+      pendingSettlementAmount: 0,
+      completedCount: 0,
+      refundedCount: 0,
+      failedCount: 0,
+    };
+
+    return res.status(200).json({
+      success: true,
+      data: transactions,
+      summary,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    console.error("getTransactions error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// PATCH /admin/transactions/:id/settlement
+exports.updateSettlementStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ success: false, message: "Invalid transaction ID." });
+    if (!SETTLEMENT_STATUSES.includes(req.body.settlementStatus)) {
+      return res.status(400).json({ success: false, message: "A valid settlement status is required." });
+    }
+
+    const transaction = await Transaction.findByIdAndUpdate(
+      id,
+      { settlementStatus: req.body.settlementStatus },
+      { new: true }
+    );
+    if (!transaction) return res.status(404).json({ success: false, message: "Transaction not found." });
+
+    return res.status(200).json({
+      success: true,
+      message: `Payout marked as ${transaction.settlementStatus}.`,
+      data: transaction,
+    });
+  } catch (error) {
+    console.error("updateSettlementStatus error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// PATCH /admin/transactions/:id/status
+exports.updateTransactionStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ success: false, message: "Invalid transaction ID." });
+    if (!TRANSACTION_STATUSES.includes(req.body.status)) {
+      return res.status(400).json({ success: false, message: "A valid transaction status is required." });
+    }
+    if (req.body.status === "refunded" && !req.body.remarks?.trim()) {
+      return res.status(400).json({ success: false, message: "A remark is required when marking a transaction as refunded." });
+    }
+
+    const updates = { status: req.body.status };
+    if (typeof req.body.remarks === "string") updates.remarks = req.body.remarks.trim();
+
+    const transaction = await Transaction.findByIdAndUpdate(id, updates, { new: true });
+    if (!transaction) return res.status(404).json({ success: false, message: "Transaction not found." });
+
+    return res.status(200).json({
+      success: true,
+      message: `Transaction marked as ${transaction.status}.`,
+      data: transaction,
+    });
+  } catch (error) {
+    console.error("updateTransactionStatus error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
