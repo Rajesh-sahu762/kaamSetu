@@ -1330,3 +1330,225 @@ exports.deleteAdminNotification = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
+// =======================================
+// BOOKING MANAGEMENT
+// =======================================
+
+// GET /admin/bookings?status=all&payment=all&search=&page=1&limit=20
+exports.getBookings = async (req, res) => {
+  try {
+    const {
+      status = "all",
+      payment = "all",
+      search = "",
+    } = req.query;
+
+    const { page, limit, skip } = paginate(req.query);
+
+    const match = {};
+
+    if (
+      status !== "all" &&
+      [
+        "pending",
+        "accepted",
+        "on_the_way",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "rejected",
+      ].includes(status)
+    ) {
+      match.status = status;
+    }
+
+    if (
+      payment !== "all" &&
+      ["pending", "paid", "failed"].includes(payment)
+    ) {
+      match.paymentStatus = payment;
+    }
+
+    const pipeline = [
+      { $match: match },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "customerId",
+          foreignField: "_id",
+          as: "customer",
+        },
+      },
+      {
+        $unwind: {
+          path: "$customer",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "vendors",
+          localField: "vendorId",
+          foreignField: "_id",
+          as: "vendor",
+        },
+      },
+      {
+        $unwind: {
+          path: "$vendor",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "services",
+          localField: "serviceId",
+          foreignField: "_id",
+          as: "service",
+        },
+      },
+      {
+        $unwind: {
+          path: "$service",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ];
+
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+
+      pipeline.push({
+        $match: {
+          $or: [
+            { bookingNumber: regex },
+            { "customer.fullName": regex },
+            { "customer.email": regex },
+            { "vendor.businessName": regex },
+            { "service.serviceName": regex },
+          ],
+        },
+      });
+    }
+
+    pipeline.push({
+      $facet: {
+        data: [
+          { $sort: { createdAt: -1 } },
+          { $skip: skip },
+          { $limit: limit },
+
+          {
+            $project: {
+              bookingNumber: 1,
+              bookingDate: 1,
+              bookingTime: 1,
+
+              status: 1,
+              paymentStatus: 1,
+              paymentMethod: 1,
+
+              totalAmount: 1,
+
+              address: 1,
+
+              createdAt: 1,
+
+              "customer._id": 1,
+              "customer.fullName": 1,
+              "customer.email": 1,
+              "customer.mobile": 1,
+
+              "vendor._id": 1,
+              "vendor.businessName": 1,
+
+              "service._id": 1,
+              "service.serviceName": 1,
+            },
+          },
+        ],
+
+        total: [
+          {
+            $count: "count",
+          },
+        ],
+      },
+    });
+
+    const [result] = await Booking.aggregate(pipeline);
+
+    const bookings = result?.data || [];
+    const total = result?.total?.[0]?.count || 0;
+
+    return res.status(200).json({
+      success: true,
+      data: bookings,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("getBookings error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// GET /admin/bookings/:id
+exports.getBookingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid booking ID.",
+      });
+    }
+
+    const booking = await Booking.findById(id)
+      .populate(
+        "customerId",
+        "fullName email mobile profileImage isActive createdAt"
+      )
+      .populate(
+        "vendorId",
+        "businessName businessType experience city state pincode address"
+      )
+      .populate(
+        "serviceId",
+        "serviceName description price duration categoryId"
+      );
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: booking,
+    });
+  } catch (error) {
+    console.error("getBookingById error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

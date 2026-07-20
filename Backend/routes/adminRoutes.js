@@ -37,6 +37,8 @@ const {
   getNotificationRecipients,
   broadcastNotification,
   deleteAdminNotification,
+  getBookings,
+  getBookingById,
 } = require("../controllers/adminController");
 
 // Every route below requires a valid token AND role === "admin"
@@ -105,5 +107,11 @@ router.get("/notifications", getNotifications);
 router.get("/notifications/recipients", getNotificationRecipients);
 router.post("/notifications/broadcast", broadcastNotification);
 router.delete("/notifications/:id", deleteAdminNotification);
+
+// =======================================
+// Booking Management
+// =======================================
+router.get("/bookings", getBookings);
+router.get("/bookings/:id", getBookingById);
 
 module.exports = router;
