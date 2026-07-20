@@ -9,6 +9,7 @@ import Services from "@/pages/Admin/Services";
 import Reviews from "@/pages/Admin/Reviews";
 import Transactions from "@/pages/Admin/Transactions";
 import Notifications from "@/pages/Admin/Notifications";
+import BookingManagement from "@/pages/Admin/Bookings";
 
 const adminRoutes = () => (
     <>
@@ -22,6 +23,7 @@ const adminRoutes = () => (
         <Route path="/admin/reviews" element={<Reviews />} />
         <Route path="/admin/transactions" element={<Transactions />} />
           <Route path="/admin/notifications" element={<Notifications />} />
+          <Route path="/admin/bookings" element={<BookingManagement />} />
       </Route>
     </Route>
     
