@@ -5,6 +5,7 @@ const Transaction = require("../models/transaction");
 const Service = require("../models/service");
 const Review = require("../models/review");
 const Category = require("../models/category");
+const Notification = require("../models/notification");
 
 // =======================================
 // Helpers
@@ -1131,6 +1132,201 @@ exports.updateTransactionStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("updateTransactionStatus error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// =======================================
+// NOTIFICATION MANAGEMENT
+// =======================================
+
+const NOTIFICATION_TYPES = ["booking", "payment", "review", "service", "vendor", "system"];
+
+// GET /admin/notifications?type=all&role=all&read=all&search=&page=1&limit=20
+exports.getNotifications = async (req, res) => {
+  try {
+    const { type = "all", role = "all", read = "all", search = "" } = req.query;
+    const { page, limit, skip } = paginate(req.query);
+
+    const match = {};
+    if (type !== "all" && NOTIFICATION_TYPES.includes(type)) match.type = type;
+    if (read === "read") match.isRead = true;
+    if (read === "unread") match.isRead = false;
+
+    const pipeline = [
+      { $match: match },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "recipient",
+        },
+      },
+      { $unwind: { path: "$recipient", preserveNullAndEmptyArrays: true } },
+    ];
+
+    if (role !== "all" && ["customer", "vendor", "admin"].includes(role)) {
+      pipeline.push({ $match: { "recipient.role": role } });
+    }
+
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+      pipeline.push({
+        $match: {
+          $or: [
+            { title: regex },
+            { message: regex },
+            { "recipient.fullName": regex },
+            { "recipient.email": regex },
+          ],
+        },
+      });
+    }
+
+    pipeline.push({
+      $facet: {
+        data: [
+          { $sort: { createdAt: -1 } },
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              title: 1,
+              message: 1,
+              type: 1,
+              isRead: 1,
+              referenceId: 1,
+              createdAt: 1,
+              "recipient._id": 1,
+              "recipient.fullName": 1,
+              "recipient.email": 1,
+              "recipient.role": 1,
+            },
+          },
+        ],
+        summary: [
+          {
+            $group: {
+              _id: null,
+              unreadCount: { $sum: { $cond: [{ $eq: ["$isRead", false] }, 1, 0] } },
+              readCount: { $sum: { $cond: [{ $eq: ["$isRead", true] }, 1, 0] } },
+            },
+          },
+        ],
+        total: [{ $count: "count" }],
+      },
+    });
+
+    const [result] = await Notification.aggregate(pipeline);
+    const notifications = result?.data || [];
+    const total = result?.total?.[0]?.count || 0;
+    const summary = result?.summary?.[0] || { unreadCount: 0, readCount: 0 };
+
+    return res.status(200).json({
+      success: true,
+      data: notifications,
+      summary,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    console.error("getNotifications error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// GET /admin/notifications/recipients?search=&role=all
+// Lightweight lookup used by the compose panel to find a specific recipient.
+exports.getNotificationRecipients = async (req, res) => {
+  try {
+    const { search = "", role = "all" } = req.query;
+    const filter = { isDeleted: { $ne: true } };
+    if (["customer", "vendor", "admin"].includes(role)) filter.role = role;
+
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [{ fullName: regex }, { email: regex }, { mobile: regex }];
+    }
+
+    const users = await User.find(filter)
+      .select("fullName email role")
+      .limit(20)
+      .sort({ fullName: 1 });
+
+    return res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    console.error("getNotificationRecipients error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// POST /admin/notifications/broadcast
+// body: { audience: "all" | "customers" | "vendors" | "specific", userIds: [], title, message, type }
+exports.broadcastNotification = async (req, res) => {
+  try {
+    const { audience, userIds = [], title, message, type = "system" } = req.body;
+
+    if (!title?.trim() || !message?.trim()) {
+      return res.status(400).json({ success: false, message: "A title and message are required." });
+    }
+    if (!NOTIFICATION_TYPES.includes(type)) {
+      return res.status(400).json({ success: false, message: "A valid notification type is required." });
+    }
+
+    const allowedAudiences = ["all", "customers", "vendors", "specific"];
+    if (!allowedAudiences.includes(audience)) {
+      return res.status(400).json({ success: false, message: "A valid audience is required." });
+    }
+
+    let targetIds = [];
+    if (audience === "specific") {
+      if (!Array.isArray(userIds) || !userIds.length || !userIds.every(isValidId)) {
+        return res.status(400).json({ success: false, message: "Select at least one valid recipient." });
+      }
+      targetIds = userIds;
+    } else {
+      const roleFilter =
+        audience === "customers" ? { role: "customer" } : audience === "vendors" ? { role: "vendor" } : {};
+      const recipients = await User.find({ ...roleFilter, isActive: true, isDeleted: { $ne: true } }).select("_id");
+      targetIds = recipients.map((user) => user._id);
+    }
+
+    if (!targetIds.length) {
+      return res.status(404).json({ success: false, message: "No matching recipients were found." });
+    }
+
+    const documents = targetIds.map((userId) => ({
+      userId,
+      title: title.trim(),
+      message: message.trim(),
+      type,
+    }));
+
+    await Notification.insertMany(documents);
+
+    return res.status(201).json({
+      success: true,
+      message: `Notification sent to ${documents.length} recipient${documents.length === 1 ? "" : "s"}.`,
+      data: { sentCount: documents.length },
+    });
+  } catch (error) {
+    console.error("broadcastNotification error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// DELETE /admin/notifications/:id
+exports.deleteAdminNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ success: false, message: "Invalid notification ID." });
+
+    const notification = await Notification.findByIdAndDelete(id);
+    if (!notification) return res.status(404).json({ success: false, message: "Notification not found." });
+
+    return res.status(200).json({ success: true, message: "Notification removed successfully." });
+  } catch (error) {
+    console.error("deleteAdminNotification error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };

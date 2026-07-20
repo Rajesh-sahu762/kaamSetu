@@ -33,6 +33,10 @@ const {
   getTransactions,
   updateSettlementStatus,
   updateTransactionStatus,
+  getNotifications,
+  getNotificationRecipients,
+  broadcastNotification,
+  deleteAdminNotification,
 } = require("../controllers/adminController");
 
 // Every route below requires a valid token AND role === "admin"
@@ -93,5 +97,13 @@ router.delete("/reviews/:id", deleteReview);
 router.get("/transactions", getTransactions);
 router.patch("/transactions/:id/settlement", updateSettlementStatus);
 router.patch("/transactions/:id/status", updateTransactionStatus);
+
+// =======================================
+// Notification Management
+// =======================================
+router.get("/notifications", getNotifications);
+router.get("/notifications/recipients", getNotificationRecipients);
+router.post("/notifications/broadcast", broadcastNotification);
+router.delete("/notifications/:id", deleteAdminNotification);
 
 module.exports = router;

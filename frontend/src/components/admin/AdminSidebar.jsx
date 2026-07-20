@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { BarChart3, ChevronLeft, FolderKanban, LayoutDashboard, LogOut, MessageSquareText, ShieldCheck, Store, Users, Wallet, Wrench, X } from "lucide-react";
+import { BarChart3, Bell, ChevronLeft, FolderKanban, LayoutDashboard, LogOut, MessageSquareText, ShieldCheck, Store, Users, Wallet, Wrench, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "@/context/authContext";
 import { T } from "@/utils/vendorTheme";
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { label: "Services", to: "/admin/services", icon: Wrench },
   { label: "Reviews", to: "/admin/reviews", icon: MessageSquareText },
   { label: "Transactions", to: "/admin/transactions", icon: Wallet },
+  { label: "Notifications", to: "/admin/notifications", icon: Bell },
 ];
 
 const initials = (name = "Admin") =>

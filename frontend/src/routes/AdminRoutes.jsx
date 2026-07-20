@@ -8,6 +8,7 @@ import AdminLayout from "@/layouts/AdminLayout";
 import Services from "@/pages/Admin/Services";
 import Reviews from "@/pages/Admin/Reviews";
 import Transactions from "@/pages/Admin/Transactions";
+import Notifications from "@/pages/Admin/Notifications";
 
 const adminRoutes = () => (
     <>
@@ -20,6 +21,7 @@ const adminRoutes = () => (
         <Route path="/admin/services" element={<Services />} />
         <Route path="/admin/reviews" element={<Reviews />} />
         <Route path="/admin/transactions" element={<Transactions />} />
+          <Route path="/admin/notifications" element={<Notifications />} />
       </Route>
     </Route>
     
