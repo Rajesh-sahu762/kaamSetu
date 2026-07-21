@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 import {
   CalendarDays,
   IndianRupee,
@@ -7,11 +7,11 @@ import {
   User,
   Briefcase,
   X,
-} from "lucide-react";
+} from 'lucide-react';
 
-import api from "@/services/api";
-import { T } from "@/utils/vendorTheme";
-import useBreakpoint from "@/utils/useBreakpoint";
+import api from '@/services/api';
+import { T } from '@/utils/vendorTheme';
+import useBreakpoint from '@/utils/useBreakpoint';
 
 import {
   ActionButton,
@@ -21,23 +21,22 @@ import {
   Pagination,
   StatusBadge,
   surface,
-} from "@/components/admin/ManagementPrimitives";
-
+} from '@/components/admin/ManagementPrimitives';
 
 const formatDate = (value) => {
   const date = new Date(value);
 
   return Number.isNaN(date.getTime())
-    ? "—"
-    : new Intl.DateTimeFormat("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
+    ? '—'
+    : new Intl.DateTimeFormat('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
       }).format(date);
 };
 
 const formatMoney = (value = 0) =>
-  `₹${Number(value || 0).toLocaleString("en-IN")}`;
+  `₹${Number(value || 0).toLocaleString('en-IN')}`;
 
 const BookingDetailModal = ({ booking, onClose }) => {
   if (!booking) return null;
@@ -46,17 +45,17 @@ const BookingDetailModal = ({ booking, onClose }) => {
     color: T.slateGray,
     fontSize: 10,
     fontWeight: 750,
-    textTransform: "uppercase",
-    letterSpacing: ".07em",
+    textTransform: 'uppercase',
+    letterSpacing: '.07em',
   };
 
   const Row = ({ label, children }) => (
     <div
       style={{
-        display: "flex",
-        justifyContent: "space-between",
+        display: 'flex',
+        justifyContent: 'space-between',
         gap: 12,
-        padding: "10px 0",
+        padding: '10px 0',
         borderBottom: `1px solid ${T.border}`,
       }}
     >
@@ -67,7 +66,7 @@ const BookingDetailModal = ({ booking, onClose }) => {
           color: T.slate,
           fontSize: 12,
           fontWeight: 700,
-          textAlign: "right",
+          textAlign: 'right',
         }}
       >
         {children}
@@ -78,33 +77,33 @@ const BookingDetailModal = ({ booking, onClose }) => {
   return (
     <div
       style={{
-        position: "fixed",
+        position: 'fixed',
         inset: 0,
         zIndex: 100,
-        display: "grid",
-        placeItems: "center",
+        display: 'grid',
+        placeItems: 'center',
         padding: 16,
-        background: "rgba(9,20,38,.55)",
-        backdropFilter: "blur(5px)",
+        background: 'rgba(9,20,38,.55)',
+        backdropFilter: 'blur(5px)',
       }}
     >
       <div
         style={{
           width: 560,
-          maxWidth: "100%",
-          maxHeight: "calc(100vh - 32px)",
-          overflowY: "auto",
+          maxWidth: '100%',
+          maxHeight: 'calc(100vh - 32px)',
+          overflowY: 'auto',
           background: T.white,
           borderRadius: 18,
-          boxShadow: "0 28px 65px rgba(9,20,38,.25)",
+          boxShadow: '0 28px 65px rgba(9,20,38,.25)',
         }}
       >
         <div
           style={{
-            padding: "18px 20px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            padding: '18px 20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
             borderBottom: `1px solid ${T.border}`,
           }}
         >
@@ -122,7 +121,7 @@ const BookingDetailModal = ({ booking, onClose }) => {
 
             <p
               style={{
-                margin: "4px 0 0",
+                margin: '4px 0 0',
                 color: T.slateGray,
                 fontSize: 11,
               }}
@@ -136,8 +135,8 @@ const BookingDetailModal = ({ booking, onClose }) => {
             onClick={onClose}
             style={{
               border: 0,
-              background: "transparent",
-              cursor: "pointer",
+              background: 'transparent',
+              cursor: 'pointer',
               color: T.slateGray,
             }}
           >
@@ -147,75 +146,34 @@ const BookingDetailModal = ({ booking, onClose }) => {
 
         <div
           style={{
-            padding: "6px 20px 20px",
+            padding: '6px 20px 20px',
           }}
-        >           <Row label="Customer">
-            {booking.customerId?.fullName || "—"}
-          </Row>
-
-          <Row label="Customer Email">
-            {booking.customerId?.email || "—"}
-          </Row>
-
-          <Row label="Customer Mobile">
-            {booking.customerId?.mobile || "—"}
-          </Row>
-                    <Row label="Vendor">
-            {booking.vendorId?.businessName || "—"}
-          </Row>
-
-          <Row label="Vendor Email">
-            {booking.vendorId?.email || "—"}
-          </Row>
-                    <Row label="Service">
-            {booking.serviceId?.serviceName || "—"}
-          </Row>
-
-          <Row label="Booking Date">
-            {formatDate(booking.bookingDate)}
-          </Row>
-
-          <Row label="Booking Time">
-            {booking.bookingTime || "—"}
-          </Row>
-
-                    <Row label="Status">
+        >
+          {' '}
+          <Row label="Customer">{booking.customerId?.fullName || '—'}</Row>
+          <Row label="Customer Email">{booking.customerId?.email || '—'}</Row>
+          <Row label="Customer Mobile">{booking.customerId?.mobile || '—'}</Row>
+          <Row label="Vendor">{booking.vendorId?.businessName || '—'}</Row>
+          <Row label="Vendor Email">{booking.vendorId?.email || '—'}</Row>
+          <Row label="Service">{booking.serviceId?.serviceName || '—'}</Row>
+          <Row label="Booking Date">{formatDate(booking.bookingDate)}</Row>
+          <Row label="Booking Time">{booking.bookingTime || '—'}</Row>
+          <Row label="Status">
             <StatusBadge value={booking.status} />
           </Row>
-
           <Row label="Payment Status">
             <StatusBadge value={booking.paymentStatus} />
           </Row>
-
-          <Row label="Payment Method">
-            {booking.paymentMethod}
-          </Row>
-
-          <Row label="Amount">
-            {formatMoney(booking.totalAmount)}
-          </Row>
-
-                    <Row label="Address">
-            {booking.address || "—"}
-          </Row>
-
-          <Row label="Notes">
-            {booking.notes || "—"}
-          </Row>
-
-          <Row label="Created">
-            {formatDate(booking.createdAt)}
-          </Row>
-
-                    {booking.status === "cancelled" && (
+          <Row label="Payment Method">{booking.paymentMethod}</Row>
+          <Row label="Amount">{formatMoney(booking.totalAmount)}</Row>
+          <Row label="Address">{booking.address || '—'}</Row>
+          <Row label="Notes">{booking.notes || '—'}</Row>
+          <Row label="Created">{formatDate(booking.createdAt)}</Row>
+          {booking.status === 'cancelled' && (
             <>
-              <Row label="Cancelled By">
-                {booking.cancelledBy || "—"}
-              </Row>
+              <Row label="Cancelled By">{booking.cancelledBy || '—'}</Row>
 
-              <Row label="Reason">
-                {booking.cancelReason || "—"}
-              </Row>
+              <Row label="Reason">{booking.cancelReason || '—'}</Row>
             </>
           )}
         </div>
@@ -230,26 +188,26 @@ const BookingManagement = () => {
   const [bookings, setBookings] = useState([]);
   const [pagination, setPagination] = useState(null);
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
-  const [status, setStatus] = useState("all");
+  const [status, setStatus] = useState('all');
 
-  const [paymentStatus, setPaymentStatus] = useState("all");
+  const [paymentStatus, setPaymentStatus] = useState('all');
 
   const [page, setPage] = useState(1);
 
   const [loading, setLoading] = useState(true);
 
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const [viewing, setViewing] = useState(null);
 
-    const loadBookings = useCallback(async () => {
+  const loadBookings = useCallback(async () => {
     try {
       setLoading(true);
-      setError("");
+      setError('');
 
-      const response = await api.get("/admin/bookings", {
+      const response = await api.get('/admin/bookings', {
         params: {
           page,
           limit: 10,
@@ -263,8 +221,7 @@ const BookingManagement = () => {
       setPagination(response.data.pagination || null);
     } catch (requestError) {
       setError(
-        requestError?.response?.data?.message ||
-          "Could not load bookings."
+        requestError?.response?.data?.message || 'Could not load bookings.'
       );
     } finally {
       setLoading(false);
@@ -298,7 +255,7 @@ const BookingManagement = () => {
 
   const handleViewBooking = async (bookingId) => {
     try {
-      setError("");
+      setError('');
 
       const response = await api.get(`/admin/bookings/${bookingId}`);
 
@@ -306,7 +263,7 @@ const BookingManagement = () => {
     } catch (requestError) {
       setError(
         requestError?.response?.data?.message ||
-          "Could not load booking details."
+          'Could not load booking details.'
       );
     }
   };
@@ -315,22 +272,22 @@ const BookingManagement = () => {
     <main
       style={{
         padding: isMobile
-          ? "18px 14px 36px"
-          : "28px clamp(20px, 3vw, 48px) 48px",
-        minHeight: "100%",
+          ? '18px 14px 36px'
+          : '28px clamp(20px, 3vw, 48px) 48px',
+        minHeight: '100%',
         background: T.ivory,
       }}
     >
       <div
         style={{
           maxWidth: 1500,
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
           gap: 18,
         }}
       >
-                <ManagementHeader
+        <ManagementHeader
           eyebrow="Bookings"
           title="Booking Management"
           description="Monitor all customer bookings across the platform."
@@ -341,21 +298,21 @@ const BookingManagement = () => {
           onRefresh={handleRefresh}
         >
           {[
-            "all",
-            "pending",
-            "accepted",
-            "on_the_way",
-            "in_progress",
-            "completed",
-            "cancelled",
-            "rejected",
+            'all',
+            'pending',
+            'accepted',
+            'on_the_way',
+            'in_progress',
+            'completed',
+            'cancelled',
+            'rejected',
           ].map((item) => (
             <FilterButton
               key={item}
               active={status === item}
               onClick={() => handleStatusFilter(item)}
             >
-              {item.replaceAll("_", " ")}
+              {item.replaceAll('_', ' ')}
             </FilterButton>
           ))}
 
@@ -367,10 +324,10 @@ const BookingManagement = () => {
               borderRadius: 9,
               background: T.white,
               color: T.slate,
-              padding: "8px 10px",
+              padding: '8px 10px',
               fontSize: 11,
               fontWeight: 700,
-              cursor: "pointer",
+              cursor: 'pointer',
             }}
           >
             <option value="all">All Payments</option>
@@ -379,13 +336,13 @@ const BookingManagement = () => {
             <option value="failed">Failed</option>
           </select>
         </ManagementHeader>
-                {error && (
+        {error && (
           <div
             style={{
-              border: "1px solid rgba(239,68,68,.25)",
+              border: '1px solid rgba(239,68,68,.25)',
               background: T.redDim,
               borderRadius: 10,
-              padding: "11px 13px",
+              padding: '11px 13px',
               color: T.red,
               fontSize: 12,
             }}
@@ -394,18 +351,18 @@ const BookingManagement = () => {
           </div>
         )}
 
-                <section
+        <section
           style={{
             ...surface,
-            overflow: "hidden",
+            overflow: 'hidden',
           }}
         >
           <div
             style={{
-              padding: "15px 17px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              padding: '15px 17px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               borderBottom: `1px solid ${T.border}`,
             }}
           >
@@ -428,11 +385,11 @@ const BookingManagement = () => {
               {pagination?.total || 0} bookings
             </span>
           </div>
-                    {loading ? (
+          {loading ? (
             <div
               style={{
                 padding: 56,
-                textAlign: "center",
+                textAlign: 'center',
                 color: T.slateGray,
                 fontSize: 12,
               }}
@@ -441,42 +398,44 @@ const BookingManagement = () => {
             </div>
           ) : bookings.length ? (
             <div
-              style={{
-                // overflowX: "auto",
-              }}
+              style={
+                {
+                  // overflowX: "auto",
+                }
+              }
             >
-                              <table
+              <table
                 style={{
-                  borderCollapse: "collapse",
-                  width: "100%",
+                  borderCollapse: 'collapse',
+                  width: '100%',
                   minWidth: 1200,
                 }}
               >
                 <thead>
                   <tr>
                     {[
-                      "Booking",
-                      "Customer",
-                      "Vendor",
-                      "Service",
-                      "Date",
-                      "Amount",
-                      "Payment",
-                      "Status",
-                      "Actions",
+                      'Booking',
+                      'Customer',
+                      'Vendor',
+                      'Service',
+                      'Date',
+                      'Amount',
+                      'Payment',
+                      'Status',
+                      'Actions',
                     ].map((heading) => (
                       <th
                         key={heading}
                         style={{
-                          padding: "11px 16px",
+                          padding: '11px 16px',
                           color: T.slateGray,
                           background: T.surfaceLow,
                           borderBottom: `1px solid ${T.border}`,
-                          textAlign: "left",
+                          textAlign: 'left',
                           fontSize: 9,
                           fontWeight: 800,
-                          letterSpacing: ".08em",
-                          textTransform: "uppercase",
+                          letterSpacing: '.08em',
+                          textTransform: 'uppercase',
                         }}
                       >
                         {heading}
@@ -488,9 +447,9 @@ const BookingManagement = () => {
                 <tbody>
                   {bookings.map((booking) => (
                     <tr key={booking._id}>
-                                              <td
+                      <td
                         style={{
-                          padding: "13px 16px",
+                          padding: '13px 16px',
                           borderBottom: `1px solid ${T.border}`,
                         }}
                       >
@@ -514,9 +473,9 @@ const BookingManagement = () => {
                           {formatDate(booking.createdAt)}
                         </div>
                       </td>
-                                            <td
+                      <td
                         style={{
-                          padding: "13px 16px",
+                          padding: '13px 16px',
                           borderBottom: `1px solid ${T.border}`,
                         }}
                       >
@@ -527,7 +486,7 @@ const BookingManagement = () => {
                             fontWeight: 700,
                           }}
                         >
-                          {booking.customerId?.fullName || "—"}
+                          {booking.customerId?.fullName || '—'}
                         </div>
 
                         <div
@@ -537,23 +496,23 @@ const BookingManagement = () => {
                             fontSize: 10,
                           }}
                         >
-                          {booking.customerId?.mobile || "—"}
+                          {booking.customerId?.mobile || '—'}
                         </div>
                       </td>
 
-                                            <td
+                      <td
                         style={{
-                          padding: "13px 16px",
+                          padding: '13px 16px',
                           borderBottom: `1px solid ${T.border}`,
                           color: T.slateGray,
                           fontSize: 11,
                         }}
                       >
-                        {booking.vendorId?.businessName || "—"}
+                        {booking.vendorId?.businessName || '—'}
                       </td>
-                                            <td
+                      <td
                         style={{
-                          padding: "13px 16px",
+                          padding: '13px 16px',
                           borderBottom: `1px solid ${T.border}`,
                         }}
                       >
@@ -564,7 +523,7 @@ const BookingManagement = () => {
                             fontWeight: 700,
                           }}
                         >
-                          {booking.serviceId?.serviceName || "—"}
+                          {booking.serviceId?.serviceName || '—'}
                         </div>
 
                         <div
@@ -574,13 +533,13 @@ const BookingManagement = () => {
                             fontSize: 10,
                           }}
                         >
-                          {booking.bookingTime || "—"}
+                          {booking.bookingTime || '—'}
                         </div>
                       </td>
 
-                                            <td
+                      <td
                         style={{
-                          padding: "13px 16px",
+                          padding: '13px 16px',
                           borderBottom: `1px solid ${T.border}`,
                           color: T.slateGray,
                           fontSize: 11,
@@ -589,9 +548,9 @@ const BookingManagement = () => {
                         {formatDate(booking.bookingDate)}
                       </td>
 
-                                            <td
+                      <td
                         style={{
-                          padding: "13px 16px",
+                          padding: '13px 16px',
                           borderBottom: `1px solid ${T.border}`,
                           color: T.slate,
                           fontSize: 11,
@@ -601,19 +560,19 @@ const BookingManagement = () => {
                         <IndianRupee
                           size={11}
                           style={{
-                            verticalAlign: "-1px",
+                            verticalAlign: '-1px',
                             marginRight: 2,
                           }}
                         />
 
-                        {Number(
-                          booking.totalAmount || 0
-                        ).toLocaleString("en-IN")}
+                        {Number(booking.totalAmount || 0).toLocaleString(
+                          'en-IN'
+                        )}
                       </td>
 
-                                            <td
+                      <td
                         style={{
-                          padding: "13px 16px",
+                          padding: '13px 16px',
                           borderBottom: `1px solid ${T.border}`,
                         }}
                       >
@@ -624,31 +583,29 @@ const BookingManagement = () => {
                             marginTop: 5,
                             color: T.slateGray,
                             fontSize: 10,
-                            textTransform: "capitalize",
+                            textTransform: 'capitalize',
                           }}
                         >
                           {booking.paymentMethod}
                         </div>
                       </td>
-                                            <td
+                      <td
                         style={{
-                          padding: "13px 16px",
+                          padding: '13px 16px',
                           borderBottom: `1px solid ${T.border}`,
                         }}
                       >
                         <StatusBadge value={booking.status} />
                       </td>
 
-                                            <td
+                      <td
                         style={{
-                          padding: "13px 16px",
+                          padding: '13px 16px',
                           borderBottom: `1px solid ${T.border}`,
                         }}
                       >
                         <ActionButton
-                          onClick={() =>
-                            handleViewBooking(booking._id)
-                          }
+                          onClick={() => handleViewBooking(booking._id)}
                         >
                           View
                         </ActionButton>
@@ -658,21 +615,15 @@ const BookingManagement = () => {
                 </tbody>
               </table>
             </div>
-                      ) : (
+          ) : (
             <EmptyTable label="No bookings match the selected filters." />
           )}
 
-          <Pagination
-            pagination={pagination}
-            onPageChange={setPage}
-          />
+          <Pagination pagination={pagination} onPageChange={setPage} />
         </section>
       </div>
 
-      <BookingDetailModal
-        booking={viewing}
-        onClose={() => setViewing(null)}
-      />
+      <BookingDetailModal booking={viewing} onClose={() => setViewing(null)} />
     </main>
   );
 };
