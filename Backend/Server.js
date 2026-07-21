@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes')
 const vendorRoutes = require('./routes/vendorRoutes')
 const adminRoutes = require("./routes/adminRoutes");
 const notificationRoutes = require('./routes/notificationRoutes')
+const customerRoutes = require('./routes/customerRoutes')
 const cors = require('cors')
 const transporter = require('./config/mail');
 const paymentRoutes = require("./routes/paymentRoutes");
@@ -32,6 +33,8 @@ app.use('/api/vendor', vendorRoutes)
 app.use("/uploads", express.static("uploads"));
 
 app.use("/api/notifications", notificationRoutes);
+
+app.use("/api/customer", customerRoutes);
 
 app.use("/api/admin", adminRoutes);
 

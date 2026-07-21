@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import {
   Search,
   User,
   Moon,
   Sun,
   Menu,
-  X
+  X,
+  Bell,
+  LayoutDashboard,
+  CalendarCheck,
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
 
 import SearchModal from './SearchModal';
@@ -13,6 +18,8 @@ import SearchModal from './SearchModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useTheme } from '@/context/ThemeContext';
+import { AuthContext } from '@/context/authContext';
+import api from '@/services/api';
 import { Link, useLocation, useNavigate  } from "react-router-dom";
 
 const Navbar = () => {
@@ -24,11 +31,16 @@ const [searchOpen, setSearchOpen] =
   useState(false);
 
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useContext(AuthContext);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef(null);
 
   const location = useLocation();
 
 useEffect(() => {
   setMobileOpen(false);
+  setAccountOpen(false);
 }, [location.pathname]);
 
   useEffect(() => {
@@ -40,6 +52,48 @@ useEffect(() => {
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Live unread notification count for the logged-in customer (reuses the existing self-notifications API)
+  useEffect(() => {
+    if (!user) { setUnreadCount(0); return; }
+    let cancelled = false;
+    const fetchUnread = async () => {
+      try {
+        const response = await api.get('/notifications');
+        if (!cancelled) setUnreadCount(response.data?.unreadCount || 0);
+      } catch {
+        // Silently ignore — the badge simply stays at its last known value.
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [user, location.pathname]);
+
+  // Close the account dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (accountRef.current && !accountRef.current.contains(event.target)) {
+        setAccountOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const initials = (user?.fullName || 'U')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+
+  const handleLogout = () => {
+    logout();
+    setAccountOpen(false);
+    navigate('/login', { replace: true });
+  };
 
 const navLinks = [
   {
@@ -223,16 +277,30 @@ rounded-full
       gap-5
     "
   >
-    <button
-      onClick={() => navigate("/profile")}
-      className="
-        hover:text-[#745A38]
-
-        transition
-      "
-    >
-      <User size={20} />
-    </button>
+    {user && (
+      <button
+        onClick={() => navigate("/notifications")}
+        className="relative hover:text-[#745A38] transition"
+        aria-label="Notifications"
+      >
+        <Bell size={20} />
+        {unreadCount > 0 && (
+          <span
+            className="
+              absolute -top-1.5 -right-1.5
+              min-w-[16px] h-[16px] px-1
+              rounded-full
+              bg-[#745A38] text-white
+              text-[9px] font-bold
+              flex items-center justify-center
+              leading-none
+            "
+          >
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </button>
+    )}
 
     <button
       onClick={() =>
@@ -263,6 +331,90 @@ rounded-full
         <Sun size={20} />
       )}
     </button>
+
+    {user ? (
+      <div className="relative" ref={accountRef}>
+        <button
+          onClick={() => setAccountOpen((open) => !open)}
+          className="
+            flex items-center gap-2
+            pl-1 pr-3 py-1
+            rounded-full
+            border border-theme
+            hover:border-[#745A38]/50
+            transition
+          "
+        >
+          <span
+            className="
+              w-8 h-8 rounded-full
+              bg-gradient-to-br from-[#745A38] to-[#A88A64]
+              text-white text-xs font-bold
+              flex items-center justify-center
+            "
+          >
+            {initials}
+          </span>
+          <ChevronDown size={14} className={`text-muted transition-transform ${accountOpen ? "rotate-180" : ""}`} />
+        </button>
+
+        <AnimatePresence>
+          {accountOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.15 }}
+              className="
+                absolute right-0 top-[calc(100%+10px)]
+                w-56
+                bg-card border border-theme
+                rounded-2xl shadow-theme
+                overflow-hidden
+                z-50
+              "
+            >
+              <div className="px-4 py-3 border-b border-theme">
+                <p className="text-sm font-semibold text-primary truncate">{user.fullName}</p>
+                <p className="text-xs text-muted truncate">{user.email}</p>
+              </div>
+              <button
+                onClick={() => { setAccountOpen(false); navigate("/profile"); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-primary hover:bg-[#745A38]/8 transition"
+              >
+                <LayoutDashboard size={16} /> Dashboard
+              </button>
+              <button
+                onClick={() => { setAccountOpen(false); navigate("/my-bookings"); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-primary hover:bg-[#745A38]/8 transition"
+              >
+                <CalendarCheck size={16} /> My Bookings
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-500/8 transition border-t border-theme"
+              >
+                <LogOut size={16} /> Logout
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    ) : (
+      <button
+        onClick={() => btnClick("login")}
+        className="
+          px-5 py-2
+          rounded-full
+          bg-[#745A38] text-white
+          text-sm font-medium
+          hover:scale-105
+          transition
+        "
+      >
+        Login
+      </button>
+    )}
   </div>
 
   {/* MOBILE */}
@@ -395,12 +547,50 @@ rounded-full
       )}
     </button>
 
+  {user && (
+    <button
+      onClick={() => navigate("/notifications")}
+      className="relative hover:text-[#745A38] transition"
+      aria-label="Notifications"
+    >
+      <Bell size={24} />
+      {unreadCount > 0 && (
+        <span
+          className="
+            absolute -top-1.5 -right-1.5
+            min-w-[16px] h-[16px] px-1
+            rounded-full
+            bg-[#745A38] text-white
+            text-[9px] font-bold
+            flex items-center justify-center
+            leading-none
+          "
+        >
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </span>
+      )}
+    </button>
+  )}
+
   <button
     onClick={() =>
-      navigate("/profile")
+      navigate(user ? "/profile" : "/login")
     }
   >
-    <User size={24} />
+    {user ? (
+      <span
+        className="
+          w-8 h-8 rounded-full
+          bg-gradient-to-br from-[#745A38] to-[#A88A64]
+          text-white text-xs font-bold
+          flex items-center justify-center
+        "
+      >
+        {initials}
+      </span>
+    ) : (
+      <User size={24} />
+    )}
   </button>
 
   <button
@@ -416,7 +606,12 @@ rounded-full
     >
       <Search size={20} />
     </button>
-    
+
+  {user && (
+    <button onClick={handleLogout} className="hover:text-red-500 transition" aria-label="Logout">
+      <LogOut size={22} />
+    </button>
+  )}
 </div>
             </div>
           </motion.div>

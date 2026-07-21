@@ -12,15 +12,57 @@ import {
   Clock3,
 } from 'lucide-react';
 import { AuthContext } from '@/context/authContext';
+import { getDashboardSummary } from '@/services/customerService';
 
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+
+const timeAgo = (value) => {
+  const diffMs = Date.now() - new Date(value).getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} Min${minutes === 1 ? "" : "s"} Ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} Hour${hours === 1 ? "" : "s"} Ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return days === 1 ? "Yesterday" : `${days} Days Ago`;
+  const weeks = Math.floor(days / 7);
+  return `${weeks} Week${weeks === 1 ? "" : "s"} Ago`;
+};
 
 const CustomerProfilePage = () => {
 
-  const { logout } = useContext(AuthContext)
+  const { user, logout } = useContext(AuthContext)
   const navigate = useNavigate();
+
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await getDashboardSummary();
+        if (!cancelled) setSummary(response.data);
+      } catch (error) {
+        console.error("Failed to load dashboard summary:", error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const profile = summary?.profile;
+  const stats = summary?.stats;
+  const recentActivity = summary?.recentActivity || [];
+
+  const displayName = profile?.fullName || user?.fullName || "Customer";
+  const displayEmail = profile?.email || user?.email || "";
+  const displayMobile = profile?.mobile || "";
+  const isVerified = profile?.isVerified ?? true;
+  const avatarInitial = displayName.trim().charAt(0).toUpperCase() || "U";
 
   const handleLogout = () => {
 
@@ -135,14 +177,14 @@ const CustomerProfilePage = () => {
                 font-bold
               "
             >
-              R
+              {avatarInitial}
             </div>
 
             {/* Info */}
 
-            <div className="flex-1">
+            <div className="flex-1 text-center lg:text-left">
               <div
-                className="
+                className={`
                   inline-flex
 
                   items-center
@@ -154,16 +196,14 @@ const CustomerProfilePage = () => {
 
                   rounded-full
 
-                  bg-green-100
-
-                  text-green-700
+                  ${isVerified ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}
 
                   text-sm
                   font-medium
-                "
+                `}
               >
                 <CheckCircle2 size={16} />
-                Verified Customer
+                {isVerified ? "Verified Customer" : "Unverified Customer"}
               </div>
 
               <h1
@@ -176,20 +216,24 @@ const CustomerProfilePage = () => {
                   text-primary
                 "
               >
-                Rajesh Sahu
+                {displayName}
               </h1>
 
-              <p className="mt-2 text-muted">rajesh@gmail.com</p>
+              <p className="mt-2 text-muted">{displayEmail}</p>
 
-              <p className="mt-1 text-muted">+91 9999999999</p>
+              <p className="mt-1 text-muted">{displayMobile}</p>
             </div>
 
             {/* Edit */}
 
             <button
               className="
+                w-full
+                lg:w-auto
+
                 flex
                 items-center
+                justify-center
 
                 gap-2
 
@@ -229,13 +273,13 @@ const CustomerProfilePage = () => {
             mt-8
           "
         >
-          <StatCard number="24" title="Total Bookings" />
+          <StatCard number={loading ? "…" : (stats?.totalBookings ?? 0)} title="Total Bookings" />
 
-          <StatCard number="2" title="Active Services" />
+          <StatCard number={loading ? "…" : (stats?.activeBookings ?? 0)} title="Active Services" />
 
-          <StatCard number="21" title="Completed" />
+          <StatCard number={loading ? "…" : (stats?.completedBookings ?? 0)} title="Completed" />
 
-          <StatCard number="3" title="Saved Addresses" />
+          <StatCard number={loading ? "…" : (stats?.savedAddresses ?? 0)} title="Saved Addresses" />
         </div>
 
         {/* QUICK ACTIONS */}
@@ -330,19 +374,19 @@ const CustomerProfilePage = () => {
               <InfoRow
                 icon={<User size={18} />}
                 label="Full Name"
-                value="Rajesh Sahu"
+                value={displayName}
               />
 
               <InfoRow
                 icon={<Mail size={18} />}
                 label="Email"
-                value="rajesh@gmail.com"
+                value={displayEmail}
               />
 
               <InfoRow
                 icon={<Phone size={18} />}
                 label="Mobile"
-                value="+91 9999999999"
+                value={displayMobile || "—"}
               />
             </div>
           </div>
@@ -375,16 +419,19 @@ const CustomerProfilePage = () => {
             </h2>
 
             <div className="space-y-5">
-              <ActivityItem
-                title="Electrical Repair Booked"
-                time="2 Hours Ago"
-              />
-
-              <ActivityItem title="Booking Completed" time="Yesterday" />
-
-              <ActivityItem title="New Address Added" time="3 Days Ago" />
-
-              <ActivityItem title="Review Submitted" time="1 Week Ago" />
+              {loading ? (
+                <p className="text-muted text-sm">Loading activity…</p>
+              ) : recentActivity.length ? (
+                recentActivity.map((activity) => (
+                  <ActivityItem
+                    key={activity.id}
+                    title={activity.title}
+                    time={timeAgo(activity.time)}
+                  />
+                ))
+              ) : (
+                <p className="text-muted text-sm">No recent activity yet. Book a service to get started.</p>
+              )}
             </div>
           </div>
         </div>
