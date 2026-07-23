@@ -7,54 +7,11 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const experts = [
-  {
-    id: 1,
-    name: "Rajesh Sharma",
-    category: "Electrician",
-    city: "Jaipur",
-    rating: 4.9,
-    experience: "8 Years",
-    jobs: "520+ Jobs",
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43d?w=500",
-  },
-  {
-    id: 2,
-    name: "Amit Verma",
-    category: "Plumber",
-    city: "Udaipur",
-    rating: 4.8,
-    experience: "6 Years",
-    jobs: "410+ Jobs",
-    image:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500",
-  },
-  {
-    id: 3,
-    name: "Vikram Singh",
-    category: "Carpenter",
-    city: "Jodhpur",
-    rating: 4.9,
-    experience: "10 Years",
-    jobs: "680+ Jobs",
-    image:
-      "https://images.unsplash.com/photo-1504593811423-6dd665756598?w=500",
-  },
-  {
-    id: 4,
-    name: "Mohit Patel",
-    category: "AC Repair",
-    city: "Bhilwara",
-    rating: 4.7,
-    experience: "5 Years",
-    jobs: "300+ Jobs",
-    image:
-      "https://images.unsplash.com/photo-1504257432389-52343af06ae3?w=500",
-  },
-];
 
-const FeaturedExperts = () => {
+const FeaturedExperts = ({
+  experts = [],
+  loading,
+}) => {
 
   const navigate =useNavigate();
 
@@ -115,7 +72,7 @@ const FeaturedExperts = () => {
         >
           {experts.map((expert, index) => (
             <motion.div
-            onClick={() => navigate('/expert/:id')}
+            onClick={() => navigate(`/experts/${expert._id}`)}
               key={expert.id}
               initial={{
                 opacity: 0,

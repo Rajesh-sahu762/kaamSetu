@@ -1,43 +1,37 @@
-import { motion } from "framer-motion";
-import {
-  ShieldCheck,
-  BadgeCheck,
-  Clock3,
-  HeadphonesIcon,
-} from "lucide-react";
+import { motion } from 'framer-motion';
+import { ShieldCheck, BadgeCheck, Clock3, HeadphonesIcon } from 'lucide-react';
 
 const features = [
   {
     icon: ShieldCheck,
-    title: "Verified Professionals",
+    title: 'Verified Professionals',
     description:
-      "Every expert goes through document and identity verification before joining the platform.",
+      'Every expert goes through document and identity verification before joining the platform.',
   },
   {
     icon: BadgeCheck,
-    title: "Quality Assured Service",
+    title: 'Quality Assured Service',
     description:
-      "Work with trusted professionals who are rated and reviewed by real customers.",
+      'Work with trusted professionals who are rated and reviewed by real customers.',
   },
   {
     icon: Clock3,
-    title: "Quick Booking",
+    title: 'Quick Booking',
     description:
-      "Book services within minutes and connect with professionals near you instantly.",
+      'Book services within minutes and connect with professionals near you instantly.',
   },
   {
     icon: HeadphonesIcon,
-    title: "Dedicated Support",
+    title: 'Dedicated Support',
     description:
-      "Our support team is always available to help before, during, and after your booking.",
+      'Our support team is always available to help before, during, and after your booking.',
   },
 ];
 
-const WhyChooseKaamSetu = () => {
+const WhyChooseKaamSetu = ({ stats, loading }) => {
   return (
     <section className="py-2 bg-card">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-        
         {/* Section Heading */}
 
         <div className="text-center max-w-3xl mx-auto">
@@ -73,8 +67,8 @@ const WhyChooseKaamSetu = () => {
               leading-8
             "
           >
-            We connect customers with trusted professionals while
-            ensuring quality, transparency and peace of mind.
+            We connect customers with trusted professionals while ensuring
+            quality, transparency and peace of mind.
           </p>
         </div>
 
@@ -201,10 +195,22 @@ const WhyChooseKaamSetu = () => {
             text-center
           "
         >
-          <Stat number="10K+" label="Happy Customers" />
-          <Stat number="2K+" label="Verified Experts" />
-          <Stat number="50+" label="Service Categories" />
-          <Stat number="4.9★" label="Average Rating" />
+          <Stat
+            number={loading ? '--' : `${stats?.happyCustomers || 0}+`}
+            label="Happy Customers"
+          />
+          <Stat
+            number={loading ? '--' : `${stats?.verifiedExperts || 0}+`}
+            label="Verified Experts"
+          />
+          <Stat
+            number={loading ? '--' : `${stats?.serviceCategories || 0}+`}
+            label="Service Categories"
+          />
+          <Stat
+            number={loading ? '--' : `${stats?.averageRating || 0}★`}
+            label="Average Rating"
+          />
         </div>
       </div>
     </section>

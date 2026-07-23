@@ -2,7 +2,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Wrench, Hammer, Paintbrush, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const HeroSection = () => {
+const HeroSection = ({ hero, loading }) => {
   const { scrollY } = useScroll();
   const navigate = useNavigate();
 
@@ -115,7 +115,7 @@ const HeroSection = () => {
               
               <div>
                 <h3 className="text-3xl font-semibold text-primary">
-                  10K+
+                   {loading ? "--" : `${hero?.verifiedExperts || 0}+`}
                 </h3>
                 <p className="text-muted mt-1">
                   Verified Experts
@@ -124,7 +124,7 @@ const HeroSection = () => {
 
               <div>
                 <h3 className="text-3xl font-semibold text-primary">
-                  50K+
+                  {loading ? "--" : `${hero?.jobsCompleted || 0}+`}
                 </h3>
                 <p className="text-muted mt-1">
                   Jobs Completed
@@ -133,7 +133,7 @@ const HeroSection = () => {
 
               <div>
                 <h3 className="text-3xl font-semibold text-primary">
-                  98%
+                  {loading ? "--" : `${hero?.satisfactionRate || 0}%`}
                 </h3>
                 <p className="text-muted mt-1">
                   Satisfaction Rate

@@ -11,54 +11,30 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+// Icon fallback per category name — only used when a category has no image of its own.
+const ICON_BY_NAME = {
+  electrician: Zap,
+  plumber: Wrench,
+  plumbing: Wrench,
+  carpenter: Hammer,
+  carpentry: Hammer,
+  painter: Paintbrush,
+  painting: Paintbrush,
+  "ac repair": Wind,
+  "appliance repair": ShieldCheck,
+  "interior design": Home,
+  cleaning: Sparkles,
+  "home cleaning": Sparkles,
+};
 
-const services = [
-  {
-    icon: Zap,
-    title: "Electrician",
-    desc: "Certified electrical repairs and installations.",
-  },
-  {
-    icon: Wrench,
-    title: "Plumber",
-    desc: "Professional plumbing and maintenance services.",
-  },
-  {
-    icon: Hammer,
-    title: "Carpenter",
-    desc: "Custom furniture and woodwork solutions.",
-  },
-  {
-    icon: Paintbrush,
-    title: "Painter",
-    desc: "Interior and exterior painting experts.",
-  },
-  {
-    icon: Wind,
-    title: "AC Repair",
-    desc: "Fast cooling system repair and servicing.",
-  },
-  {
-    icon: Home,
-    title: "Interior Design",
-    desc: "Transform your home with modern designs.",
-  },
-  {
-    icon: Sparkles,
-    title: "Home Cleaning",
-    desc: "Deep cleaning by trained professionals.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Appliance Repair",
-    desc: "Repair services for all major appliances.",
-  },
-];
+const getIconFor = (name = "") => ICON_BY_NAME[name.trim().toLowerCase()] || Sparkles;
 
-const PopularServices = () => {
+const PopularServices = ({
+    categories = [],
+    loading
+}) => {
 
   const navigate = useNavigate()
-
 
   return (
     <section className="py-22 bg-card">
@@ -106,6 +82,12 @@ const PopularServices = () => {
 
         {/* Services Grid */}
 
+        {!loading && categories.length === 0 && (
+          <p className="mt-10 text-center text-muted">
+            No service categories are available right now. Please check back soon.
+          </p>
+        )}
+
         <div
           className="
             mt-16
@@ -115,17 +97,33 @@ const PopularServices = () => {
             gap-6
           "
         >
-          {services.map((service, index) => {
-            const Icon = service.icon;
+          {loading ? (
+            Array.from({ length: 8 }).map((_, index) => (
+              <div
+                key={index}
+                className="
+                  bg-card border border-theme rounded-2xl p-7
+                  animate-pulse
+                "
+              >
+                <div className="w-14 h-14 rounded-xl bg-[#745A38]/10" />
+                <div className="mt-6 h-5 w-2/3 rounded bg-[#745A38]/10" />
+                <div className="mt-3 h-4 w-full rounded bg-[#745A38]/5" />
+                <div className="mt-3 h-4 w-4/5 rounded bg-[#745A38]/5" />
+              </div>
+            ))
+          ) : (
+            categories.map((category, index) => {
+            const Icon = getIconFor(category.name);
 
             return (
               <motion.div
               onClick={() =>
   navigate(
-    `/services?category=${service.title}`
+    `/services?category=${category.slug}`
   )
 }
-                key={service.title}
+                key={category._id}
                 initial={{
                   opacity: 0,
                   y: 40,
@@ -159,6 +157,18 @@ const PopularServices = () => {
               >
                 {/* Icon */}
 
+             {category.image ? (
+               <div
+                 className="
+                   w-14 h-14
+                   rounded-xl
+                   overflow-hidden
+                   bg-[#745A38]/10
+                 "
+               >
+                 <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
+               </div>
+             ) : (
              <div
   className="
     w-14
@@ -187,6 +197,7 @@ const PopularServices = () => {
                     "
                   />
                 </div>
+             )}
 
                 {/* Content */}
 
@@ -198,7 +209,7 @@ const PopularServices = () => {
                     text-primary
                   "
                 >
-                  {service.title}
+                  {category.name}
                 </h3>
 
                 <p
@@ -209,7 +220,7 @@ const PopularServices = () => {
                     text-sm
                   "
                 >
-                  {service.desc}
+                  {category.description || `Verified ${category.name.toLowerCase()} professionals near you.`}
                 </p>
 
                 {/* Link */}
@@ -236,7 +247,8 @@ const PopularServices = () => {
                 </div>
               </motion.div>
             );
-          })}
+            })
+          )}
         </div>
 
         {/* Bottom CTA */}

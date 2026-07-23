@@ -112,6 +112,9 @@ const navLinks = [
 
 const navigate = useNavigate()
 
+const isActiveLink = (to) =>
+  to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
+
 const btnClick = (type) => {
 
   if (type === "login") {
@@ -186,24 +189,32 @@ rounded-full
 
       items-center
 
-      gap-8
+      gap-1.5
     "
   >
     {navLinks.map((item) => (
       <Link
         key={item.name}
         to={item.to}
-        className="
-          text-sm
+        className={`
+          relative
+          px-4 py-2
 
+          text-sm
+          font-medium
           tracking-wide
 
-          text-muted
+          rounded-full
 
-          hover:text-primary
+          transition-all
+          duration-300
 
-          transition
-        "
+          ${
+            isActiveLink(item.to)
+              ? "text-[#745A38] bg-[#745A38]/10"
+              : "text-muted hover:text-primary hover:bg-[#745A38]/5"
+          }
+        `}
       >
         {item.name}
       </Link>
@@ -301,6 +312,37 @@ rounded-full
         )}
       </button>
     )}
+
+    <button
+      onClick={() => btnClick("vendor")}
+      className="
+        hidden
+        xl:flex
+        items-center
+        gap-1.5
+
+        px-4 py-2
+
+        text-sm font-medium
+
+        rounded-full
+
+        border border-[#745A38]/30
+
+        text-[#745A38]
+
+        hover:bg-[#745A38]
+        hover:text-white
+        hover:border-[#745A38]
+
+        transition-all
+        duration-300
+      "
+    >
+      Become a Pro
+    </button>
+
+    <span className="hidden xl:block w-px h-6 bg-theme" />
 
     <button
       onClick={() =>
@@ -451,8 +493,10 @@ rounded-full
             className="
               fixed
               inset-0
-              bg-card
+              bg-card/98
+              backdrop-blur-2xl
               z-[100]
+              overflow-y-auto
             "
           >
             <div
@@ -462,19 +506,33 @@ rounded-full
                 flex
                 items-center
                 justify-between
+
+                border-b border-theme
               "
             >
               <h2
                 className="
-                  
+                  text-lg
+                  font-semibold
                   tracking-[0.3em]
                 "
               >
-                KAAMSETU
+                <span className="text-primary">KAAM</span>
+                <span className="text-[#745A38]">SETU</span>
               </h2>
 
-              <button onClick={() => setMobileOpen(false)}>
-                <X size={30} />
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="
+                  w-10 h-10
+                  rounded-full
+                  border border-theme
+                  flex items-center justify-center
+                  hover:bg-[#745A38]/10 hover:border-[#745A38]/40
+                  transition
+                "
+              >
+                <X size={20} />
               </button>
             </div>
 
@@ -512,16 +570,34 @@ rounded-full
                 >
                   <Link
                   to={item.to}
-                  className="
+                  className={`
         relative
-        hover:text-primary
         transition
-      "
+        ${isActiveLink(item.to) ? "text-[#745A38]" : "hover:text-primary"}
+      `}
                   >
                   {item.name}
                   </Link>
                 </motion.div>
               ))}
+
+              <motion.button
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: navLinks.length * 0.1 }}
+                onClick={() => { setMobileOpen(false); btnClick("vendor"); }}
+                className="
+                  px-6 py-3
+                  rounded-full
+                  border border-[#745A38]/30
+                  text-[#745A38]
+                  text-base font-medium
+                  hover:bg-[#745A38] hover:text-white hover:border-[#745A38]
+                  transition-all
+                "
+              >
+                Become a Pro
+              </motion.button>
 
              <div
   className="

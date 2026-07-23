@@ -5,3 +5,9 @@ export const getDashboardSummary = async () => {
   const response = await api.get("/customer/dashboard-summary");
   return response.data;
 };
+
+// Home Page
+export const getHomeData = async () => {
+  const response = await api.get("/customer/home");
+  return response.data;
+};
