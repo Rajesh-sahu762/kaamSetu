@@ -241,3 +241,173 @@ reviewStats.length > 0
     });
   }
 };
+
+
+// =======================================
+// GET /api/customer/expert/:vendorId
+// =======================================
+exports.getExpertProfile = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(vendorId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid vendor id",
+      });
+    }
+
+    const [
+      vendor,
+      services,
+      reviews,
+      reviewStats,
+      completedJobs,
+      ratingBreakdown,
+    ] = await Promise.all([
+      Vendor.findOne({
+        _id: vendorId,
+        status: "approved",
+      }).populate({
+        path: "userId",
+        select: "fullName profileImage",
+      }),
+
+      Service.find({
+        vendorId,
+        isActive: true,
+      })
+        .select(
+          "serviceName description startingPrice duration coverImage"
+        )
+        .sort({ serviceName: 1 }),
+
+      Review.find({
+        vendorId,
+        isReported: false,
+      })
+        .populate("customerId", "fullName profileImage")
+        .sort({ createdAt: -1 }),
+
+      Review.aggregate([
+        {
+          $match: {
+            vendorId: new mongoose.Types.ObjectId(vendorId),
+            isReported: false,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            averageRating: {
+              $avg: "$rating",
+            },
+            totalReviews: {
+              $sum: 1,
+            },
+          },
+        },
+      ]),
+
+      Booking.countDocuments({
+        vendorId,
+        status: "completed",
+      }),
+
+      Review.aggregate([
+        {
+          $match: {
+            vendorId: new mongoose.Types.ObjectId(vendorId),
+            isReported: false,
+          },
+        },
+        {
+          $group: {
+            _id: "$rating",
+            count: {
+              $sum: 1,
+            },
+          },
+        },
+      ]),
+    ]);
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Expert not found",
+      });
+    }
+
+    const averageRating =
+      reviewStats.length > 0
+        ? Number(reviewStats[0].averageRating.toFixed(1))
+        : 0;
+
+    const totalReviews =
+      reviewStats.length > 0
+        ? reviewStats[0].totalReviews
+        : 0;
+
+    const breakdown = {
+      5: 0,
+      4: 0,
+      3: 0,
+      2: 0,
+      1: 0,
+    };
+
+    ratingBreakdown.forEach((item) => {
+      breakdown[item._id] = item.count;
+    });
+
+    return res.status(200).json({
+      success: true,
+
+      data: {
+        expert: {
+    _id: vendor._id,
+
+    businessName: vendor.businessName,
+
+    name: vendor.userId.fullName,
+
+    image: vendor.userId.profileImage,
+
+    bio: vendor.bio,
+
+    city: vendor.city,
+
+    state: vendor.state,
+
+    experience: vendor.experience,
+
+    verified: vendor.status === "approved",
+
+    servicesAvailable: services.length,
+},
+
+        stats: {
+          averageRating,
+
+          totalReviews,
+
+          completedJobs,
+        },
+
+        services,
+
+        reviews,
+
+        ratingBreakdown: breakdown,
+      },
+    });
+  } catch (error) {
+    console.error("getExpertProfile:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};

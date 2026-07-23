@@ -11,3 +11,9 @@ export const getHomeData = async () => {
   const response = await api.get("/customer/home");
   return response.data;
 };
+
+// Expert Profile
+export const getExpertProfile = async (vendorId) => {
+  const response = await api.get(`/customer/expert/${vendorId}`);
+  return response.data;
+};

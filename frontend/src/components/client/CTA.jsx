@@ -6,7 +6,10 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const FinalCTA = () => {
+const FinalCTA = ({
+    stats,
+    loading,
+}) => {
   const navigate = useNavigate();
   return (
     <section className="py-15 bg-card">
@@ -214,17 +217,17 @@ const FinalCTA = () => {
               "
             >
               <StatCard
-                value="10K+"
+                value={stats?.verifiedExperts}
                 label="Happy Customers"
               />
 
               <StatCard
-                value="2K+"
+                value={stats?.satisfactionRate}
                 label="Verified Experts"
               />
 
               <StatCard
-                value="50+"
+                value={stats?.customerReviews}
                 label="Service Categories"
               />
 

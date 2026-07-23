@@ -5,31 +5,12 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const testimonials = [
-  {
-    name: "Amit Sharma",
-    city: "Jaipur",
-    rating: 5,
-    review:
-      "Booked an electrician through KaamSetu and the experience was excellent. The professional arrived on time and completed the work perfectly.",
-  },
-  {
-    name: "Priya Verma",
-    city: "Udaipur",
-    rating: 5,
-    review:
-      "The platform made it easy to find a trusted plumber. Transparent pricing and professional service.",
-  },
-  {
-    name: "Rohit Mehta",
-    city: "Bhilwara",
-    rating: 5,
-    review:
-      "Very smooth booking experience. I found a carpenter within minutes and the quality of work exceeded expectations.",
-  },
-];
 
-const Testimonials = () => {
+const Testimonials = ({
+    testimonials = [],
+    stats,
+    loading,
+}) => {
   const navigate = useNavigate()
   return (
     <section className="py-24 bg-card">
@@ -86,12 +67,16 @@ const Testimonials = () => {
           "
         >
           <StatCard
-            number="4.9★"
+            number={loading
+    ? "--"
+    : stats?.averageRating}
             label="Average Rating"
           />
 
           <StatCard
-            number="12K+"
+            number={loading
+    ? "--"
+    : stats?.customerReviews}
             label="Customer Reviews"
           />
 

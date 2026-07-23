@@ -72,7 +72,7 @@ const FeaturedExperts = ({
         >
           {experts.map((expert, index) => (
             <motion.div
-            onClick={() => navigate(`/experts/${expert._id}`)}
+            onClick={() => navigate(`/expert/${expert._id}`)}
               key={expert.id}
               initial={{
                 opacity: 0,

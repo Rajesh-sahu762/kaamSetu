@@ -2,7 +2,11 @@ const express = require("express");
 const router = express.Router();
 
 const verifyToken = require("../middleware/verifyToken");
-const { getDashboardSummary, getHomeData } = require("../controllers/customerController");
+const {
+  getDashboardSummary,
+  getHomeData,
+  getExpertProfile,
+} = require("../controllers/customerController");
 
 // =======================================
 // Customer Dashboard Routes
@@ -10,5 +14,7 @@ const { getDashboardSummary, getHomeData } = require("../controllers/customerCon
 router.get("/dashboard-summary", verifyToken, getDashboardSummary);
 
 router.get("/home", getHomeData);
+
+router.get("/expert/:vendorId", verifyToken, getExpertProfile );
 
 module.exports = router;

@@ -1,32 +1,11 @@
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
-import {
-  Star,
-  MapPin,
-  Briefcase,
-  ShieldCheck,
-  ArrowRight,
-} from "lucide-react";
+import { Star, MapPin, Briefcase, ShieldCheck, ArrowRight } from 'lucide-react';
 
-const ExpertProfileHero = () => {
-  const expert = {
-    id: 1,
-    name: "Rajesh Electric Works",
-    category: "Electrician",
-    location: "Bhilwara, Rajasthan",
-    experience: "8 Years",
-    rating: 4.9,
-    reviews: 245,
-    completedJobs: 1200,
-    verified: true,
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000",
-  };
-
+const ExpertProfileHero = ({ expert, stats, loading }) => {
   return (
     <section className="pt-32 pb-16 bg-theme">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-
         <motion.div
           initial={{
             opacity: 0,
@@ -68,8 +47,12 @@ const ExpertProfileHero = () => {
 
             <div>
               <img
-                src={expert.image}
-                alt={expert.name}
+                src={
+                  expert?.image
+                    ? `/uploads/${expert.image}`
+                    : '/images/default-avatar.png'
+                }
+                alt={expert?.businessName}
                 className="
                   w-full
                   h-[320px]
@@ -109,7 +92,9 @@ const ExpertProfileHero = () => {
                   font-medium
                 "
               >
-                {expert.category}
+                {loading
+  ? "Loading..."
+  : `${expert?.servicesAvailable || 0} Services Available`}
               </span>
 
               {/* Name */}
@@ -126,12 +111,25 @@ const ExpertProfileHero = () => {
                   text-primary
                 "
               >
-                {expert.name}
+                {loading
+  ? "Loading..."
+  : expert?.businessName}
               </h1>
+              <p
+  className="
+    mt-2
+    text-lg
+    text-muted
+  "
+>
+  {loading
+    ? ""
+    : `by ${expert?.name}`}
+</p>
 
               {/* Verified */}
 
-              {expert.verified && (
+              {expert?.verified && (
                 <div
                   className="
                     mt-4
@@ -185,9 +183,9 @@ const ExpertProfileHero = () => {
                 >
                   <MapPin size={18} />
 
-                  <span>
-                    {expert.location}
-                  </span>
+                  <span>{loading
+  ? "--"
+  : `${expert?.city}, ${expert?.state}`}</span>
                 </div>
 
                 <div
@@ -202,9 +200,9 @@ const ExpertProfileHero = () => {
                 >
                   <Briefcase size={18} />
 
-                  <span>
-                    {expert.experience}
-                  </span>
+                  <span>{loading
+  ? "--"
+  : `${expert?.experience} Years`}</span>
                 </div>
               </div>
 
@@ -244,12 +242,14 @@ const ExpertProfileHero = () => {
                       text-primary
                     "
                   >
-                    {expert.rating}
+                    {loading
+  ? "--"
+  : stats?.averageRating}
                   </span>
 
-                  <span className="text-muted">
-                    ({expert.reviews} Reviews)
-                  </span>
+                  <span className="text-muted">({loading
+  ? "--"
+  : stats?.totalReviews} Reviews)</span>
                 </div>
 
                 <div>
@@ -261,7 +261,9 @@ const ExpertProfileHero = () => {
                       text-primary
                     "
                   >
-                    {expert.completedJobs}+
+                    {loading
+  ? "--"
+  : stats?.completedJobs}+
                   </span>
 
                   <span
@@ -270,7 +272,7 @@ const ExpertProfileHero = () => {
                       text-muted
                     "
                   >
-                    Jobs Completed
+                    Services Completed
                   </span>
                 </div>
               </div>
@@ -311,7 +313,6 @@ const ExpertProfileHero = () => {
                   "
                 >
                   Book Appointment
-
                   <ArrowRight size={18} />
                 </button>
 
@@ -338,7 +339,6 @@ const ExpertProfileHero = () => {
             </div>
           </div>
         </motion.div>
-
       </div>
     </section>
   );

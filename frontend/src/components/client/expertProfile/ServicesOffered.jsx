@@ -3,20 +3,12 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const ServicesOffered = () => {
+const ServicesOffered = ({
+  services = [],
+  loading,
+}) => {
 
-  const services = [
-    "Fan Installation",
-    "Switch Board Repair",
-    "House Wiring",
-    "MCB Replacement",
-    "Electrical Fault Diagnosis",
-    "Power Backup Setup",
-    "Light Installation",
-    "Socket Repair",
-    "Emergency Electrical Service",
-    "Inverter Installation",
-  ];
+  
 
   return (
     <section className="py-16 bg-theme">
@@ -87,7 +79,7 @@ const ServicesOffered = () => {
           >
             {services.map((service) => (
               <motion.div
-                key={service}
+                key={service._id}
                 whileHover={{
                   y: -3,
                 }}
@@ -125,7 +117,7 @@ const ServicesOffered = () => {
                     font-medium
                   "
                 >
-                  {service}
+                  {service.serviceName}
                 </span>
               </motion.div>
             ))}
@@ -154,10 +146,11 @@ const ServicesOffered = () => {
                 text-primary
               "
             >
-              This expert specializes in residential
-              and commercial electrical services,
-              including installation, maintenance,
-              repairs, and emergency support.
+              {loading
+  ? "Loading..."
+  : services.length > 0
+  ? services[0].description
+  : "No services available."}
             </p>
           </div>
         </motion.div>
