@@ -1,56 +1,14 @@
-import { motion } from "framer-motion";
-import {
-  Star,
-  ArrowRight,
-} from "lucide-react";
+import { motion } from 'framer-motion';
+import { Star, ArrowRight } from 'lucide-react';
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
-const ReviewsSection = () => {
-
+const ReviewsSection = ({ reviews = [], stats, ratingBreakdown, loading }) => {
   const navigate = useNavigate();
-
-  const reviews = [
-    {
-      id: 1,
-      name: "Rahul Sharma",
-      rating: 5,
-      comment:
-        "Very professional and completed the work on time.",
-      date: "2 days ago",
-    },
-
-    {
-      id: 2,
-      name: "Priya Jain",
-      rating: 5,
-      comment:
-        "Excellent service. Highly recommended.",
-      date: "1 week ago",
-    },
-
-    {
-      id: 3,
-      name: "Amit Gupta",
-      rating: 4,
-      comment:
-        "Good work quality and reasonable pricing.",
-      date: "2 weeks ago",
-    },
-  ];
-
-  const ratingBreakdown = [
-    { star: 5, count: 196 },
-    { star: 4, count: 32 },
-    { star: 3, count: 9 },
-    { star: 2, count: 4 },
-    { star: 1, count: 4 },
-  ];
 
   return (
     <section className="py-16 bg-theme">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-
         <div
           className="
             bg-card
@@ -79,7 +37,6 @@ const ReviewsSection = () => {
             {/* Rating Summary */}
 
             <div className="lg:w-[320px]">
-
               <h2
                 className="
                   text-3xl
@@ -115,7 +72,7 @@ const ReviewsSection = () => {
                     text-primary
                   "
                 >
-                  4.9
+                  {loading ? '--' : stats?.averageRating}
                 </span>
               </div>
 
@@ -125,62 +82,65 @@ const ReviewsSection = () => {
                   text-muted
                 "
               >
-                Based on 245 reviews
+                {loading
+                  ? 'Loading...'
+                  : `Based on ${stats?.totalReviews || 0} reviews`}
               </p>
 
               {/* Breakdown */}
 
               <div className="mt-8 space-y-3">
-                {ratingBreakdown.map((item) => (
+                {[5, 4, 3, 2, 1].map((star) => (
                   <div
-                    key={item.star}
+                    key={star}
                     className="
-                      flex
-                      items-center
-
-                      gap-3
-                    "
+    flex
+    items-center
+    gap-3
+  "
                   >
                     <span
                       className="
-                        text-sm
-                        w-8
-                      "
+      text-sm
+      w-8
+    "
                     >
-                      {item.star}★
+                      {star}★
                     </span>
 
                     <div
                       className="
-                        flex-1
-
-                        h-2
-
-                        rounded-full
-
-                        bg-gray-200
-                        overflow-hidden
-                      "
+      flex-1
+      h-2
+      rounded-full
+      bg-gray-200
+      overflow-hidden
+    "
                     >
                       <div
                         style={{
-                          width: `${(item.count / 245) * 100}%`,
+                          width: `${
+                            stats?.totalReviews
+                              ? ((ratingBreakdown?.[star] || 0) /
+                                  stats.totalReviews) *
+                                100
+                              : 0
+                          }%`,
                         }}
                         className="
-                          h-full
-
-                          bg-[#745A38]
-                        "
+        h-full
+        bg-[#745A38]
+      "
                       />
                     </div>
 
                     <span
                       className="
-                        text-sm
-                        text-muted
-                      "
+      text-sm
+      text-muted
+    "
                     >
-                      {item.count}
+                      {ratingBreakdown?.[star] || 0}
                     </span>
                   </div>
                 ))}
@@ -190,7 +150,6 @@ const ReviewsSection = () => {
             {/* Latest Reviews */}
 
             <div className="flex-1">
-
               <h3
                 className="
                   text-xl
@@ -235,7 +194,7 @@ const ReviewsSection = () => {
                           text-primary
                         "
                       >
-                        {review.name}
+                        {review.customerId?.fullName}
                       </h4>
 
                       <span
@@ -244,7 +203,7 @@ const ReviewsSection = () => {
                           text-muted
                         "
                       >
-                        {review.date}
+                        {new Date(review.createdAt).toLocaleDateString()}
                       </span>
                     </div>
 
@@ -256,18 +215,16 @@ const ReviewsSection = () => {
                         mb-3
                       "
                     >
-                      {[...Array(review.rating)].map(
-                        (_, index) => (
-                          <Star
-                            key={index}
-                            size={16}
-                            fill="currentColor"
-                            className="
+                      {[...Array(review.rating)].map((_, index) => (
+                        <Star
+                          key={index}
+                          size={16}
+                          fill="currentColor"
+                          className="
                               text-yellow-500
                             "
-                          />
-                        )
-                      )}
+                        />
+                      ))}
                     </div>
 
                     <p
@@ -275,8 +232,44 @@ const ReviewsSection = () => {
                         text-muted
                       "
                     >
-                      {review.comment}
+                      {review.review}
                     </p>
+                    {review.vendorReply && (
+  <div
+    className="
+      mt-4
+
+      rounded-xl
+
+      border
+      border-theme
+
+      bg-card
+
+      p-4
+    "
+  >
+    <p
+      className="
+        text-sm
+        font-semibold
+        text-primary
+      "
+    >
+      Vendor Reply
+    </p>
+
+    <p
+      className="
+        mt-2
+        text-sm
+        text-muted
+      "
+    >
+      {review.vendorReply}
+    </p>
+  </div>
+)}
                   </motion.div>
                 ))}
               </div>
@@ -284,11 +277,7 @@ const ReviewsSection = () => {
               {/* View All */}
 
               <button
-                onClick={() =>
-                  navigate(
-                    "/review/:bookingId"
-                  )
-                }
+                onClick={() => navigate('/review/:bookingId')}
                 className="
                   mt-8
 
@@ -307,10 +296,8 @@ const ReviewsSection = () => {
                 "
               >
                 View All Reviews
-
                 <ArrowRight size={18} />
               </button>
-
             </div>
           </div>
         </div>

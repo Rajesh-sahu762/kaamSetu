@@ -6,6 +6,7 @@ const {
   getDashboardSummary,
   getHomeData,
   getExpertProfile,
+  getServicesPage,
 } = require("../controllers/customerController");
 
 // =======================================
@@ -16,5 +17,7 @@ router.get("/dashboard-summary", verifyToken, getDashboardSummary);
 router.get("/home", getHomeData);
 
 router.get("/expert/:vendorId", verifyToken, getExpertProfile );
+
+router.get("/services", getServicesPage);
 
 module.exports = router;

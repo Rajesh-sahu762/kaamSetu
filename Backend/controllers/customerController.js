@@ -411,3 +411,167 @@ exports.getExpertProfile = async (req, res) => {
     });
   }
 };
+
+
+exports.getServicesPage = async (req, res) => {
+  try {
+
+    const [
+      categories,
+      vendors,
+      reviews
+    ] = await Promise.all([
+
+      Category.find({
+        isActive: true,
+      })
+      .sort({
+        name: 1,
+      }),
+
+      Vendor.find()
+      .populate(
+        "userId",
+        "fullName profileImage"
+      ),
+
+      Review.find()
+    ]);
+
+    const vendorCards = await Promise.all(
+
+      vendors.map(async (vendor) => {
+
+        const vendorServices =
+          await Service.find({
+            vendorId: vendor._id,
+            isActive: true,
+          });
+
+        const vendorReviews =
+          reviews.filter(
+            (review) =>
+              review.vendorId.toString() ===
+              vendor._id.toString()
+          );
+
+        const totalReviews =
+          vendorReviews.length;
+
+        const averageRating =
+          totalReviews > 0
+            ? (
+                vendorReviews.reduce(
+                  (sum, review) =>
+                    sum + review.rating,
+                  0
+                ) / totalReviews
+              ).toFixed(1)
+            : 0;
+
+        const startingPrice =
+          vendorServices.length > 0
+            ? Math.min(
+                ...vendorServices.map(
+                  (service) =>
+                    service.startingPrice
+                )
+              )
+            : 0;
+
+        return {
+
+          _id: vendor._id,
+
+          businessName:
+            vendor.businessName,
+
+          businessType:
+            vendor.businessType,
+
+          city: vendor.city,
+
+          state: vendor.state,
+
+          experience:
+            vendor.experience,
+
+          servicesAvailable:
+            vendorServices.length,
+
+          averageRating,
+
+          totalReviews,
+
+          startingPrice,
+
+          profileImage:
+            vendor.userId?.profileImage,
+
+          name:
+            vendor.userId?.fullName,
+
+          verified: true,
+        };
+      })
+    );
+
+    const hero = {
+
+      verifiedExperts:
+        vendorCards.length,
+
+      serviceCategories:
+        categories.length,
+
+      cities: new Set(
+        vendorCards.map(
+          (vendor) => vendor.city
+        )
+      ).size,
+
+      averageRating:
+        vendorCards.length > 0
+          ? (
+              vendorCards.reduce(
+                (sum, vendor) =>
+                  sum +
+                  Number(
+                    vendor.averageRating
+                  ),
+                0
+              ) /
+              vendorCards.length
+            ).toFixed(1)
+          : 0,
+    };
+
+    res.status(200).json({
+
+      success: true,
+
+      data: {
+
+        hero,
+
+        categories,
+
+        vendors: vendorCards,
+      },
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+
+      success: false,
+
+      message:
+        "Failed to fetch services page.",
+    });
+
+  }
+};
+
