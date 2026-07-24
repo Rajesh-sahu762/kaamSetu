@@ -7,6 +7,9 @@ const {
   getHomeData,
   getExpertProfile,
   getServicesPage,
+  getCustomerBookings,
+  getCustomerBookingById,
+  cancelCustomerBooking,
 } = require("../controllers/customerController");
 
 // =======================================
@@ -19,5 +22,9 @@ router.get("/home", getHomeData);
 router.get("/expert/:vendorId", verifyToken, getExpertProfile );
 
 router.get("/services", getServicesPage);
+
+router.get("/bookings", verifyToken, getCustomerBookings);
+router.get("/bookings/:bookingId", verifyToken, getCustomerBookingById);
+router.patch("/bookings/:bookingId/cancel", verifyToken, cancelCustomerBooking);
 
 module.exports = router;
