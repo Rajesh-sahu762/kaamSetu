@@ -5,6 +5,7 @@ const Category = require("../models/category");
 const Review = require("../models/review");
 const Service = require("../models/service");
 const User = require("../models/user");
+const Notification = require("../models/notification");
 
 // =======================================
 // helpers
@@ -92,6 +93,231 @@ exports.getDashboardSummary = async (req, res) => {
   } catch (error) {
     console.error("getDashboardSummary error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// =======================================
+// GET /api/customer/bookings
+// Customer-facing bookings list for the My Bookings UI.
+// =======================================
+exports.getCustomerBookings = async (req, res) => {
+  try {
+    const authUserId = req.user?.userId || req.user?._id;
+
+    if (!authUserId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
+
+    const {
+      status = "all",
+      page = 1,
+      limit = 10,
+      search = "",
+    } = req.query;
+
+    const currentPage = Math.max(Number(page) || 1, 1);
+    const pageSize = Math.min(Math.max(Number(limit) || 10, 1), 50);
+    const skip = (currentPage - 1) * pageSize;
+
+    const filter = {
+      customerId: authUserId,
+    };
+
+    if (status && status !== "all") {
+      filter.status = status;
+    }
+
+    if (search?.trim()) {
+      const searchTerm = search.trim();
+      const vendors = await Vendor.find({
+        businessName: { $regex: searchTerm, $options: "i" },
+      }).select("_id");
+
+      filter.$or = [
+        {
+          bookingNumber: {
+            $regex: searchTerm,
+            $options: "i",
+          },
+        },
+        {
+          address: {
+            $regex: searchTerm,
+            $options: "i",
+          },
+        },
+        {
+          vendorId: {
+            $in: vendors.map((vendor) => vendor._id),
+          },
+        },
+      ];
+    }
+
+    const [bookings, totalBookings, pending, accepted, onTheWay, inProgress, completed, cancelled, rejected] =
+      await Promise.all([
+        Booking.find(filter)
+          .populate("vendorId", "businessName city state")
+          .populate(
+            "serviceId",
+            "serviceName description startingPrice duration coverImage",
+          )
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(pageSize),
+        Booking.countDocuments(filter),
+        Booking.countDocuments({ customerId: authUserId, status: "pending" }),
+        Booking.countDocuments({ customerId: authUserId, status: "accepted" }),
+        Booking.countDocuments({ customerId: authUserId, status: "on_the_way" }),
+        Booking.countDocuments({ customerId: authUserId, status: "in_progress" }),
+        Booking.countDocuments({ customerId: authUserId, status: "completed" }),
+        Booking.countDocuments({ customerId: authUserId, status: "cancelled" }),
+        Booking.countDocuments({ customerId: authUserId, status: "rejected" }),
+      ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Bookings fetched successfully.",
+      data: bookings,
+      stats: {
+        total: totalBookings,
+        pending,
+        accepted,
+        onTheWay,
+        inProgress,
+        completed,
+        cancelled,
+        rejected,
+        active: pending + accepted + onTheWay + inProgress,
+      },
+      pagination: {
+        currentPage,
+        totalPages: Math.ceil(totalBookings / pageSize),
+        totalBookings,
+        pageSize,
+      },
+    });
+  } catch (error) {
+    console.error("getCustomerBookings error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// =======================================
+// GET /api/customer/bookings/:bookingId
+// Customer booking detail view for the track-booking flow.
+// =======================================
+exports.getCustomerBookingById = async (req, res) => {
+  try {
+    const authUserId = req.user?.userId || req.user?._id;
+
+    if (!authUserId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
+
+    const booking = await Booking.findOne({
+      _id: req.params.bookingId,
+      customerId: authUserId,
+    })
+      .populate("vendorId", "businessName city state bio")
+      .populate(
+        "serviceId",
+        "serviceName description startingPrice duration coverImage",
+      );
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking fetched successfully.",
+      data: booking,
+    });
+  } catch (error) {
+    console.error("getCustomerBookingById error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// =======================================
+// PATCH /api/customer/bookings/:bookingId/cancel
+// Customer cancellation flow for active bookings.
+// =======================================
+exports.cancelCustomerBooking = async (req, res) => {
+  try {
+    const authUserId = req.user?.userId || req.user?._id;
+
+    if (!authUserId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
+
+    const booking = await Booking.findOne({
+      _id: req.params.bookingId,
+      customerId: authUserId,
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    if (["completed", "cancelled", "rejected"].includes(booking.status)) {
+      return res.status(400).json({
+        success: false,
+        message: "This booking cannot be cancelled.",
+      });
+    }
+
+    booking.status = "cancelled";
+    booking.cancelledBy = "customer";
+    booking.cancelReason = req.body?.cancelReason || booking.cancelReason || "";
+
+    await booking.save();
+
+    const vendor = await Vendor.findById(booking.vendorId).select("userId");
+
+    if (vendor?.userId) {
+      await Notification.create({
+        userId: vendor.userId,
+        title: "Booking Cancelled",
+        message: `A customer cancelled booking ${booking.bookingNumber}.`,
+        type: "booking",
+        referenceId: booking._id,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking cancelled successfully.",
+      data: booking,
+    });
+  } catch (error) {
+    console.error("cancelCustomerBooking error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
@@ -415,163 +641,370 @@ exports.getExpertProfile = async (req, res) => {
 
 exports.getServicesPage = async (req, res) => {
   try {
+    // ===========================
+    // Categories
+    // ===========================
+
+    const categoriesPromise = Category.find(
+      { isActive: true },
+      "name slug image description"
+    ).sort({ name: 1 });
+
+    // ===========================
+    // Hero Stats
+    // ===========================
+
+    const heroPromise = Promise.all([
+      Vendor.countDocuments({
+        status: "approved",
+      }),
+
+      Category.countDocuments({
+        isActive: true,
+      }),
+
+      Vendor.distinct("city", {
+        status: "approved",
+      }),
+
+      Review.aggregate([
+        {
+          $group: {
+            _id: null,
+            averageRating: {
+              $avg: "$rating",
+            },
+          },
+        },
+      ]),
+    ]);
+
+    // ===========================
+    // Featured Experts
+    // ===========================
+
+    const expertsPromise = Vendor.aggregate([
+      {
+        $match: {
+          status: "approved",
+        },
+      },
+
+      // --------------------------
+      // User
+      // --------------------------
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+
+      {
+        $unwind: "$user",
+      },
+
+      {
+        $match: {
+          "user.isActive": true,
+          "user.isDeleted": false,
+        },
+      },
+
+      // --------------------------
+      // Services
+      // --------------------------
+
+      {
+        $lookup: {
+          from: "services",
+          let: {
+            vendorId: "$_id",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: [
+                        "$vendorId",
+                        "$$vendorId",
+                      ],
+                    },
+                    {
+                      $eq: [
+                        "$isActive",
+                        true,
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+
+            {
+              $sort: {
+                startingPrice: 1,
+              },
+            },
+
+            {
+              $project: {
+                serviceName: 1,
+                startingPrice: 1,
+              },
+            },
+          ],
+          as: "services",
+        },
+      },
+
+      // --------------------------
+      // Reviews
+      // --------------------------
+
+      {
+        $lookup: {
+          from: "reviews",
+          let: {
+            vendorId: "$_id",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [
+                    "$vendorId",
+                    "$$vendorId",
+                  ],
+                },
+              },
+            },
+
+            {
+              $group: {
+                _id: null,
+
+                averageRating: {
+                  $avg: "$rating",
+                },
+
+                totalReviews: {
+                  $sum: 1,
+                },
+              },
+            },
+          ],
+          as: "reviewStats",
+        },
+      },
+
+      // --------------------------
+      // Bookings
+      // --------------------------
+
+      {
+        $lookup: {
+          from: "bookings",
+          let: {
+            vendorId: "$_id",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: [
+                        "$vendorId",
+                        "$$vendorId",
+                      ],
+                    },
+                    {
+                      $eq: [
+                        "$status",
+                        "completed",
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+
+            {
+              $count: "totalBookings",
+            },
+          ],
+          as: "bookingStats",
+        },
+      },
+
+      // --------------------------
+      // Final Shape
+      // --------------------------
+
+      {
+        $project: {
+          businessName: 1,
+          businessType: 1,
+          city: 1,
+          state: 1,
+          experience: 1,
+
+          profileImage:
+            "$user.profileImage",
+
+          name:
+            "$user.fullName",
+
+          servicesAvailable: {
+            $size: "$services",
+          },
+
+          startingPrice: {
+            $ifNull: [
+              {
+                $arrayElemAt: [
+                  "$services.startingPrice",
+                  0,
+                ],
+              },
+              0,
+            ],
+          },
+
+          averageRating: {
+            $round: [
+              {
+                $ifNull: [
+                  {
+                    $arrayElemAt: [
+                      "$reviewStats.averageRating",
+                      0,
+                    ],
+                  },
+                  0,
+                ],
+              },
+              1,
+            ],
+          },
+
+          totalReviews: {
+            $ifNull: [
+              {
+                $arrayElemAt: [
+                  "$reviewStats.totalReviews",
+                  0,
+                ],
+              },
+              0,
+            ],
+          },
+
+          totalBookings: {
+            $ifNull: [
+              {
+                $arrayElemAt: [
+                  "$bookingStats.totalBookings",
+                  0,
+                ],
+              },
+              0,
+            ],
+          },
+
+          serviceHighlights: {
+            $slice: [
+              "$services.serviceName",
+              3,
+            ],
+          },
+
+          remainingServices: {
+            $max: [
+              {
+                $subtract: [
+                  {
+                    $size: "$services",
+                  },
+                  3,
+                ],
+              },
+              0,
+            ],
+          },
+        },
+      },
+
+      {
+        $sort: {
+          totalBookings: -1,
+          averageRating: -1,
+        },
+      },
+
+      {
+        $limit: 6,
+      },
+    ]);
+
+    // ===========================
+    // Execute
+    // ===========================
 
     const [
       categories,
-      vendors,
-      reviews
+      heroResult,
+      featuredExperts,
     ] = await Promise.all([
-
-      Category.find({
-        isActive: true,
-      })
-      .sort({
-        name: 1,
-      }),
-
-      Vendor.find()
-      .populate(
-        "userId",
-        "fullName profileImage"
-      ),
-
-      Review.find()
+      categoriesPromise,
+      heroPromise,
+      expertsPromise,
     ]);
 
-    const vendorCards = await Promise.all(
-
-      vendors.map(async (vendor) => {
-
-        const vendorServices =
-          await Service.find({
-            vendorId: vendor._id,
-            isActive: true,
-          });
-
-        const vendorReviews =
-          reviews.filter(
-            (review) =>
-              review.vendorId.toString() ===
-              vendor._id.toString()
-          );
-
-        const totalReviews =
-          vendorReviews.length;
-
-        const averageRating =
-          totalReviews > 0
-            ? (
-                vendorReviews.reduce(
-                  (sum, review) =>
-                    sum + review.rating,
-                  0
-                ) / totalReviews
-              ).toFixed(1)
-            : 0;
-
-        const startingPrice =
-          vendorServices.length > 0
-            ? Math.min(
-                ...vendorServices.map(
-                  (service) =>
-                    service.startingPrice
-                )
-              )
-            : 0;
-
-        return {
-
-          _id: vendor._id,
-
-          businessName:
-            vendor.businessName,
-
-          businessType:
-            vendor.businessType,
-
-          city: vendor.city,
-
-          state: vendor.state,
-
-          experience:
-            vendor.experience,
-
-          servicesAvailable:
-            vendorServices.length,
-
-          averageRating,
-
-          totalReviews,
-
-          startingPrice,
-
-          profileImage:
-            vendor.userId?.profileImage,
-
-          name:
-            vendor.userId?.fullName,
-
-          verified: true,
-        };
-      })
-    );
-
     const hero = {
-
       verifiedExperts:
-        vendorCards.length,
+        heroResult[0],
 
       serviceCategories:
-        categories.length,
+        heroResult[1],
 
-      cities: new Set(
-        vendorCards.map(
-          (vendor) => vendor.city
-        )
-      ).size,
+      cities:
+        heroResult[2].length,
 
       averageRating:
-        vendorCards.length > 0
-          ? (
-              vendorCards.reduce(
-                (sum, vendor) =>
-                  sum +
-                  Number(
-                    vendor.averageRating
-                  ),
-                0
-              ) /
-              vendorCards.length
-            ).toFixed(1)
+        heroResult[3].length > 0
+          ? Number(
+              heroResult[3][0]
+                .averageRating.toFixed(1)
+            )
           : 0,
     };
 
-    res.status(200).json({
-
+    return res.status(200).json({
       success: true,
 
+      message:
+        "Services page fetched successfully.",
+
       data: {
-
         hero,
-
         categories,
-
-        vendors: vendorCards,
+        featuredExperts,
       },
     });
-
   } catch (error) {
-
     console.log(error);
 
-    res.status(500).json({
-
+    return res.status(500).json({
       success: false,
-
       message:
-        "Failed to fetch services page.",
+        "Internal server error.",
     });
-
   }
 };
-
