@@ -27,13 +27,6 @@ router.get(
     verifyToken,
     getNotifications
 );
-
-router.patch(
-    "/:id/read",
-    verifyToken,
-    markNotificationAsRead
-);
-
 router.patch("/read-all", verifyToken, markAllNotificationsAsRead);
 
 router.delete("/clear-all", verifyToken, clearAllNotifications);
