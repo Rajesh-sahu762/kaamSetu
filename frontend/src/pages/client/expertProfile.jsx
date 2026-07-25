@@ -5,7 +5,7 @@ import ExpertProfileHero from "@/components/client/expertProfile/ExpertProfileHe
 import ServicesOffered from "@/components/client/expertProfile/ServicesOffered";
 import ReviewsSection from "@/components/client/expertProfile/ExpertReview";
 
-import { getExpertProfile } from "@/services/customerService";
+// import { getExpertProfile } from "@/services/customerService";
 
 const ExpertProfile = () => {
   const { id } = useParams();
@@ -13,31 +13,31 @@ const ExpertProfile = () => {
   const [expertData, setExpertData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let ignore = false;
+  // useEffect(() => {
+  //   let ignore = false;
 
-    const fetchExpertProfile = async () => {
-      try {
-        const response = await getExpertProfile(id);
+  //   const fetchExpertProfile = async () => {
+  //     try {
+  //       const response = await getExpertProfile(id);
 
-        if (!ignore && response.success) {
-          setExpertData(response.data);
-        }
-      } catch (error) {
-        console.error("Failed to load expert profile:", error);
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
-    };
+  //       if (!ignore && response.success) {
+  //         setExpertData(response.data);
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to load expert profile:", error);
+  //     } finally {
+  //       if (!ignore) {
+  //         setLoading(false);
+  //       }
+  //     }
+  //   };
 
-    fetchExpertProfile();
+  //   fetchExpertProfile();
 
-    return () => {
-      ignore = true;
-    };
-  }, [id]);
+  //   return () => {
+  //     ignore = true;
+  //   };
+  // }, [id]);
 
   return (
     <>
