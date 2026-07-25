@@ -6,6 +6,7 @@ const Service = require("../models/service");
 const Booking = require("../models/booking");
 const Review = require("../models/review");
 const Notification = require("../models/notification");
+const Category = require("../models/category");
 
 // =======================================
 // Helpers
@@ -600,5 +601,104 @@ exports.createReview = async (req, res) => {
   } catch (error) {
     console.error("createReview error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+// =======================================
+// GET /customer/services
+// =======================================
+
+exports.getServices = async (req, res) => {
+  try {
+    const {
+      category = "",
+      search = "",
+      sort = "newest",
+    } = req.query;
+
+    const { page, limit, skip } = paginate(req.query);
+
+    const filter = {
+      isActive: true,
+    };
+
+    // Category Filter
+    if (category && isValidId(category)) {
+      filter.categoryId = category;
+    }
+
+    // Search
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+
+      filter.$or = [
+        { serviceName: regex },
+        { description: regex },
+        { slug: regex },
+      ];
+    }
+
+    // Sorting
+    let sortOption = { createdAt: -1 };
+
+    switch (sort) {
+      case "price-low":
+        sortOption = { startingPrice: 1 };
+        break;
+
+      case "price-high":
+        sortOption = { startingPrice: -1 };
+        break;
+
+      case "popular":
+        sortOption = { totalBookings: -1 };
+        break;
+
+      case "rating":
+        sortOption = { rating: -1 };
+        break;
+
+      default:
+        sortOption = { createdAt: -1 };
+    }
+
+    const [services, total, categories] = await Promise.all([
+  Service.find(filter)
+    .populate("vendorId", "businessName city state profileImage")
+    .populate("categoryId", "name slug")
+    .sort(sortOption)
+    .skip(skip)
+    .limit(limit),
+
+  Service.countDocuments(filter),
+
+  Category.find({ isActive: true })
+    .select("name slug")
+    .sort({ name: 1 }),
+]);
+
+   return res.status(200).json({
+  success: true,
+
+  data: {
+    services,
+    categories,
+  },
+
+  pagination: {
+    page,
+    limit,
+    total,
+    pages: Math.ceil(total / limit),
+  },
+});
+  } catch (error) {
+    console.error("Customer getServices error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };

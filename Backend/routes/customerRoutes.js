@@ -14,6 +14,7 @@ const {
   getBookingById,
   cancelBooking,
   createReview,
+  getServices,
 } = require("../controllers/customerController");
 
 // Profile image upload is generic on the User model (not vendor-specific),
@@ -50,5 +51,7 @@ router.patch("/bookings/:bookingId/cancel", verifyToken, verifyCustomer, cancelB
 // Review Routes
 // =======================================
 router.post("/bookings/:bookingId/review", verifyToken, verifyCustomer, createReview);
+
+router.get("/services", getServices);
 
 module.exports = router;

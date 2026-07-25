@@ -1,17 +1,10 @@
-import { motion } from "framer-motion";
-import {
-  Filter,
-  MapPin,
-  Star,
-  Briefcase,
-  IndianRupee,
-} from "lucide-react";
+import { motion } from 'framer-motion';
+import { Filter, MapPin, Star, Briefcase, IndianRupee } from 'lucide-react';
 
-const ServiceFilters = () => {
+const ServiceFilters = ({ filters, setFilters, categories }) => {
   return (
     <section className="py-8 bg-theme">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-
         {/* Filter Card */}
 
         <motion.div
@@ -49,10 +42,7 @@ const ServiceFilters = () => {
               mb-6
             "
           >
-            <Filter
-              size={20}
-              className="text-accent"
-            />
+            <Filter size={20} className="text-accent" />
 
             <h2
               className="
@@ -81,33 +71,52 @@ const ServiceFilters = () => {
 
             <FilterSelect
               icon={<Briefcase size={18} />}
+              value={filters.category}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  category: e.target.value,
+                  page: 1,
+                }))
+              }
               options={[
-                "All Categories",
-                "Electrician",
-                "Plumber",
-                "Carpenter",
-                "Painter",
-                "AC Repair",
+                {
+                  label: 'All Categories',
+                  value: '',
+                },
+
+                ...categories.map((category) => ({
+                  label: category.name,
+                  value: category._id,
+                })),
               ]}
             />
 
             {/* Location */}
 
             <FilterInput
-              icon={<MapPin size={18} />}
-              placeholder="Location"
-            />
+  icon={<Filter size={18} />}
+  placeholder="Search services..."
+  value={filters.search}
+  onChange={(e) =>
+    setFilters((prev) => ({
+      ...prev,
+      search: e.target.value,
+      page: 1,
+    }))
+  }
+/>
 
             {/* Experience */}
 
             <FilterSelect
               icon={<Briefcase size={18} />}
               options={[
-                "Experience",
-                "0-1 Years",
-                "1-3 Years",
-                "3-5 Years",
-                "5+ Years",
+                'Experience',
+                '0-1 Years',
+                '1-3 Years',
+                '3-5 Years',
+                '5+ Years',
               ]}
             />
 
@@ -115,26 +124,44 @@ const ServiceFilters = () => {
 
             <FilterSelect
               icon={<Star size={18} />}
-              options={[
-                "Rating",
-                "4★ & Above",
-                "4.5★ & Above",
-                "5★ Only",
-              ]}
+              options={['Rating', '4★ & Above', '4.5★ & Above', '5★ Only']}
             />
 
             {/* Price */}
 
             <FilterSelect
-              icon={<IndianRupee size={18} />}
-              options={[
-                "Price",
-                "₹0 - ₹500",
-                "₹500 - ₹1000",
-                "₹1000 - ₹2000",
-                "₹2000+",
-              ]}
-            />
+  icon={<Filter size={18} />}
+  value={filters.sort}
+  onChange={(e) =>
+    setFilters((prev) => ({
+      ...prev,
+      sort: e.target.value,
+      page: 1,
+    }))
+  }
+  options={[
+    {
+      label: "Newest",
+      value: "newest",
+    },
+    {
+      label: "Popular",
+      value: "popular",
+    },
+    {
+      label: "Highest Rating",
+      value: "rating",
+    },
+    {
+      label: "Price Low → High",
+      value: "price-low",
+    },
+    {
+      label: "Price High → Low",
+      value: "price-high",
+    },
+  ]}
+/>
           </div>
 
           {/* Bottom Actions */}
@@ -154,29 +181,33 @@ const ServiceFilters = () => {
             "
           >
             <p className="text-muted text-sm">
-              Showing available services
-              based on selected filters.
+              Showing available services based on selected filters.
             </p>
 
             <div className="flex gap-3">
-              <button
-                className="
-                  px-5
-                  py-3
-
-                  rounded-xl
-
-                  border
-                  border-theme
-
-                  text-primary
-
-                  hover:bg-surface
-                  transition
-                "
-              >
-                Clear Filters
-              </button>
+             <button
+  onClick={() =>
+    setFilters({
+      search: "",
+      category: "",
+      sort: "newest",
+      page: 1,
+      limit: 12,
+    })
+  }
+  className="
+    px-5
+    py-3
+    rounded-xl
+    border
+    border-theme
+    text-primary
+    hover:bg-surface
+    transition
+  "
+>
+  Clear Filters
+</button>
 
               <button
                 className="
@@ -205,10 +236,7 @@ const ServiceFilters = () => {
   );
 };
 
-const FilterInput = ({
-  icon,
-  placeholder,
-}) => {
+const FilterInput = ({ icon, placeholder, value, onChange }) => {
   return (
     <div
       className="
@@ -229,13 +257,13 @@ const FilterInput = ({
         bg-surface
       "
     >
-      <span className="text-muted">
-        {icon}
-      </span>
+      <span className="text-muted">{icon}</span>
 
       <input
         type="text"
         placeholder={placeholder}
+        value={value}
+        onChange={onChange}
         className="
           flex-1
 
@@ -250,10 +278,7 @@ const FilterInput = ({
   );
 };
 
-const FilterSelect = ({
-  icon,
-  options,
-}) => {
+const FilterSelect = ({ icon, options, value, onChange }) => {
   return (
     <div
       className="
@@ -274,9 +299,7 @@ const FilterSelect = ({
         bg-surface
       "
     >
-      <span className="text-muted">
-        {icon}
-      </span>
+      <span className="text-muted">{icon}</span>
 
       <select
         className="
@@ -289,13 +312,12 @@ const FilterSelect = ({
           text-primary
           cursor-pointer
         "
+        value={value}
+        onChange={onChange}
       >
         {options.map((item) => (
-          <option
-            key={item}
-            value={item}
-          >
-            {item}
+          <option key={item.value} value={item.value}>
+            {item.label}
           </option>
         ))}
       </select>
