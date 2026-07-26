@@ -1,13 +1,46 @@
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Wrench, Hammer, Paintbrush, ArrowRight } from "lucide-react";
+import { motion, useScroll, useTransform, useInView, animate } from "framer-motion";
+import { Wrench, Hammer, Paintbrush, ArrowRight, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 
-const HeroSection = ({ hero, loading }) => {
+// Counts up from 0 to `value` once the number scrolls into view — a small
+// premium touch that also makes the (now real) stats feel alive.
+const CountUp = ({ value = 0, suffix = "" }) => {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    const controls = animate(0, value, {
+      duration: 1.2,
+      ease: "easeOut",
+      onUpdate: (latest) => setDisplay(Math.round(latest)),
+    });
+    return () => controls.stop();
+  }, [inView, value]);
+
+  return (
+    <span ref={ref}>
+      {display.toLocaleString("en-IN")}
+      {suffix}
+    </span>
+  );
+};
+
+const HeroSection = ({ stats, categories = [], loading = false }) => {
   const { scrollY } = useScroll();
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const y1 = useTransform(scrollY, [0, 500], [0, -120]);
   const y2 = useTransform(scrollY, [0, 500], [0, -70]);
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+    const trimmed = searchTerm.trim();
+    navigate(trimmed ? `/services?search=${encodeURIComponent(trimmed)}` : "/services");
+  };
 
   return (
     <section className="relative overflow-hidden mt-15 bg-card min-h-screen flex items-center">
@@ -15,12 +48,12 @@ const HeroSection = ({ hero, loading }) => {
       {/* Background Blobs */}
       <motion.div
         style={{ y: y1 }}
-        className="absolute top-[-120px] right-[-120px] w-[420px] h-[420px] rounded-full bg-[#d3e4fe] blur-3xl opacity-50"
+        className="absolute top-[-120px] right-[-120px] w-[420px] h-[420px] rounded-full bg-[#A88A64]/20 blur-3xl opacity-60"
       />
 
       <motion.div
         style={{ y: y2 }}
-        className="absolute bottom-[-150px] left-[-150px] w-[380px] h-[380px] rounded-full bg-[#e5eeff] blur-3xl opacity-60"
+        className="absolute bottom-[-150px] left-[-150px] w-[380px] h-[380px] rounded-full bg-[#745A38]/10 blur-3xl opacity-70"
       />
 
       <div className="max-w-[1200px] mx-auto px-6 lg:px-8 w-full relative z-10">
@@ -66,7 +99,69 @@ const HeroSection = ({ hero, loading }) => {
               exceptional quality and reliability.
             </p>
 
-            <div className="mt-10 flex flex-col sm:flex-row gap-4">
+            <form
+              onSubmit={handleSearch}
+              className="
+                mt-8
+                flex
+                items-center
+                gap-2
+                bg-card
+                border border-theme
+                rounded-full
+                p-2
+                pl-5
+                max-w-lg
+                shadow-[0_8px_24px_rgba(9,20,38,0.06)]
+                focus-within:border-[#745A38]/50
+                transition
+              "
+            >
+              <Search size={18} className="text-muted shrink-0" />
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                type="text"
+                placeholder="Search 'electrician', 'AC repair'…"
+                className="flex-1 bg-transparent outline-none text-sm text-primary placeholder:text-muted"
+              />
+              <button
+                type="submit"
+                className="
+                  bg-[#745A38] text-white text-sm font-medium
+                  px-5 py-2.5 rounded-full
+                  hover:bg-[#5f4a2e]
+                  transition
+                  shrink-0
+                "
+              >
+                Search
+              </button>
+            </form>
+
+            {categories.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {categories.slice(0, 5).map((category) => (
+                  <button
+                    key={category._id}
+                    onClick={() => navigate(`/services?category=${category.slug}`)}
+                    className="
+                      text-xs font-medium
+                      text-muted
+                      border border-theme
+                      rounded-full
+                      px-3.5 py-1.5
+                      hover:text-[#745A38] hover:border-[#745A38]/40
+                      transition
+                    "
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-4">
               
               <button
               onClick={() => navigate('/services') }
@@ -115,7 +210,7 @@ const HeroSection = ({ hero, loading }) => {
               
               <div>
                 <h3 className="text-3xl font-semibold text-primary">
-                   {loading ? "--" : `${hero?.verifiedExperts || 0}+`}
+                  {loading ? "…" : <CountUp value={stats?.verifiedExperts || 0} suffix="+" />}
                 </h3>
                 <p className="text-muted mt-1">
                   Verified Experts
@@ -124,7 +219,7 @@ const HeroSection = ({ hero, loading }) => {
 
               <div>
                 <h3 className="text-3xl font-semibold text-primary">
-                  {loading ? "--" : `${hero?.jobsCompleted || 0}+`}
+                  {loading ? "…" : <CountUp value={stats?.jobsCompleted || 0} suffix="+" />}
                 </h3>
                 <p className="text-muted mt-1">
                   Jobs Completed
@@ -133,7 +228,7 @@ const HeroSection = ({ hero, loading }) => {
 
               <div>
                 <h3 className="text-3xl font-semibold text-primary">
-                  {loading ? "--" : `${hero?.satisfactionRate || 0}%`}
+                  {loading ? "…" : <CountUp value={stats?.satisfactionRate || 0} suffix="%" />}
                 </h3>
                 <p className="text-muted mt-1">
                   Satisfaction Rate
@@ -177,6 +272,7 @@ const HeroSection = ({ hero, loading }) => {
                 <div className="p-6">
                   <span
                     className="
+                      inline-flex items-center gap-1.5
                       bg-[#ffddb4]
                       text-[#5a4222]
                       text-xs
@@ -185,6 +281,10 @@ const HeroSection = ({ hero, loading }) => {
                       rounded-full
                     "
                   >
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5a4222] opacity-60" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#5a4222]" />
+                    </span>
                     VERIFIED
                   </span>
 

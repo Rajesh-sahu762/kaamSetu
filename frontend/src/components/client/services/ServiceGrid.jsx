@@ -5,70 +5,39 @@ import {
   Users,
   ArrowRight,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const services = [
-  {
-    id: 1,
-    name: "Electrician",
-    image:
-      "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800",
-    experts: 120,
-    rating: 4.9,
-    price: 299,
-  },
 
-  {
-    id: 2,
-    name: "Plumber",
-    image:
-      "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=800",
-    experts: 95,
-    rating: 4.8,
-    price: 349,
-  },
+const ServiceGrid = ({
+  services,
+  loading,
+  error,
+  pagination,
+  filters,
+  setFilters,
+}) => {
 
-  {
-    id: 3,
-    name: "Carpenter",
-    image:
-      "https://images.unsplash.com/photo-1513467655676-561b7d489a88?w=800",
-    experts: 80,
-    rating: 4.7,
-    price: 399,
-  },
 
-  {
-    id: 4,
-    name: "Painter",
-    image:
-      "https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=800",
-    experts: 65,
-    rating: 4.8,
-    price: 499,
-  },
+  if (loading) {
+  return (
+    <section className="py-20 bg-theme">
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 text-center">
+        Loading services...
+      </div>
+    </section>
+  );
+}
+if (error) {
+  return (
+    <section className="py-20 bg-theme">
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 text-center text-red-500">
+        {error}
+      </div>
+    </section>
+  );
+}
 
-  {
-    id: 5,
-    name: "AC Repair",
-    image:
-      "https://images.unsplash.com/photo-1581092919535-7146ff1a5907?w=800",
-    experts: 110,
-    rating: 4.9,
-    price: 599,
-  },
-
-  {
-    id: 6,
-    name: "Home Cleaning",
-    image:
-      "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800",
-    experts: 140,
-    rating: 4.8,
-    price: 699,
-  },
-];
-
-const ServiceGrid = () => {
+  const navigate = useNavigate();
   return (
     <section className="py-20 bg-theme">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
@@ -130,6 +99,18 @@ const ServiceGrid = () => {
 
         {/* Grid */}
 
+        {services.length === 0 && (
+  <div className="text-center py-20">
+    <h3 className="text-2xl font-semibold text-primary">
+      No Services Found
+    </h3>
+
+    <p className="text-muted mt-3">
+      Try changing your filters.
+    </p>
+  </div>
+)}
+{services.length > 0 && (
         <div
           className="
             mt-14
@@ -188,8 +169,12 @@ const ServiceGrid = () => {
                 "
               >
                 <img
-                  src={service.image}
-                  alt={service.name}
+                  src={
+  service.coverImage ||
+  service.images?.[0] ||
+  "/images/service-placeholder.png"
+}
+                  alt={service.serviceName}
                   className="
                     w-full
                     h-full
@@ -216,7 +201,7 @@ const ServiceGrid = () => {
                     text-primary
                   "
                 >
-                  {service.name}
+                  {service.serviceName}
                 </h3>
 
                 {/* Stats */}
@@ -250,7 +235,7 @@ const ServiceGrid = () => {
                         text-sm
                       "
                     >
-                      {service.experts}
+                      {service.totalBookings}
                     </span>
                   </div>
 
@@ -299,7 +284,7 @@ const ServiceGrid = () => {
                       text-primary
                     "
                   >
-                    ₹{service.price}
+                    ₹{service.startingPrice}
                   </span>
 
                   <span
@@ -314,6 +299,9 @@ const ServiceGrid = () => {
                 {/* CTA */}
 
                 <button
+  onClick={() =>
+    navigate(`/customer/experts?service=${service._id}`)
+  }
                   className="
                     mt-8
 
@@ -349,7 +337,7 @@ const ServiceGrid = () => {
             </motion.div>
           ))}
         </div>
-
+)}
         {/* Load More */}
 
         <div
@@ -360,25 +348,29 @@ const ServiceGrid = () => {
             justify-center
           "
         >
-          <button
-            className="
-              px-8
-              py-4
-
-              rounded-2xl
-
-              border
-              border-theme
-
-              text-primary
-
-              hover:bg-card
-
-              transition
-            "
-          >
-            Load More Services
-          </button>
+          {pagination &&
+pagination.page < pagination.pages && (
+  <button
+    onClick={() =>
+      setFilters((prev) => ({
+        ...prev,
+        page: prev.page + 1,
+      }))
+    }
+    className="
+      px-8
+      py-4
+      rounded-2xl
+      border
+      border-theme
+      text-primary
+      hover:bg-card
+      transition
+    "
+  >
+    Load More Services
+  </button>
+)}
         </div>
       </div>
     </section>

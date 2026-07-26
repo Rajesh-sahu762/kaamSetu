@@ -604,101 +604,275 @@ exports.createReview = async (req, res) => {
   }
 };
 
-
 // =======================================
-// GET /customer/services
+// PUBLIC BROWSE (no login required — powers the home page, service
+// listing, and expert-profile pages for both guests and logged-in customers)
 // =======================================
 
+// GET /api/customer/home
+exports.getHomeData = async (req, res) => {
+  try {
+    const [verifiedExperts, jobsCompleted, totalReviews, categories, topVendors, testimonialsRaw, ratingAgg] = await Promise.all([
+      Vendor.countDocuments({ status: "approved" }),
+      Booking.countDocuments({ status: "completed" }),
+      Review.countDocuments({}),
+      Category.find({ isActive: true }, { name: 1, slug: 1, image: 1, description: 1 }).sort({ name: 1 }).limit(8),
+      Vendor.aggregate([
+        { $match: { status: "approved" } },
+        {
+          $lookup: {
+            from: "reviews",
+            localField: "_id",
+            foreignField: "vendorId",
+            as: "reviews",
+          },
+        },
+        {
+          $lookup: {
+            from: "services",
+            localField: "_id",
+            foreignField: "vendorId",
+            as: "services",
+          },
+        },
+        {
+          $addFields: {
+            averageRating: { $ifNull: [{ $avg: "$reviews.rating" }, 0] },
+            reviewCount: { $size: "$reviews" },
+            totalBookings: { $sum: "$services.totalBookings" },
+            primaryCategory: { $arrayElemAt: ["$services.serviceName", 0] },
+          },
+        },
+        { $sort: { averageRating: -1, reviewCount: -1 } },
+        { $limit: 8 },
+        {
+          $project: {
+            businessName: 1,
+            city: 1,
+            state: 1,
+            experience: 1,
+            skills: 1,
+            userId: 1,
+            averageRating: 1,
+            reviewCount: 1,
+            totalBookings: 1,
+            primaryCategory: 1,
+          },
+        },
+      ]),
+      Review.find({ rating: { $gte: 4 }, review: { $ne: "" } })
+        .sort({ createdAt: -1 })
+        .limit(6)
+        .populate("customerId", "fullName profileImage")
+        .populate("vendorId", "businessName")
+        .populate("serviceId", "serviceName"),
+      Review.aggregate([{ $group: { _id: null, avg: { $avg: "$rating" } } }]),
+    ]);
+
+    const vendorUserIds = topVendors.map((v) => v.userId).filter(Boolean);
+    const vendorUsers = await User.find({ _id: { $in: vendorUserIds } }).select("profileImage");
+    const imageByUserId = new Map(vendorUsers.map((u) => [u._id.toString(), u.profileImage]));
+
+    const featuredExperts = topVendors.map((v) => ({
+      id: v._id,
+      name: v.businessName,
+      category: v.primaryCategory || v.skills?.[0] || "Service Professional",
+      city: v.city,
+      state: v.state,
+      rating: Number((v.averageRating || 0).toFixed(1)),
+      reviewCount: v.reviewCount || 0,
+      experience: v.experience ? `${v.experience} ${v.experience === 1 ? "Year" : "Years"}` : "New",
+      jobs: v.totalBookings ? `${v.totalBookings}+ Jobs` : "New on KaamSetu",
+      image: imageByUserId.get(v.userId?.toString()) || "",
+    }));
+
+    const testimonials = testimonialsRaw.map((r) => ({
+      id: r._id,
+      name: r.customerId?.fullName || "Verified Customer",
+      image: r.customerId?.profileImage || "",
+      rating: r.rating,
+      review: r.review,
+      vendor: r.vendorId?.businessName || "",
+      service: r.serviceId?.serviceName || "",
+      date: r.createdAt,
+    }));
+
+    const satisfactionRate = ratingAgg.length ? Math.round((ratingAgg[0].avg / 5) * 100) : 0;
+    const averageRating = ratingAgg.length ? Number(ratingAgg[0].avg.toFixed(1)) : 0;
+
+    return res.status(200).json({
+      success: true,
+      message: "Home data fetched successfully.",
+      data: {
+        stats: {
+          verifiedExperts,
+          jobsCompleted,
+          satisfactionRate,
+          averageRating,
+          totalReviews,
+        },
+        categories,
+        featuredExperts,
+        testimonials,
+      },
+    });
+  } catch (error) {
+    console.error("getHomeData error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// GET /api/customer/services?category=&search=&city=&sort=popular&page=1&limit=12
 exports.getServices = async (req, res) => {
   try {
-    const {
-      category = "",
-      search = "",
-      sort = "newest",
-    } = req.query;
+    const { category = "", search = "", city = "", sort = "popular", page = 1, limit = 12 } = req.query;
 
-    const { page, limit, skip } = paginate(req.query);
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.min(50, Math.max(1, Number(limit) || 12));
+    const skip = (pageNum - 1) * limitNum;
 
-    const filter = {
-      isActive: true,
-    };
+    const approvedVendorFilter = { status: "approved" };
+    if (city.trim()) approvedVendorFilter.city = { $regex: city.trim(), $options: "i" };
+    const approvedVendors = await Vendor.find(approvedVendorFilter).select("_id");
 
-    // Category Filter
-    if (category && isValidId(category)) {
-      filter.categoryId = category;
+    const filter = { isActive: true, vendorId: { $in: approvedVendors.map((v) => v._id) } };
+
+    if (category) {
+      if (isValidId(category)) {
+        filter.categoryId = category;
+      } else {
+        const matchedCategory = await Category.findOne({ slug: category });
+        filter.categoryId = matchedCategory ? matchedCategory._id : null;
+      }
     }
 
-    // Search
     if (search.trim()) {
-      const regex = new RegExp(search.trim(), "i");
-
-      filter.$or = [
-        { serviceName: regex },
-        { description: regex },
-        { slug: regex },
-      ];
+      filter.serviceName = { $regex: search.trim(), $options: "i" };
     }
 
-    // Sorting
-    let sortOption = { createdAt: -1 };
+    const sortMap = {
+      popular: { totalBookings: -1 },
+      priceLow: { startingPrice: 1 },
+      priceHigh: { startingPrice: -1 },
+      rating: { rating: -1 },
+      newest: { createdAt: -1 },
+    };
+    const sortOption = sortMap[sort] || sortMap.popular;
 
-    switch (sort) {
-      case "price-low":
-        sortOption = { startingPrice: 1 };
-        break;
+    const [services, total] = await Promise.all([
+      Service.find(filter)
+        .populate("vendorId", "businessName city state")
+        .populate("categoryId", "name slug")
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limitNum),
+      Service.countDocuments(filter),
+    ]);
 
-      case "price-high":
-        sortOption = { startingPrice: -1 };
-        break;
+    const data = services.map((service) => ({
+      id: service._id,
+      name: service.serviceName,
+      description: service.description,
+      price: service.startingPrice,
+      priceType: service.priceType,
+      duration: service.duration,
+      rating: service.rating,
+      totalBookings: service.totalBookings,
+      image: service.coverImage,
+      category: service.categoryId?.name || "",
+      categorySlug: service.categoryId?.slug || "",
+      vendorId: service.vendorId?._id,
+      vendorName: service.vendorId?.businessName || "",
+      city: service.vendorId?.city || "",
+    }));
 
-      case "popular":
-        sortOption = { totalBookings: -1 };
-        break;
-
-      case "rating":
-        sortOption = { rating: -1 };
-        break;
-
-      default:
-        sortOption = { createdAt: -1 };
-    }
-
-    const [services, total, categories] = await Promise.all([
-  Service.find(filter)
-    .populate("vendorId", "businessName city state profileImage")
-    .populate("categoryId", "name slug")
-    .sort(sortOption)
-    .skip(skip)
-    .limit(limit),
-
-  Service.countDocuments(filter),
-
-  Category.find({ isActive: true })
-    .select("name slug")
-    .sort({ name: 1 }),
-]);
-
-   return res.status(200).json({
-  success: true,
-
-  data: {
-    services,
-    categories,
-  },
-
-  pagination: {
-    page,
-    limit,
-    total,
-    pages: Math.ceil(total / limit),
-  },
-});
-  } catch (error) {
-    console.error("Customer getServices error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
+    return res.status(200).json({
+      success: true,
+      message: "Services fetched successfully.",
+      data,
+      pagination: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) },
     });
+  } catch (error) {
+    console.error("getServices error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// GET /api/customer/expert/:vendorId
+exports.getExpertDetails = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+
+    if (!isValidId(vendorId)) {
+      return res.status(400).json({ success: false, message: "Invalid vendor ID." });
+    }
+
+    const vendor = await Vendor.findOne({ _id: vendorId, status: "approved" }).select(
+      "-aadhaarNumber -panNumber -aadhaarImage -panImage -bankDetails -__v",
+    );
+
+    if (!vendor) {
+      return res.status(404).json({ success: false, message: "Expert not found." });
+    }
+
+    const [vendorUser, services, reviews, ratingAgg] = await Promise.all([
+      User.findById(vendor.userId).select("fullName profileImage"),
+      Service.find({ vendorId: vendor._id, isActive: true }).select(
+        "serviceName description startingPrice priceType duration coverImage rating totalBookings",
+      ),
+      Review.find({ vendorId: vendor._id, review: { $ne: "" } })
+        .sort({ createdAt: -1 })
+        .limit(20)
+        .populate("customerId", "fullName profileImage")
+        .populate("serviceId", "serviceName"),
+      Review.aggregate([
+        { $match: { vendorId: vendor._id } },
+        { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Expert details fetched successfully.",
+      data: {
+        id: vendor._id,
+        name: vendor.businessName,
+        city: vendor.city,
+        state: vendor.state,
+        experience: vendor.experience,
+        bio: vendor.bio || "",
+        skills: vendor.skills || [],
+        serviceAreas: vendor.serviceAreas || [],
+        availability: vendor.availability || [],
+        image: vendorUser?.profileImage || "",
+        contactName: vendorUser?.fullName || "",
+        rating: ratingAgg.length ? Number(ratingAgg[0].avg.toFixed(1)) : 0,
+        reviewCount: ratingAgg.length ? ratingAgg[0].count : 0,
+        services: services.map((service) => ({
+          id: service._id,
+          name: service.serviceName,
+          description: service.description,
+          price: service.startingPrice,
+          priceType: service.priceType,
+          duration: service.duration,
+          image: service.coverImage,
+          rating: service.rating,
+          totalBookings: service.totalBookings,
+        })),
+        reviews: reviews.map((review) => ({
+          id: review._id,
+          name: review.customerId?.fullName || "Verified Customer",
+          image: review.customerId?.profileImage || "",
+          rating: review.rating,
+          review: review.review,
+          service: review.serviceId?.serviceName || "",
+          date: review.createdAt,
+          vendorReply: review.vendorReply || "",
+        })),
+      },
+    });
+  } catch (error) {
+    console.error("getExpertDetails error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };

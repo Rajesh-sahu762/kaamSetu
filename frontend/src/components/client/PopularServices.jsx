@@ -9,7 +9,9 @@ import {
   Sparkles,
   ShieldCheck,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCategories } from "@/services/serviceService";
 
 // Icon fallback per category name — only used when a category has no image of its own.
 const ICON_BY_NAME = {
@@ -29,12 +31,34 @@ const ICON_BY_NAME = {
 
 const getIconFor = (name = "") => ICON_BY_NAME[name.trim().toLowerCase()] || Sparkles;
 
-const PopularServices = ({
-    categories = [],
-    loading
-}) => {
+const PopularServices = ({ categories: categoriesProp, loading: loadingProp }) => {
 
   const navigate = useNavigate()
+
+  const [selfFetched, setSelfFetched] = useState([]);
+  const [selfLoading, setSelfLoading] = useState(categoriesProp === undefined);
+
+  // Only self-fetch when no data was handed down (e.g. when used standalone
+  // on the Services page). The home page passes real data from one shared
+  // getHomeData() call instead, avoiding a duplicate network request.
+  useEffect(() => {
+    if (categoriesProp !== undefined) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await getCategories();
+        if (!cancelled) setSelfFetched((response.data || []).slice(0, 8));
+      } catch (error) {
+        console.error("Failed to load categories:", error);
+      } finally {
+        if (!cancelled) setSelfLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [categoriesProp]);
+
+  const categories = categoriesProp !== undefined ? categoriesProp : selfFetched;
+  const loading = loadingProp !== undefined ? loadingProp : selfLoading;
 
   return (
     <section className="py-22 bg-card">

@@ -5,12 +5,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
-const Testimonials = ({
-    testimonials = [],
-    stats,
-    loading,
-}) => {
+const Testimonials = ({ testimonials = [], stats, loading = false }) => {
   const navigate = useNavigate()
   return (
     <section className="py-24 bg-card">
@@ -67,21 +62,17 @@ const Testimonials = ({
           "
         >
           <StatCard
-            number={loading
-    ? "--"
-    : stats?.averageRating}
+            number={loading ? "…" : `${stats?.averageRating || 0}★`}
             label="Average Rating"
           />
 
           <StatCard
-            number={loading
-    ? "--"
-    : stats?.customerReviews}
+            number={loading ? "…" : `${stats?.totalReviews || 0}+`}
             label="Customer Reviews"
           />
 
           <StatCard
-            number="98%"
+            number={loading ? "…" : `${stats?.satisfactionRate || 0}%`}
             label="Customer Satisfaction"
           />
         </div>
@@ -96,10 +87,28 @@ const Testimonials = ({
             gap-6
           "
         >
-          {testimonials.map(
+          {loading ? (
+            Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="bg-card border border-theme rounded-3xl p-8 animate-pulse">
+                <div className="w-8 h-8 rounded bg-[#745A38]/10" />
+                <div className="mt-5 h-4 w-24 rounded bg-[#745A38]/10" />
+                <div className="mt-5 space-y-2">
+                  <div className="h-4 w-full rounded bg-[#745A38]/5" />
+                  <div className="h-4 w-full rounded bg-[#745A38]/5" />
+                  <div className="h-4 w-2/3 rounded bg-[#745A38]/5" />
+                </div>
+                <div className="mt-8 h-4 w-32 rounded bg-[#745A38]/10" />
+              </div>
+            ))
+          ) : testimonials.length === 0 ? (
+            <p className="col-span-full text-center text-muted">
+              Be the first to share your experience with a KaamSetu professional.
+            </p>
+          ) : (
+          testimonials.map(
             (testimonial, index) => (
               <motion.div
-                key={testimonial.name}
+                key={testimonial.id}
                 initial={{
                   opacity: 0,
                   y: 30,
@@ -190,17 +199,18 @@ const Testimonials = ({
                       text-[#745A38]
                     "
                   >
-                    {testimonial.city}
+                    {[testimonial.vendor, testimonial.service].filter(Boolean).join(" · ")}
                   </p>
                 </div>
               </motion.div>
             )
+          )
           )}
         </div>
 
   <div className="text-center mt-16">
           <button
-          onClick={() => navigate('/review/:bookingId')}
+          onClick={() => navigate('/services')}
             className="
               px-8
               py-4
@@ -216,7 +226,7 @@ const Testimonials = ({
               shadow-lg
             "
           >
-            View All Reviews
+            Explore Services
           </button>
         </div>
 
@@ -254,7 +264,7 @@ const StatCard = ({
       <p
         className="
           mt-3
-          text-[#d3e4fe]
+          text-[#A88A64]
         "
       >
         {label}

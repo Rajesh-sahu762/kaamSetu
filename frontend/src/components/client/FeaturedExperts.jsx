@@ -7,11 +7,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
-const FeaturedExperts = ({
-  experts = [],
-  loading,
-}) => {
+const FeaturedExperts = ({ experts = [], loading = false }) => {
 
   const navigate =useNavigate();
 
@@ -70,9 +66,25 @@ const FeaturedExperts = ({
             gap-6
           "
         >
-          {experts.map((expert, index) => (
+          {loading ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="bg-card border border-theme rounded-3xl overflow-hidden animate-pulse">
+                <div className="h-[280px] w-full bg-[#745A38]/10" />
+                <div className="p-6">
+                  <div className="h-5 w-2/3 rounded bg-[#745A38]/10" />
+                  <div className="mt-3 h-4 w-1/2 rounded bg-[#745A38]/5" />
+                  <div className="mt-5 h-4 w-full rounded bg-[#745A38]/5" />
+                </div>
+              </div>
+            ))
+          ) : experts.length === 0 ? (
+            <p className="col-span-full text-center text-muted">
+              New experts are joining every day — check back soon.
+            </p>
+          ) : (
+          experts.map((expert, index) => (
             <motion.div
-            onClick={() => navigate(`/expert/${expert._id}`)}
+            onClick={() => navigate(`/expert/${expert.id}`)}
               key={expert.id}
               initial={{
                 opacity: 0,
@@ -107,15 +119,28 @@ const FeaturedExperts = ({
               {/* Image */}
 
               <div className="relative">
-                <img
-                  src={expert.image}
-                  alt={expert.name}
-                  className="
-                    h-[280px]
-                    w-full
-                    object-cover
-                  "
-                />
+                {expert.image ? (
+                  <img
+                    src={expert.image}
+                    alt={expert.name}
+                    className="
+                      h-[280px]
+                      w-full
+                      object-cover
+                    "
+                  />
+                ) : (
+                  <div
+                    className="
+                      h-[280px] w-full
+                      flex items-center justify-center
+                      bg-gradient-to-br from-[#745A38] to-[#A88A64]
+                      text-white text-5xl font-bold
+                    "
+                  >
+                    {expert.name?.trim()?.charAt(0)?.toUpperCase() || "K"}
+                  </div>
+                )}
 
                 <div
                   className="
@@ -141,7 +166,7 @@ const FeaturedExperts = ({
                     size={15}
                     className="text-yellow-500"
                   />
-                  {expert.rating}
+                  {expert.rating || "New"}
                 </div>
               </div>
 
@@ -230,10 +255,11 @@ const FeaturedExperts = ({
                       text-muted
                     "
                   >
-                    {expert.jobs}
+                    {expert.jobs} · {expert.reviewCount || 0} reviews
                   </span>
 
                   <button
+                    type="button"
                     className="
                       text-[#745A38]
                       font-medium
@@ -244,7 +270,8 @@ const FeaturedExperts = ({
                 </div>
               </div>
             </motion.div>
-          ))}
+          ))
+          )}
         </div>
 
         {/* Bottom CTA */}

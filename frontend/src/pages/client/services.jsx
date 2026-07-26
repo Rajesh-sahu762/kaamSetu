@@ -30,8 +30,15 @@ const [categories, setCategories] = useState([]);
 
       const response = await getServices(filters);
 
-      if (response.success) {
-  setServices(response.data.services || []);
+ if (response.success) {
+  const newServices = response.data.services || [];
+
+  setServices((prev) =>
+    filters.page === 1
+      ? newServices
+      : [...prev, ...newServices]
+  );
+
   setCategories(response.data.categories || []);
   setPagination(response.pagination || null);
 }

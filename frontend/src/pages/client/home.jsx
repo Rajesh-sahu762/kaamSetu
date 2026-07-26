@@ -1,81 +1,59 @@
-import { useEffect, useState } from "react";
-
-import HeroSection from "@/components/client/hero";
-import PopularServices from "@/components/client/PopularServices";
-import WhyChooseKaamSetu from "@/components/client/WhyChooseUs";
-import FeaturedExperts from "@/components/client/FeaturedExperts";
-import HowItWorks from "@/components/client/HowItWorks";
-import Testimonials from "@/components/client/Testimonials";
-import FinalCTA from "@/components/client/CTA";
-
-import { getHomeData } from "@/services/customerService";
+import FinalCTA from '@/components/client/CTA'
+import FeaturedExperts from '@/components/client/FeaturedExperts'
+import HeroSection from '@/components/client/hero'
+import HowItWorks from '@/components/client/HowItWorks'
+import PopularServices from '@/components/client/PopularServices'
+import Testimonials from '@/components/client/Testimonials'
+import WhyChooseKaamSetu from '@/components/client/WhyChooseUs'
+import { getHomeData } from '@/services/customerService'
+import { useEffect, useState } from 'react'
 
 const Home = () => {
+
   const [homeData, setHomeData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let ignore = false;
-
-    const fetchHomeData = async () => {
+    let cancelled = false;
+    (async () => {
       try {
         const response = await getHomeData();
-
-        if (!ignore && response.success) {
-          setHomeData(response.data);
-        }
+        if (!cancelled) setHomeData(response.data);
       } catch (error) {
-        console.error("Failed to load home page:", error);
+        console.error("Failed to load home data:", error);
       } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
-    };
-
-    fetchHomeData();
-
-    return () => {
-      ignore = true;
-    };
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   return (
     <>
-      <HeroSection
-        hero={homeData?.hero}
-        loading={loading}
-      />
+     <HeroSection
+       stats={homeData?.stats}
+       categories={homeData?.categories}
+       loading={loading}
+     />
+     <PopularServices
+       categories={homeData?.categories || []}
+       loading={loading}
+     />
+     <WhyChooseKaamSetu />
+     <FeaturedExperts
+       experts={homeData?.featuredExperts || []}
+       loading={loading}
+     />
+     <HowItWorks />
+     <Testimonials
+       testimonials={homeData?.testimonials || []}
+       stats={homeData?.stats}
+       loading={loading}
+     />
+     <FinalCTA />
 
-      <PopularServices
-        categories={homeData?.categories || []}
-        loading={loading}
-      />
-
-      <WhyChooseKaamSetu
-        stats={homeData?.stats}
-        loading={loading}
-      />
-
-      <FeaturedExperts
-        experts={homeData?.featuredExperts || []}
-        loading={loading}
-      />
-
-      <HowItWorks />
-
-      <Testimonials
-        testimonials={homeData?.testimonials || []}
-        stats={homeData?.stats}
-        loading={loading}
-      />
-
-      <FinalCTA
-        stats={homeData?.stats}
-        loading={loading}
-      />
     </>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

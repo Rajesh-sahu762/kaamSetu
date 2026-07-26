@@ -14,12 +14,22 @@ const {
   getBookingById,
   cancelBooking,
   createReview,
+  getHomeData,
   getServices,
+  getExpertDetails,
 } = require("../controllers/customerController");
 
 // Profile image upload is generic on the User model (not vendor-specific),
 // so we reuse the vendor panel's existing controller instead of duplicating it.
 const { updateProfileImage } = require("../controllers/vendorController");
+
+// =======================================
+// Public Browse Routes (no login required — guests can view the
+// home page, browse services, and view expert profiles)
+// =======================================
+router.get("/home", getHomeData);
+router.get("/services", getServices);
+router.get("/expert/:vendorId", getExpertDetails);
 
 // =======================================
 // Profile Routes
@@ -51,7 +61,5 @@ router.patch("/bookings/:bookingId/cancel", verifyToken, verifyCustomer, cancelB
 // Review Routes
 // =======================================
 router.post("/bookings/:bookingId/review", verifyToken, verifyCustomer, createReview);
-
-router.get("/services", getServices);
 
 module.exports = router;
