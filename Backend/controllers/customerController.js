@@ -725,7 +725,18 @@ exports.getHomeData = async (req, res) => {
 // GET /api/customer/services?category=&search=&city=&sort=popular&page=1&limit=12
 exports.getServices = async (req, res) => {
   try {
-    const { category = "", search = "", city = "", sort = "popular", page = 1, limit = 12 } = req.query;
+    const {
+      category = "",
+      search = "",
+      city = "",
+      sort = "popular",
+      minExperience = "",
+      minRating = "",
+      minPrice = "",
+      maxPrice = "",
+      page = 1,
+      limit = 12,
+    } = req.query;
 
     const pageNum = Math.max(1, Number(page) || 1);
     const limitNum = Math.min(50, Math.max(1, Number(limit) || 12));
@@ -733,6 +744,9 @@ exports.getServices = async (req, res) => {
 
     const approvedVendorFilter = { status: "approved" };
     if (city.trim()) approvedVendorFilter.city = { $regex: city.trim(), $options: "i" };
+    if (minExperience && !Number.isNaN(Number(minExperience))) {
+      approvedVendorFilter.experience = { $gte: Number(minExperience) };
+    }
     const approvedVendors = await Vendor.find(approvedVendorFilter).select("_id");
 
     const filter = { isActive: true, vendorId: { $in: approvedVendors.map((v) => v._id) } };
@@ -748,6 +762,16 @@ exports.getServices = async (req, res) => {
 
     if (search.trim()) {
       filter.serviceName = { $regex: search.trim(), $options: "i" };
+    }
+
+    if (minRating && !Number.isNaN(Number(minRating))) {
+      filter.rating = { $gte: Number(minRating) };
+    }
+
+    if ((minPrice && !Number.isNaN(Number(minPrice))) || (maxPrice && !Number.isNaN(Number(maxPrice)))) {
+      filter.startingPrice = {};
+      if (minPrice && !Number.isNaN(Number(minPrice))) filter.startingPrice.$gte = Number(minPrice);
+      if (maxPrice && !Number.isNaN(Number(maxPrice))) filter.startingPrice.$lte = Number(maxPrice);
     }
 
     const sortMap = {

@@ -7,37 +7,9 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
-const ServiceGrid = ({
-  services,
-  loading,
-  error,
-  pagination,
-  filters,
-  setFilters,
-}) => {
-
-
-  if (loading) {
-  return (
-    <section className="py-20 bg-theme">
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 text-center">
-        Loading services...
-      </div>
-    </section>
-  );
-}
-if (error) {
-  return (
-    <section className="py-20 bg-theme">
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 text-center text-red-500">
-        {error}
-      </div>
-    </section>
-  );
-}
-
+const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, loadingMore = false }) => {
   const navigate = useNavigate();
+
   return (
     <section className="py-20 bg-theme">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
@@ -99,18 +71,6 @@ if (error) {
 
         {/* Grid */}
 
-        {services.length === 0 && (
-  <div className="text-center py-20">
-    <h3 className="text-2xl font-semibold text-primary">
-      No Services Found
-    </h3>
-
-    <p className="text-muted mt-3">
-      Try changing your filters.
-    </p>
-  </div>
-)}
-{services.length > 0 && (
         <div
           className="
             mt-14
@@ -123,9 +83,27 @@ if (error) {
             gap-8
           "
         >
-          {services.map((service, index) => (
+          {loading ? (
+            Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="bg-card border border-theme rounded-3xl overflow-hidden shadow-theme animate-pulse">
+                <div className="h-[240px] bg-[#745A38]/10" />
+                <div className="p-6">
+                  <div className="h-6 w-2/3 rounded bg-[#745A38]/10" />
+                  <div className="mt-4 h-4 w-1/2 rounded bg-[#745A38]/5" />
+                  <div className="mt-6 h-8 w-1/3 rounded bg-[#745A38]/10" />
+                  <div className="mt-8 h-12 w-full rounded-2xl bg-[#745A38]/10" />
+                </div>
+              </div>
+            ))
+          ) : services.length === 0 ? (
+            <p className="col-span-full text-center text-muted py-10">
+              No services matched your filters. Try adjusting your search.
+            </p>
+          ) : (
+          services.map((service, index) => (
             <motion.div
               key={service.id}
+              onClick={() => navigate(`/expert/${service.vendorId}`)}
               initial={{
                 opacity: 0,
                 y: 30,
@@ -138,7 +116,7 @@ if (error) {
                 once: true,
               }}
               transition={{
-                delay: index * 0.05,
+                delay: (index % 6) * 0.05,
               }}
               whileHover={{
                 y: -8,
@@ -168,25 +146,34 @@ if (error) {
                   overflow-hidden
                 "
               >
-                <img
-                  src={
-  service.coverImage ||
-  service.images?.[0] ||
-  "/images/service-placeholder.png"
-}
-                  alt={service.serviceName}
-                  className="
-                    w-full
-                    h-full
+                {service.image ? (
+                  <img
+                    src={service.image}
+                    alt={service.name}
+                    className="
+                      w-full
+                      h-full
 
-                    object-cover
+                      object-cover
 
-                    group-hover:scale-110
+                      group-hover:scale-110
 
-                    transition-all
-                    duration-700
-                  "
-                />
+                      transition-all
+                      duration-700
+                    "
+                  />
+                ) : (
+                  <div
+                    className="
+                      w-full h-full
+                      flex items-center justify-center
+                      bg-gradient-to-br from-[#745A38] to-[#A88A64]
+                      text-white text-4xl font-bold
+                    "
+                  >
+                    {service.name?.trim()?.charAt(0)?.toUpperCase() || "K"}
+                  </div>
+                )}
               </div>
 
               {/* Content */}
@@ -201,8 +188,10 @@ if (error) {
                     text-primary
                   "
                 >
-                  {service.serviceName}
+                  {service.name}
                 </h3>
+
+                <p className="mt-1 text-sm text-muted">{service.vendorName}</p>
 
                 {/* Stats */}
 
@@ -235,7 +224,7 @@ if (error) {
                         text-sm
                       "
                     >
-                      {service.totalBookings}
+                      {service.totalBookings || 0} booked
                     </span>
                   </div>
 
@@ -260,7 +249,7 @@ if (error) {
                         text-sm
                       "
                     >
-                      {service.rating}
+                      {service.rating || "New"}
                     </span>
                   </div>
                 </div>
@@ -284,7 +273,7 @@ if (error) {
                       text-primary
                     "
                   >
-                    ₹{service.startingPrice}
+                    ₹{service.price}
                   </span>
 
                   <span
@@ -292,16 +281,14 @@ if (error) {
                       text-muted
                     "
                   >
-                    starting
+                    {service.priceType === "variable" ? "starting" : "fixed"}
                   </span>
                 </div>
 
                 {/* CTA */}
 
                 <button
-  onClick={() =>
-    navigate(`/customer/experts?service=${service._id}`)
-  }
+                  type="button"
                   className="
                     mt-8
 
@@ -335,43 +322,46 @@ if (error) {
                 </button>
               </div>
             </motion.div>
-          ))}
+          ))
+          )}
         </div>
-)}
+
         {/* Load More */}
 
-        <div
-          className="
-            mt-16
+        {!loading && pagination && pagination.page < pagination.pages && (
+          <div
+            className="
+              mt-16
 
-            flex
-            justify-center
-          "
-        >
-          {pagination &&
-pagination.page < pagination.pages && (
-  <button
-    onClick={() =>
-      setFilters((prev) => ({
-        ...prev,
-        page: prev.page + 1,
-      }))
-    }
-    className="
-      px-8
-      py-4
-      rounded-2xl
-      border
-      border-theme
-      text-primary
-      hover:bg-card
-      transition
-    "
-  >
-    Load More Services
-  </button>
-)}
-        </div>
+              flex
+              justify-center
+            "
+          >
+            <button
+              onClick={onLoadMore}
+              disabled={loadingMore}
+              className="
+                px-8
+                py-4
+
+                rounded-2xl
+
+                border
+                border-theme
+
+                text-primary
+
+                hover:bg-card
+
+                transition
+
+                disabled:opacity-60
+              "
+            >
+              {loadingMore ? "Loading…" : "Load More Services"}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -4,8 +4,17 @@ import {
   MapPin,
   ArrowRight,
 } from "lucide-react";
+import { useState } from "react";
 
-const ServiceHero = () => {
+const ServiceHero = ({ initialSearch = "", initialCity = "", onSearch }) => {
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [city, setCity] = useState(initialCity);
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+    onSearch?.({ search: searchTerm.trim(), city: city.trim() });
+  };
+
   return (
     <section
       className="
@@ -174,6 +183,9 @@ const ServiceHero = () => {
             transition={{
               delay: 0.3,
             }}
+          >
+          <form
+            onSubmit={handleSearch}
             className="
               mt-10
 
@@ -214,6 +226,8 @@ const ServiceHero = () => {
 
               <input
                 type="text"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="What service do you need?"
                 className="
                   w-full
@@ -249,6 +263,8 @@ const ServiceHero = () => {
 
               <input
                 type="text"
+                value={city}
+                onChange={(event) => setCity(event.target.value)}
                 placeholder="Enter your city"
                 className="
                   w-full
@@ -265,6 +281,7 @@ const ServiceHero = () => {
             {/* Search Button */}
 
             <button
+              type="submit"
               className="
                 px-8
                 py-4
@@ -290,6 +307,7 @@ const ServiceHero = () => {
 
               <ArrowRight size={18} />
             </button>
+          </form>
           </motion.div>
 
           {/* Stats */}
