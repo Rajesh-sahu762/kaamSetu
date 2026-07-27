@@ -1,31 +1,61 @@
 import api from "./api";
 
-// Get all of the logged-in user's notifications + unread count
 export const getNotifications = async () => {
-  const response = await api.get("/notifications");
-  return response.data;
+  try {
+    const response = await api.get("/notifications");
+
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
 };
 
-// Mark a single notification as read
 export const markNotificationAsRead = async (id) => {
-  const response = await api.patch(`/notifications/${id}/read`);
-  return response.data;
+  try {
+    const response = await api.patch(`/notifications/${id}/read`);
+
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
 };
 
-// Mark every notification as read
 export const markAllNotificationsAsRead = async () => {
-  const response = await api.patch("/notifications/read-all");
-  return response.data;
+  try {
+    const response = await api.patch("/notifications/read-all");
+
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
 };
 
-// Delete a single notification
 export const deleteNotification = async (id) => {
-  const response = await api.delete(`/notifications/${id}`);
-  return response.data;
-};
+  try {
+    const response = await api.delete(`/notifications/${id}`);
 
-// Clear every notification
-export const clearAllNotifications = async () => {
-  const response = await api.delete("/notifications/clear-all");
-  return response.data;
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
 };

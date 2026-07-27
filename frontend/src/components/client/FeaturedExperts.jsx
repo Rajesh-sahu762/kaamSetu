@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Star,
@@ -7,9 +8,35 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const FeaturedExperts = ({ experts = [], loading = false }) => {
+import { getFeaturedExperts } from "@/services/publicService";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43d?w=500";
+
+const FeaturedExperts = () => {
 
   const navigate =useNavigate();
+
+  const [experts, setExperts] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchExperts = async () => {
+      try {
+        const response = await getFeaturedExperts();
+
+        if (response.success) {
+          setExperts(response.data);
+        } else {
+          setError(response.message || "Failed to load featured experts.");
+        }
+      } catch (err) {
+        setError("Failed to load featured experts.");
+      }
+    };
+
+    fetchExperts();
+  }, []);
 
   return (
     <section className="py-24 bg-card">
@@ -55,6 +82,20 @@ const FeaturedExperts = ({ experts = [], loading = false }) => {
           </p>
         </div>
 
+        {/* Error */}
+
+        {error && (
+          <p className="text-center text-red-500 mt-10">{error}</p>
+        )}
+
+        {/* Empty State */}
+
+        {!error && experts.length === 0 && (
+          <p className="text-center text-muted mt-10">
+            No featured experts yet.
+          </p>
+        )}
+
         {/* Cards */}
 
         <div
@@ -66,26 +107,10 @@ const FeaturedExperts = ({ experts = [], loading = false }) => {
             gap-6
           "
         >
-          {loading ? (
-            Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="bg-card border border-theme rounded-3xl overflow-hidden animate-pulse">
-                <div className="h-[280px] w-full bg-[#745A38]/10" />
-                <div className="p-6">
-                  <div className="h-5 w-2/3 rounded bg-[#745A38]/10" />
-                  <div className="mt-3 h-4 w-1/2 rounded bg-[#745A38]/5" />
-                  <div className="mt-5 h-4 w-full rounded bg-[#745A38]/5" />
-                </div>
-              </div>
-            ))
-          ) : experts.length === 0 ? (
-            <p className="col-span-full text-center text-muted">
-              New experts are joining every day — check back soon.
-            </p>
-          ) : (
-          experts.map((expert, index) => (
+          {experts.map((expert, index) => (
             <motion.div
-            onClick={() => navigate(`/expert/${expert.id}`)}
-              key={expert.id}
+            onClick={() => navigate(`/expert/${expert._id}`)}
+              key={expert._id}
               initial={{
                 opacity: 0,
                 y: 40,
@@ -111,6 +136,7 @@ const FeaturedExperts = ({ experts = [], loading = false }) => {
                 rounded-3xl
                 overflow-hidden
                 group
+                cursor-pointer
 
                 hover:shadow-[0_15px_40px_rgba(9,20,38,0.08)]
                 transition-all
@@ -119,28 +145,15 @@ const FeaturedExperts = ({ experts = [], loading = false }) => {
               {/* Image */}
 
               <div className="relative">
-                {expert.image ? (
-                  <img
-                    src={expert.image}
-                    alt={expert.name}
-                    className="
-                      h-[280px]
-                      w-full
-                      object-cover
-                    "
-                  />
-                ) : (
-                  <div
-                    className="
-                      h-[280px] w-full
-                      flex items-center justify-center
-                      bg-gradient-to-br from-[#745A38] to-[#A88A64]
-                      text-white text-5xl font-bold
-                    "
-                  >
-                    {expert.name?.trim()?.charAt(0)?.toUpperCase() || "K"}
-                  </div>
-                )}
+                <img
+                  src={expert.userId?.profileImage || FALLBACK_IMAGE}
+                  alt={expert.businessName}
+                  className="
+                    h-[280px]
+                    w-full
+                    object-cover
+                  "
+                />
 
                 <div
                   className="
@@ -166,7 +179,7 @@ const FeaturedExperts = ({ experts = [], loading = false }) => {
                     size={15}
                     className="text-yellow-500"
                   />
-                  {expert.rating || "New"}
+                  {expert.rating ? expert.rating.toFixed(1) : "New"}
                 </div>
               </div>
 
@@ -187,7 +200,7 @@ const FeaturedExperts = ({ experts = [], loading = false }) => {
                       text-primary
                     "
                   >
-                    {expert.name}
+                    {expert.businessName}
                   </h3>
 
                   <BadgeCheck
@@ -237,7 +250,7 @@ const FeaturedExperts = ({ experts = [], loading = false }) => {
                     "
                   >
                     <Briefcase size={16} />
-                    {expert.experience}
+                    {expert.experience || 0} Years
                   </div>
                 </div>
 
@@ -255,11 +268,10 @@ const FeaturedExperts = ({ experts = [], loading = false }) => {
                       text-muted
                     "
                   >
-                    {expert.jobs} · {expert.reviewCount || 0} reviews
+                    {expert.jobsCount || 0}+ Jobs
                   </span>
 
                   <button
-                    type="button"
                     className="
                       text-[#745A38]
                       font-medium
@@ -270,8 +282,7 @@ const FeaturedExperts = ({ experts = [], loading = false }) => {
                 </div>
               </div>
             </motion.div>
-          ))
-          )}
+          ))}
         </div>
 
         {/* Bottom CTA */}

@@ -1,109 +1,153 @@
-import api from "@/services/api";
-
-// =======================================
-// Home
-// =======================================
-
-export const getHomeData = async () => {
-  const { data } = await api.get("/customer/home");
-  return data;
-};
-
-// =======================================
-// Services
-// =======================================
-
-export const getServices = async (params) => {
-  const { data } = await api.get("/customer/services", { params });
-  return data;
-};
-
-// =======================================
-// Expert
-// =======================================
-
-export const getExpertDetails = async (vendorId) => {
-  const { data } = await api.get(`/customer/expert/${vendorId}`);
-  return data;
-};
-
-// =======================================
-// Profile
-// =======================================
-
-export const getProfile = async () => {
-  const { data } = await api.get("/customer/profile");
-  return data;
-};
-
-export const updateProfile = async (payload) => {
-  const { data } = await api.put("/customer/profile", payload);
-  return data;
-};
-
-export const updateProfileImage = async (formData) => {
-  const { data } = await api.patch(
-    "/customer/profile-image",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-
-  return data;
-};
-
-// =======================================
-// Dashboard
-// =======================================
-
-export const getDashboardSummary = async () => {
-  const { data } = await api.get("/customer/dashboard-summary");
-  return data;
-};
+import api from "./api";
 
 // =======================================
 // Bookings
 // =======================================
 
 export const createBooking = async (payload) => {
-  const { data } = await api.post("/customer/bookings", payload);
-  return data;
+  try {
+    const response = await api.post("/customer/bookings", payload);
+
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
 };
 
-export const getMyBookings = async (params) => {
-  const { data } = await api.get("/customer/bookings", {
-    params,
-  });
+export const getMyBookings = async (params = {}) => {
+  try {
+    const response = await api.get("/customer/bookings", { params });
 
-  return data;
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
 };
 
-export const getBookingById = async (bookingId) => {
-  const { data } = await api.get(`/customer/bookings/${bookingId}`);
-  return data;
+export const getMyBookingById = async (bookingId) => {
+  try {
+    const response = await api.get(`/customer/bookings/${bookingId}`);
+
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
 };
 
-export const cancelBooking = async (bookingId, payload) => {
-  const { data } = await api.patch(
-    `/customer/bookings/${bookingId}/cancel`,
-    payload
-  );
+export const cancelMyBooking = async (bookingId, reason) => {
+  try {
+    const response = await api.patch(
+      `/customer/bookings/${bookingId}/cancel`,
+      { reason },
+    );
 
-  return data;
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
+};
+
+// =======================================
+// Profile
+// =======================================
+
+export const getCustomerProfile = async () => {
+  try {
+    const response = await api.get("/customer/profile");
+
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
+};
+
+export const updateCustomerProfile = async (payload) => {
+  try {
+    const response = await api.put("/customer/profile", payload);
+
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
+};
+
+export const updateCustomerProfileImage = async (formData) => {
+  try {
+    const response = await api.patch("/customer/profile-image", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
 };
 
 // =======================================
 // Reviews
 // =======================================
 
-export const createReview = async (bookingId, payload) => {
-  const { data } = await api.post(
-    `/customer/bookings/${bookingId}/review`,
-    payload
-  );
+export const createReview = async (payload) => {
+  try {
+    const response = await api.post("/customer/reviews", payload);
 
-  return data;
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
+};
+
+export const getMyReviews = async () => {
+  try {
+    const response = await api.get("/customer/reviews");
+
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
 };

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Zap,
@@ -9,56 +10,55 @@ import {
   Sparkles,
   ShieldCheck,
 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCategories } from "@/services/serviceService";
 
-// Icon fallback per category name — only used when a category has no image of its own.
-const ICON_BY_NAME = {
-  electrician: Zap,
-  plumber: Wrench,
-  plumbing: Wrench,
-  carpenter: Hammer,
-  carpentry: Hammer,
-  painter: Paintbrush,
-  painting: Paintbrush,
-  "ac repair": Wind,
-  "appliance repair": ShieldCheck,
-  "interior design": Home,
-  cleaning: Sparkles,
-  "home cleaning": Sparkles,
+import { getCategories } from "@/services/publicService";
+
+// Category collection has no icon field, only a name/description/image —
+// this keeps the existing curated-icon look by matching on name, and
+// falls back to a generic icon for anything not in the list.
+const ICON_BY_CATEGORY_NAME = {
+  Electrician: Zap,
+  Plumber: Wrench,
+  Carpenter: Hammer,
+  Painter: Paintbrush,
+  "AC Repair": Wind,
+  "Interior Design": Home,
+  "Home Cleaning": Sparkles,
+  "Appliance Repair": ShieldCheck,
 };
 
-const getIconFor = (name = "") => ICON_BY_NAME[name.trim().toLowerCase()] || Sparkles;
-
-const PopularServices = ({ categories: categoriesProp, loading: loadingProp }) => {
+const PopularServices = () => {
 
   const navigate = useNavigate()
 
-  const [selfFetched, setSelfFetched] = useState([]);
-  const [selfLoading, setSelfLoading] = useState(categoriesProp === undefined);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Only self-fetch when no data was handed down (e.g. when used standalone
-  // on the Services page). The home page passes real data from one shared
-  // getHomeData() call instead, avoiding a duplicate network request.
   useEffect(() => {
-    if (categoriesProp !== undefined) return;
-    let cancelled = false;
-    (async () => {
+    const fetchCategories = async () => {
       try {
-        const response = await getCategories();
-        if (!cancelled) setSelfFetched((response.data || []).slice(0, 8));
-      } catch (error) {
-        console.error("Failed to load categories:", error);
-      } finally {
-        if (!cancelled) setSelfLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [categoriesProp]);
+        setLoading(true);
+        setError("");
 
-  const categories = categoriesProp !== undefined ? categoriesProp : selfFetched;
-  const loading = loadingProp !== undefined ? loadingProp : selfLoading;
+        const response = await getCategories();
+
+        if (response.success) {
+          setCategories(response.data.slice(0, 8));
+        } else {
+          setError(response.message || "Failed to load services.");
+        }
+      } catch (err) {
+        setError("Failed to load services.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
 
   return (
     <section className="py-22 bg-card">
@@ -104,13 +104,13 @@ const PopularServices = ({ categories: categoriesProp, loading: loadingProp }) =
           </p>
         </div>
 
-        {/* Services Grid */}
+        {/* Error */}
 
-        {!loading && categories.length === 0 && (
-          <p className="mt-10 text-center text-muted">
-            No service categories are available right now. Please check back soon.
-          </p>
+        {error && (
+          <p className="text-center text-red-500 mt-10">{error}</p>
         )}
+
+        {/* Services Grid */}
 
         <div
           className="
@@ -121,30 +121,14 @@ const PopularServices = ({ categories: categoriesProp, loading: loadingProp }) =
             gap-6
           "
         >
-          {loading ? (
-            Array.from({ length: 8 }).map((_, index) => (
-              <div
-                key={index}
-                className="
-                  bg-card border border-theme rounded-2xl p-7
-                  animate-pulse
-                "
-              >
-                <div className="w-14 h-14 rounded-xl bg-[#745A38]/10" />
-                <div className="mt-6 h-5 w-2/3 rounded bg-[#745A38]/10" />
-                <div className="mt-3 h-4 w-full rounded bg-[#745A38]/5" />
-                <div className="mt-3 h-4 w-4/5 rounded bg-[#745A38]/5" />
-              </div>
-            ))
-          ) : (
-            categories.map((category, index) => {
-            const Icon = getIconFor(category.name);
+          {categories.map((category, index) => {
+            const Icon = ICON_BY_CATEGORY_NAME[category.name] || Sparkles;
 
             return (
               <motion.div
               onClick={() =>
   navigate(
-    `/services?category=${category.slug}`
+    `/experts?category=${category._id}`
   )
 }
                 key={category._id}
@@ -181,18 +165,6 @@ const PopularServices = ({ categories: categoriesProp, loading: loadingProp }) =
               >
                 {/* Icon */}
 
-             {category.image ? (
-               <div
-                 className="
-                   w-14 h-14
-                   rounded-xl
-                   overflow-hidden
-                   bg-[#745A38]/10
-                 "
-               >
-                 <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
-               </div>
-             ) : (
              <div
   className="
     w-14
@@ -221,7 +193,6 @@ const PopularServices = ({ categories: categoriesProp, loading: loadingProp }) =
                     "
                   />
                 </div>
-             )}
 
                 {/* Content */}
 
@@ -244,7 +215,7 @@ const PopularServices = ({ categories: categoriesProp, loading: loadingProp }) =
                     text-sm
                   "
                 >
-                  {category.description || `Verified ${category.name.toLowerCase()} professionals near you.`}
+                  {category.description || "Verified professionals ready to help."}
                 </p>
 
                 {/* Link */}
@@ -271,8 +242,7 @@ const PopularServices = ({ categories: categoriesProp, loading: loadingProp }) =
                 </div>
               </motion.div>
             );
-            })
-          )}
+          })}
         </div>
 
         {/* Bottom CTA */}
