@@ -13,7 +13,7 @@ import Notifications from "@/pages/Vendor/Notifications";
 
 const VendorRoutes = () => (
   <>
-    {/* <Route element={<ProtectedRoute />}> */}
+    <Route element={<ProtectedRoute allowedRoles={["vendor"]} />}>
     <Route element={<VendorLayout />}>
     <Route path="/vendor/dashboard" element={<VendorDashboard />} />
     <Route path="/vendor/bookings" element={<Bookings />} />
@@ -24,7 +24,7 @@ const VendorRoutes = () => (
     <Route path="/vendor/earnings" element={<Earnings />} />
     <Route path="/vendor/notifications" element={<Notifications />} />
     </Route>
-    {/* </Route> */}
+    </Route>
   </>
 );
 

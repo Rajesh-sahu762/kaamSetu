@@ -7,9 +7,12 @@ import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
 import { useVendor } from "@/context/vendorContext";
 import { getVendorProfile } from "@/services/vendorService";
+import { useContext } from 'react';
+import { AuthContext } from '@/context/authContext';
 
 const Login = () => {
   const location = useLocation();
+  const { login } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
@@ -24,7 +27,7 @@ const Login = () => {
     };
   }, []);
 
-  const from = location.state?.form?.pathname;
+  const from = location.state?.from?.pathname;
 
   const navigate = useNavigate();
   const { updateVendorData } = useVendor();
@@ -72,7 +75,7 @@ const Login = () => {
 
       localStorage.setItem('token', response.token);
 
-      localStorage.setItem('user', JSON.stringify(response.user));
+      login(response.user);
 
       toast.success(response.message);
       const user = response.user;
@@ -109,7 +112,7 @@ const Login = () => {
       if (!result.isNewUser) {
         localStorage.setItem('token', result.token);
 
-        localStorage.setItem('user', JSON.stringify(result.user));
+        login(result.user);
 
         toast.success(result.message);
 
@@ -159,7 +162,7 @@ const Login = () => {
       });
 
       localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      login(response.user);
 
       toast.success(response.message);
 

@@ -63,19 +63,8 @@ const ResetPassword = () => {
       navigate('/login');
     } catch (error) {
 
-  console.log(
-    "FULL ERROR:",
-    error
-  );
-
-  console.log(
-    "RESPONSE:",
-    error.response
-  );
-
-  console.log(
-    "DATA:",
-    error.response?.data
+  toast.error(
+    error.response?.data?.message || "Something went wrong. Please try again."
   );
 
 } finally {

@@ -47,7 +47,7 @@ const AppRoutes = () => {
       <Route path='/support' element={<SupportPage />} />
 
       {/* Protected */}
-      <Route element={<ProtectedRoute />}>
+      <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>
       
       <Route path='/checkout' element={<CheckoutPage />}  />
       <Route path='/booking-success' element={<BookingSuccess />}  />
