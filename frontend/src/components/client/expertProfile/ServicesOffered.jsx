@@ -1,17 +1,12 @@
 import { motion } from "framer-motion";
-import {
-  CheckCircle2,
-} from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const ServicesOffered = ({
-  services = [],
-  loading,
-}) => {
-
-  
+const ServicesOffered = ({ services = [] }) => {
+  const navigate = useNavigate();
 
   return (
-    <section className="py-16 bg-theme">
+    <section id="services-offered" className="py-16 bg-theme">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
 
         <motion.div
@@ -65,6 +60,14 @@ const ServicesOffered = ({
             </p>
           </div>
 
+          {/* Empty State */}
+
+          {services.length === 0 && (
+            <p className="text-muted">
+              This professional hasn't listed any services yet.
+            </p>
+          )}
+
           {/* Services Grid */}
 
           <div
@@ -83,9 +86,18 @@ const ServicesOffered = ({
                 whileHover={{
                   y: -3,
                 }}
+                onClick={() =>
+                  navigate("/booking", {
+                    state: {
+                      serviceId: service._id,
+                      vendorId: service.vendorId,
+                    },
+                  })
+                }
                 className="
                   flex
                   items-center
+                  justify-between
 
                   gap-3
 
@@ -100,58 +112,51 @@ const ServicesOffered = ({
 
                   hover:shadow-md
 
+                  cursor-pointer
+
                   transition
                 "
               >
-                <CheckCircle2
-                  size={18}
+                <div
                   className="
-                    text-green-600
-                    shrink-0
+                    flex
+                    items-center
+
+                    gap-3
                   "
-                />
+                >
+                  <CheckCircle2
+                    size={18}
+                    className="
+                      text-green-600
+                      shrink-0
+                    "
+                  />
+
+                  <span
+                    className="
+                      text-primary
+                      font-medium
+                    "
+                  >
+                    {service.serviceName}
+                  </span>
+                </div>
 
                 <span
                   className="
-                    text-primary
-                    font-medium
+                    text-sm
+                    font-semibold
+
+                    text-[#745A38]
+
+                    shrink-0
                   "
                 >
-                  {service.serviceName}
+                  ₹{service.startingPrice}
                 </span>
               </motion.div>
             ))}
-          </div>
-
-          {/* Summary */}
-
-          <div
-            className="
-              mt-8
-
-              p-4
-
-              rounded-2xl
-
-              bg-[#745A38]/10
-
-              border
-              border-[#745A38]/20
-            "
-          >
-            <p
-              className="
-                text-sm
-
-                text-primary
-              "
-            >
-              {loading
-  ? "Loading..."
-  : services.length > 0
-  ? services[0].description
-  : "No services available."}
-            </p>
           </div>
         </motion.div>
 

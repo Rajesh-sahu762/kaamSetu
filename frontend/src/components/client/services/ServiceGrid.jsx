@@ -1,14 +1,51 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 import {
   Star,
   Users,
   ArrowRight,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
-const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, loadingMore = false }) => {
+import { getCategories } from "@/services/publicService";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800";
+
+const ServiceGrid = () => {
   const navigate = useNavigate();
+
+  const [categories, setCategories] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(6);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await getCategories();
+
+        if (response.success) {
+          setCategories(response.data);
+        } else {
+          setError(response.message || "Failed to load services.");
+        }
+      } catch (err) {
+        setError("Failed to load services.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const visibleCategories = categories.slice(0, visibleCount);
+  const hasMore = visibleCount < categories.length;
 
   return (
     <section className="py-20 bg-theme">
@@ -69,6 +106,20 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
           </p>
         </div>
 
+        {/* Error */}
+
+        {error && (
+          <p className="text-center text-red-500 mt-10">{error}</p>
+        )}
+
+        {/* Empty State */}
+
+        {!loading && !error && categories.length === 0 && (
+          <p className="text-center text-muted mt-10">
+            No service categories available yet.
+          </p>
+        )}
+
         {/* Grid */}
 
         <div
@@ -83,27 +134,9 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
             gap-8
           "
         >
-          {loading ? (
-            Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="bg-card border border-theme rounded-3xl overflow-hidden shadow-theme animate-pulse">
-                <div className="h-[240px] bg-[#745A38]/10" />
-                <div className="p-6">
-                  <div className="h-6 w-2/3 rounded bg-[#745A38]/10" />
-                  <div className="mt-4 h-4 w-1/2 rounded bg-[#745A38]/5" />
-                  <div className="mt-6 h-8 w-1/3 rounded bg-[#745A38]/10" />
-                  <div className="mt-8 h-12 w-full rounded-2xl bg-[#745A38]/10" />
-                </div>
-              </div>
-            ))
-          ) : services.length === 0 ? (
-            <p className="col-span-full text-center text-muted py-10">
-              No services matched your filters. Try adjusting your search.
-            </p>
-          ) : (
-          services.map((service, index) => (
+          {visibleCategories.map((category, index) => (
             <motion.div
-              key={service.id}
-              onClick={() => navigate(`/expert/${service.vendorId}`)}
+              key={category._id}
               initial={{
                 opacity: 0,
                 y: 30,
@@ -116,11 +149,12 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
                 once: true,
               }}
               transition={{
-                delay: (index % 6) * 0.05,
+                delay: index * 0.05,
               }}
               whileHover={{
                 y: -8,
               }}
+              onClick={() => navigate(`/experts?category=${category._id}`)}
               className="
                 bg-card
 
@@ -146,34 +180,21 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
                   overflow-hidden
                 "
               >
-                {service.image ? (
-                  <img
-                    src={service.image}
-                    alt={service.name}
-                    className="
-                      w-full
-                      h-full
+                <img
+                  src={category.image || FALLBACK_IMAGE}
+                  alt={category.name}
+                  className="
+                    w-full
+                    h-full
 
-                      object-cover
+                    object-cover
 
-                      group-hover:scale-110
+                    group-hover:scale-110
 
-                      transition-all
-                      duration-700
-                    "
-                  />
-                ) : (
-                  <div
-                    className="
-                      w-full h-full
-                      flex items-center justify-center
-                      bg-gradient-to-br from-[#745A38] to-[#A88A64]
-                      text-white text-4xl font-bold
-                    "
-                  >
-                    {service.name?.trim()?.charAt(0)?.toUpperCase() || "K"}
-                  </div>
-                )}
+                    transition-all
+                    duration-700
+                  "
+                />
               </div>
 
               {/* Content */}
@@ -188,10 +209,8 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
                     text-primary
                   "
                 >
-                  {service.name}
+                  {category.name}
                 </h3>
-
-                <p className="mt-1 text-sm text-muted">{service.vendorName}</p>
 
                 {/* Stats */}
 
@@ -224,7 +243,7 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
                         text-sm
                       "
                     >
-                      {service.totalBookings || 0} booked
+                      {category.expertsCount}
                     </span>
                   </div>
 
@@ -249,7 +268,7 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
                         text-sm
                       "
                     >
-                      {service.rating || "New"}
+                      {category.rating ? category.rating.toFixed(1) : "New"}
                     </span>
                   </div>
                 </div>
@@ -273,7 +292,7 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
                       text-primary
                     "
                   >
-                    ₹{service.price}
+                    ₹{category.startingPrice}
                   </span>
 
                   <span
@@ -281,14 +300,17 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
                       text-muted
                     "
                   >
-                    {service.priceType === "variable" ? "starting" : "fixed"}
+                    starting
                   </span>
                 </div>
 
                 {/* CTA */}
 
                 <button
-                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/experts?category=${category._id}`);
+                  }}
                   className="
                     mt-8
 
@@ -322,13 +344,12 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
                 </button>
               </div>
             </motion.div>
-          ))
-          )}
+          ))}
         </div>
 
         {/* Load More */}
 
-        {!loading && pagination && pagination.page < pagination.pages && (
+        {hasMore && (
           <div
             className="
               mt-16
@@ -338,8 +359,7 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
             "
           >
             <button
-              onClick={onLoadMore}
-              disabled={loadingMore}
+              onClick={() => setVisibleCount((prev) => prev + 6)}
               className="
                 px-8
                 py-4
@@ -354,11 +374,9 @@ const ServiceGrid = ({ services = [], loading = false, pagination, onLoadMore, l
                 hover:bg-card
 
                 transition
-
-                disabled:opacity-60
               "
             >
-              {loadingMore ? "Loading…" : "Load More Services"}
+              Load More Services
             </button>
           </div>
         )}

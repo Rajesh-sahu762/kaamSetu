@@ -1,92 +1,71 @@
+import { useEffect, useState } from "react";
 import ExpertCard from "./ExpertCard";
+import { getVendors } from "@/services/publicService";
 
-const experts = [
-  {
-    id: 1,
-    name: "Rajesh Electric Works",
-    category: "Electrician",
-    location: "Bhilwara",
-    experience: "8 Years",
-    rating: 4.9,
-    reviews: 245,
-    visitCharge: 499,
-    verified: true,
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800",
-  },
+const mapVendorToExpert = ({ vendor, primaryService, rating, totalReviews }) => ({
+  id: vendor._id,
+  name: vendor.businessName,
+  category: primaryService?.categoryId?.name || "Service Provider",
+  location: vendor.city,
+  experience: `${vendor.experience || 0} Years`,
+  rating: rating ? rating.toFixed(1) : "New",
+  reviews: totalReviews,
+  visitCharge: primaryService?.startingPrice ?? 0,
+  verified: true,
+  image:
+    vendor.userId?.profileImage ||
+    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800",
+});
 
-  {
-    id: 2,
-    name: "Mohan Electrical Services",
-    category: "Electrician",
-    location: "Udaipur",
-    experience: "5 Years",
-    rating: 4.8,
-    reviews: 186,
-    visitCharge: 399,
-    verified: true,
-    image:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800",
-  },
+const ExpertGrid = ({ filters = {} }) => {
+  const [experts, setExperts] = useState([]);
+  const [totalVendors, setTotalVendors] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  {
-    id: 3,
-    name: "Amit Electric Solutions",
-    category: "Electrician",
-    location: "Jaipur",
-    experience: "10 Years",
-    rating: 5.0,
-    reviews: 310,
-    visitCharge: 599,
-    verified: true,
-    image:
-      "https://images.unsplash.com/photo-1504257432389-52343af06ae3?w=800",
-  },
+  const fetchExperts = async (pageNumber) => {
+    try {
+      setLoading(true);
+      setError("");
 
-  {
-    id: 4,
-    name: "Suresh Home Services",
-    category: "Electrician",
-    location: "Kota",
-    experience: "6 Years",
-    rating: 4.7,
-    reviews: 120,
-    visitCharge: 349,
-    verified: true,
-    image:
-      "https://images.unsplash.com/photo-1504593811423-6dd665756598?w=800",
-  },
+      const response = await getVendors({
+        ...filters,
+        page: pageNumber,
+        limit: 9,
+      });
 
-  {
-    id: 5,
-    name: "Vinod Repair Experts",
-    category: "Electrician",
-    location: "Ajmer",
-    experience: "7 Years",
-    rating: 4.8,
-    reviews: 212,
-    visitCharge: 449,
-    verified: true,
-    image:
-      "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800",
-  },
+      if (response.success) {
+        const mapped = response.data.map(mapVendorToExpert);
 
-  {
-    id: 6,
-    name: "Professional Electric Care",
-    category: "Electrician",
-    location: "Jodhpur",
-    experience: "12 Years",
-    rating: 4.9,
-    reviews: 402,
-    visitCharge: 699,
-    verified: true,
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
-  },
-];
+        setExperts((prev) =>
+          pageNumber === 1 ? mapped : [...prev, ...mapped],
+        );
+        setTotalVendors(response.pagination.totalVendors);
+      } else {
+        setError(response.message || "Failed to load experts.");
+      }
+    } catch (err) {
+      setError("Failed to load experts.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const ExpertGrid = () => {
+  useEffect(() => {
+    setPage(1);
+    fetchExperts(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(filters)]);
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchExperts(nextPage);
+  };
+
+  const hasMore = experts.length < totalVendors;
+
   return (
     <section className="py-16 bg-theme">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
@@ -145,9 +124,23 @@ const ExpertGrid = () => {
               text-muted
             "
           >
-            120 Experts Found
+            {totalVendors} Experts Found
           </span>
         </div>
+
+        {/* Error */}
+
+        {error && (
+          <p className="text-center text-red-500 mb-8">{error}</p>
+        )}
+
+        {/* Empty State */}
+
+        {!loading && !error && experts.length === 0 && (
+          <p className="text-center text-muted mb-8">
+            No experts found yet. Check back soon.
+          </p>
+        )}
 
         {/* Grid */}
 
@@ -171,34 +164,40 @@ const ExpertGrid = () => {
 
         {/* Load More */}
 
-        <div
-          className="
-            flex
-            justify-center
-
-            mt-14
-          "
-        >
-          <button
+        {hasMore && (
+          <div
             className="
-              px-8
-              py-4
+              flex
+              justify-center
 
-              rounded-2xl
-
-              border
-              border-theme
-
-              text-primary
-
-              hover:bg-card
-
-              transition
+              mt-14
             "
           >
-            Load More Experts
-          </button>
-        </div>
+            <button
+              onClick={handleLoadMore}
+              disabled={loading}
+              className="
+                px-8
+                py-4
+
+                rounded-2xl
+
+                border
+                border-theme
+
+                text-primary
+
+                hover:bg-card
+
+                transition
+
+                disabled:opacity-60
+              "
+            >
+              {loading ? "Loading..." : "Load More Experts"}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

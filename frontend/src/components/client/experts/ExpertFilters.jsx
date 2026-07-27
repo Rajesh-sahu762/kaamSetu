@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 import {
@@ -6,10 +7,64 @@ import {
   Star,
   Briefcase,
   IndianRupee,
-  ShieldCheck,
+  Tag,
 } from "lucide-react";
 
-const ExpertFilters = () => {
+const EXPERIENCE_OPTIONS = [
+  { label: "Experience", value: "" },
+  { label: "1+ Years", value: "1" },
+  { label: "3+ Years", value: "3" },
+  { label: "5+ Years", value: "5" },
+  { label: "10+ Years", value: "10" },
+];
+
+const RATING_OPTIONS = [
+  { label: "Rating", value: "" },
+  { label: "4★ & Above", value: "4" },
+  { label: "4.5★ & Above", value: "4.5" },
+  { label: "5★ Only", value: "5" },
+];
+
+const PRICE_OPTIONS = [
+  { label: "Price", minPrice: "", maxPrice: "" },
+  { label: "₹0 - ₹500", minPrice: "0", maxPrice: "500" },
+  { label: "₹500 - ₹1000", minPrice: "500", maxPrice: "1000" },
+  { label: "₹1000 - ₹2000", minPrice: "1000", maxPrice: "2000" },
+  { label: "₹2000+", minPrice: "2000", maxPrice: "" },
+];
+
+const EMPTY_DRAFT = {
+  search: "",
+  city: "",
+  category: "",
+  minExperience: "",
+  minRating: "",
+  minPrice: "",
+  maxPrice: "",
+};
+
+const ExpertFilters = ({
+  categories = [],
+  initialCategory = "",
+  onApply,
+  onReset,
+}) => {
+  const [draft, setDraft] = useState({
+    ...EMPTY_DRAFT,
+    category: initialCategory,
+  });
+
+  const updateDraft = (patch) => setDraft((prev) => ({ ...prev, ...patch }));
+
+  const handleReset = () => {
+    setDraft(EMPTY_DRAFT);
+    onReset?.();
+  };
+
+  const handleApply = () => {
+    onApply?.(draft);
+  };
+
   return (
     <section className="py-8 bg-theme">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
@@ -76,6 +131,7 @@ const ExpertFilters = () => {
             </div>
 
             <button
+              onClick={handleReset}
               className="
                 px-5
                 py-3
@@ -113,6 +169,8 @@ const ExpertFilters = () => {
             <FilterInput
               icon={<Search size={18} />}
               placeholder="Search expert"
+              value={draft.search}
+              onChange={(value) => updateDraft({ search: value })}
             />
 
             {/* Location */}
@@ -120,56 +178,62 @@ const ExpertFilters = () => {
             <FilterInput
               icon={<MapPin size={18} />}
               placeholder="Location"
+              value={draft.city}
+              onChange={(value) => updateDraft({ city: value })}
+            />
+
+            {/* Category */}
+
+            <FilterSelect
+              icon={<Tag size={18} />}
+              value={draft.category}
+              onChange={(value) => updateDraft({ category: value })}
+              options={[
+                { label: "Category", value: "" },
+                ...categories.map((c) => ({ label: c.name, value: c._id })),
+              ]}
             />
 
             {/* Experience */}
 
             <FilterSelect
               icon={<Briefcase size={18} />}
-              options={[
-                "Experience",
-                "0-1 Years",
-                "1-3 Years",
-                "3-5 Years",
-                "5-10 Years",
-                "10+ Years",
-              ]}
+              value={draft.minExperience}
+              onChange={(value) => updateDraft({ minExperience: value })}
+              options={EXPERIENCE_OPTIONS}
             />
 
             {/* Rating */}
 
             <FilterSelect
               icon={<Star size={18} />}
-              options={[
-                "Rating",
-                "4★ & Above",
-                "4.5★ & Above",
-                "5★ Only",
-              ]}
+              value={draft.minRating}
+              onChange={(value) => updateDraft({ minRating: value })}
+              options={RATING_OPTIONS}
             />
 
             {/* Price */}
 
             <FilterSelect
               icon={<IndianRupee size={18} />}
-              options={[
-                "Price",
-                "₹0 - ₹500",
-                "₹500 - ₹1000",
-                "₹1000 - ₹2000",
-                "₹2000+",
-              ]}
-            />
-
-            {/* Verification */}
-
-            <FilterSelect
-              icon={<ShieldCheck size={18} />}
-              options={[
-                "Verification",
-                "Verified Only",
-                "All Experts",
-              ]}
+              value={
+                draft.minPrice || draft.maxPrice
+                  ? `${draft.minPrice}-${draft.maxPrice}`
+                  : ""
+              }
+              onChange={(value) => {
+                const option = PRICE_OPTIONS.find(
+                  (o) => `${o.minPrice}-${o.maxPrice}` === value,
+                );
+                updateDraft({
+                  minPrice: option?.minPrice || "",
+                  maxPrice: option?.maxPrice || "",
+                });
+              }}
+              options={PRICE_OPTIONS.map((o) => ({
+                label: o.label,
+                value: `${o.minPrice}-${o.maxPrice}`,
+              }))}
             />
           </div>
 
@@ -189,17 +253,10 @@ const ExpertFilters = () => {
               gap-4
             "
           >
-            <p
-              className="
-                text-muted
-                text-sm
-              "
-            >
-              Showing 120 verified experts
-              in your area.
-            </p>
+            <div />
 
             <button
+              onClick={handleApply}
               className="
                 px-6
                 py-3
@@ -231,6 +288,8 @@ const ExpertFilters = () => {
 const FilterInput = ({
   icon,
   placeholder,
+  value,
+  onChange,
 }) => {
   return (
     <div
@@ -259,6 +318,8 @@ const FilterInput = ({
       <input
         type="text"
         placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
         className="
           flex-1
 
@@ -278,6 +339,8 @@ const FilterInput = ({
 const FilterSelect = ({
   icon,
   options,
+  value,
+  onChange,
 }) => {
   return (
     <div
@@ -304,6 +367,8 @@ const FilterSelect = ({
       </span>
 
       <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
         className="
           flex-1
 
@@ -318,10 +383,10 @@ const FilterSelect = ({
       >
         {options.map((item) => (
           <option
-            key={item}
-            value={item}
+            key={item.value}
+            value={item.value}
           >
-            {item}
+            {item.label}
           </option>
         ))}
       </select>

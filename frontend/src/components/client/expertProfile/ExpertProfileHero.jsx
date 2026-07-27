@@ -1,11 +1,24 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
-import { Star, MapPin, Briefcase, ShieldCheck, ArrowRight } from 'lucide-react';
+import {
+  Star,
+  MapPin,
+  Briefcase,
+  ShieldCheck,
+  ArrowRight,
+} from "lucide-react";
 
-const ExpertProfileHero = ({ expert, stats, loading }) => {
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000";
+
+const ExpertProfileHero = ({ vendor, services, rating, totalReviews }) => {
+  const primaryCategory =
+    services?.[0]?.categoryId?.name || "Service Provider";
+
   return (
     <section className="pt-32 pb-16 bg-theme">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
+
         <motion.div
           initial={{
             opacity: 0,
@@ -47,12 +60,8 @@ const ExpertProfileHero = ({ expert, stats, loading }) => {
 
             <div>
               <img
-                src={
-                  expert?.image
-                    ? `/uploads/${expert.image}`
-                    : '/images/default-avatar.png'
-                }
-                alt={expert?.businessName}
+                src={vendor.userId?.profileImage || FALLBACK_IMAGE}
+                alt={vendor.businessName}
                 className="
                   w-full
                   h-[320px]
@@ -92,9 +101,7 @@ const ExpertProfileHero = ({ expert, stats, loading }) => {
                   font-medium
                 "
               >
-                {loading
-  ? "Loading..."
-  : `${expert?.servicesAvailable || 0} Services Available`}
+                {primaryCategory}
               </span>
 
               {/* Name */}
@@ -111,53 +118,38 @@ const ExpertProfileHero = ({ expert, stats, loading }) => {
                   text-primary
                 "
               >
-                {loading
-  ? "Loading..."
-  : expert?.businessName}
+                {vendor.businessName}
               </h1>
-              <p
-  className="
-    mt-2
-    text-lg
-    text-muted
-  "
->
-  {loading
-    ? ""
-    : `by ${expert?.name}`}
-</p>
 
               {/* Verified */}
 
-              {expert?.verified && (
-                <div
+              <div
+                className="
+                  mt-4
+
+                  flex
+                  items-center
+
+                  gap-2
+                "
+              >
+                <ShieldCheck
+                  size={20}
                   className="
-                    mt-4
+                    text-green-600
+                  "
+                />
 
-                    flex
-                    items-center
+                <span
+                  className="
+                    font-medium
 
-                    gap-2
+                    text-green-600
                   "
                 >
-                  <ShieldCheck
-                    size={20}
-                    className="
-                      text-green-600
-                    "
-                  />
-
-                  <span
-                    className="
-                      font-medium
-
-                      text-green-600
-                    "
-                  >
-                    Verified Professional
-                  </span>
-                </div>
-              )}
+                  Verified Professional
+                </span>
+              </div>
 
               {/* Meta Info */}
 
@@ -183,9 +175,10 @@ const ExpertProfileHero = ({ expert, stats, loading }) => {
                 >
                   <MapPin size={18} />
 
-                  <span>{loading
-  ? "--"
-  : `${expert?.city}, ${expert?.state}`}</span>
+                  <span>
+                    {vendor.city}
+                    {vendor.state ? `, ${vendor.state}` : ""}
+                  </span>
                 </div>
 
                 <div
@@ -200,9 +193,9 @@ const ExpertProfileHero = ({ expert, stats, loading }) => {
                 >
                   <Briefcase size={18} />
 
-                  <span>{loading
-  ? "--"
-  : `${expert?.experience} Years`}</span>
+                  <span>
+                    {vendor.experience || 0} Years
+                  </span>
                 </div>
               </div>
 
@@ -242,37 +235,11 @@ const ExpertProfileHero = ({ expert, stats, loading }) => {
                       text-primary
                     "
                   >
-                    {loading
-  ? "--"
-  : stats?.averageRating}
+                    {rating ? rating.toFixed(1) : "New"}
                   </span>
 
-                  <span className="text-muted">({loading
-  ? "--"
-  : stats?.totalReviews} Reviews)</span>
-                </div>
-
-                <div>
-                  <span
-                    className="
-                      text-lg
-                      font-semibold
-
-                      text-primary
-                    "
-                  >
-                    {loading
-  ? "--"
-  : stats?.completedJobs}+
-                  </span>
-
-                  <span
-                    className="
-                      ml-2
-                      text-muted
-                    "
-                  >
-                    Services Completed
+                  <span className="text-muted">
+                    ({totalReviews || 0} Reviews)
                   </span>
                 </div>
               </div>
@@ -289,7 +256,8 @@ const ExpertProfileHero = ({ expert, stats, loading }) => {
                   gap-4
                 "
               >
-                <button
+                <a
+                  href="#services-offered"
                   className="
                     px-8
                     py-4
@@ -313,10 +281,12 @@ const ExpertProfileHero = ({ expert, stats, loading }) => {
                   "
                 >
                   Book Appointment
-                  <ArrowRight size={18} />
-                </button>
 
-                <button
+                  <ArrowRight size={18} />
+                </a>
+
+                <a
+                  href="#reviews"
                   className="
                     px-8
                     py-4
@@ -333,12 +303,13 @@ const ExpertProfileHero = ({ expert, stats, loading }) => {
                     transition
                   "
                 >
-                  Contact Expert
-                </button>
+                  View Reviews
+                </a>
               </div>
             </div>
           </div>
         </motion.div>
+
       </div>
     </section>
   );
