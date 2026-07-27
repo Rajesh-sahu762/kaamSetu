@@ -39,7 +39,9 @@ router.post("/resend-otp", resendOtp);
 // forgot-password
 router.post("/forgot-password", forgotPassword);
 
-router.post("/reset-password", resetPassword);
+// requires the token issued by /verify-email's OTP check — see resetPassword
+// in authController for why this can no longer be a bare, unauthenticated call.
+router.post("/reset-password", verifyToken, resetPassword);
 
 router.post("/google", googleLogin);
 

@@ -1,65 +1,51 @@
 const express = require("express");
 const router = express.Router();
 
+const {
+  createBooking,
+  getMyBookings,
+  getMyBookingById,
+  cancelMyBooking,
+  getCustomerProfile,
+  updateCustomerProfile,
+  updateCustomerProfileImage,
+  createReview,
+  getMyReviews,
+} = require("../controllers/customerController");
+
 const verifyToken = require("../middleware/verifyToken");
 const verifyCustomer = require("../middleware/verifyCustomer");
 const upload = require("../middleware/upload");
 
-const {
-  getProfile,
-  updateProfile,
-  getDashboardSummary,
-  createBooking,
-  getMyBookings,
-  getBookingById,
-  cancelBooking,
-  createReview,
-  getHomeData,
-  getServices,
-  getExpertDetails,
-} = require("../controllers/customerController");
-
-// Profile image upload is generic on the User model (not vendor-specific),
-// so we reuse the vendor panel's existing controller instead of duplicating it.
-const { updateProfileImage } = require("../controllers/vendorController");
-
-// =======================================
-// Public Browse Routes (no login required — guests can view the
-// home page, browse services, and view expert profiles)
-// =======================================
-router.get("/home", getHomeData);
-router.get("/services", getServices);
-router.get("/expert/:vendorId", getExpertDetails);
+// Every route below requires a valid token AND role === "customer".
+router.use(verifyToken, verifyCustomer);
 
 // =======================================
 // Profile Routes
 // =======================================
-router.get("/profile", verifyToken, verifyCustomer, getProfile);
-router.put("/profile", verifyToken, verifyCustomer, updateProfile);
+
+router.get("/profile", getCustomerProfile);
+router.put("/profile", updateCustomerProfile);
 router.patch(
   "/profile-image",
-  verifyToken,
-  verifyCustomer,
   upload("profile").single("profileImage"),
-  updateProfileImage,
+  updateCustomerProfileImage,
 );
-
-// =======================================
-// Dashboard Route
-// =======================================
-router.get("/dashboard-summary", verifyToken, verifyCustomer, getDashboardSummary);
 
 // =======================================
 // Booking Routes
 // =======================================
-router.post("/bookings", verifyToken, verifyCustomer, createBooking);
-router.get("/bookings", verifyToken, verifyCustomer, getMyBookings);
-router.get("/bookings/:bookingId", verifyToken, verifyCustomer, getBookingById);
-router.patch("/bookings/:bookingId/cancel", verifyToken, verifyCustomer, cancelBooking);
+
+router.post("/bookings", createBooking);
+router.get("/bookings", getMyBookings);
+router.get("/bookings/:bookingId", getMyBookingById);
+router.patch("/bookings/:bookingId/cancel", cancelMyBooking);
 
 // =======================================
 // Review Routes
 // =======================================
-router.post("/bookings/:bookingId/review", verifyToken, verifyCustomer, createReview);
+
+router.post("/reviews", createReview);
+router.get("/reviews", getMyReviews);
 
 module.exports = router;
