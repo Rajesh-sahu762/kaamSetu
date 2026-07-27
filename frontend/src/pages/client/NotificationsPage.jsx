@@ -1,14 +1,16 @@
+import { useEffect, useState } from "react";
+
 import {
   Bell,
   CheckCircle2,
   Truck,
   Star,
   Trash2,
-  CheckCheck,
 } from "lucide-react";
 
 import { motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+
 import {
   getNotifications,
   markNotificationAsRead,
@@ -16,79 +18,87 @@ import {
   deleteNotification,
 } from "@/services/notificationService";
 
-const timeAgo = (value) => {
-  const diffMs = Date.now() - new Date(value).getTime();
-  const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes} min ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hr${hours === 1 ? "" : "s"} ago`;
-  const days = Math.floor(hours / 24);
-  return days === 1 ? "Yesterday" : `${days} days ago`;
+const getDayLabel = (dateString) => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) return "Today";
+  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+
+  return date.toLocaleDateString("en-IN", { day: "2-digit", month: "long" });
 };
 
-const getDayLabel = (value) => {
-  const date = new Date(value);
-  const startOfDay = (d) => { const c = new Date(d); c.setHours(0, 0, 0, 0); return c.getTime(); };
-  const today = startOfDay(new Date());
-  const yesterday = today - 24 * 60 * 60 * 1000;
-  const target = startOfDay(date);
-  if (target === today) return "Today";
-  if (target === yesterday) return "Yesterday";
-  return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "long", year: "numeric" }).format(date);
+const getRelativeTime = (dateString) => {
+  const diffMs = Date.now() - new Date(dateString).getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} min ago`;
+
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours} hour(s) ago`;
+
+  return getDayLabel(dateString);
 };
 
 const NotificationsPage = () => {
-
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [markingAll, setMarkingAll] = useState(false);
-
-  const loadNotifications = useCallback(async () => {
-    try {
-      const response = await getNotifications();
-      setNotifications(response.data || []);
-    } catch (error) {
-      console.error("Failed to load notifications:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+        const response = await getNotifications();
 
-  const handleMarkRead = async (notification) => {
-    if (notification.isRead) return;
-    setNotifications((prev) =>
-      prev.map((item) => (item._id === notification._id ? { ...item, isRead: true } : item)),
-    );
-    try {
-      await markNotificationAsRead(notification._id);
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
-    }
-  };
+        if (response.success) {
+          setNotifications(response.data);
+        }
+      } catch (err) {
+        toast.error("Failed to load notifications.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   const handleMarkAllRead = async () => {
-    setMarkingAll(true);
-    setNotifications((prev) => prev.map((item) => ({ ...item, isRead: true })));
-    try {
-      await markAllNotificationsAsRead();
-    } catch (error) {
-      console.error("Failed to mark all as read:", error);
-    } finally {
-      setMarkingAll(false);
+    const response = await markAllNotificationsAsRead();
+
+    if (response.success) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    } else {
+      toast.error(response.message || "Failed to update notifications.");
     }
   };
 
-  const handleDelete = async (notification) => {
-    setNotifications((prev) => prev.filter((item) => item._id !== notification._id));
-    try {
-      await deleteNotification(notification._id);
-    } catch (error) {
-      console.error("Failed to delete notification:", error);
+  const handleNotificationClick = async (notification) => {
+    if (notification.isRead) return;
+
+    const response = await markNotificationAsRead(notification._id);
+
+    if (response.success) {
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n._id === notification._id ? { ...n, isRead: true } : n,
+        ),
+      );
+    }
+  };
+
+  const handleDelete = async (id, e) => {
+    e.stopPropagation();
+
+    const response = await deleteNotification(id);
+
+    if (response.success) {
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
+    } else {
+      toast.error(response.message || "Failed to delete notification.");
     }
   };
 
@@ -99,23 +109,23 @@ const NotificationsPage = () => {
     return acc;
   }, {});
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const getIcon = (type) => {
+    switch (type) {
+      case "booking":
+        return <CheckCircle2 className="text-green-500" size={22} />;
 
-  const getIcon = (notification) => {
-    const text = `${notification.title} ${notification.message}`.toLowerCase();
-    if (notification.type === "review") {
-      return <Star className="text-yellow-500" size={22} />;
+      case "payment":
+        return <CheckCircle2 className="text-[#745A38]" size={22} />;
+
+      case "review":
+        return <Star className="text-yellow-500" size={22} />;
+
+      case "service":
+        return <Truck className="text-blue-500" size={22} />;
+
+      default:
+        return <Bell className="text-primary" size={22} />;
     }
-    if (text.includes("way")) {
-      return <Truck className="text-blue-500" size={22} />;
-    }
-    if (text.includes("completed")) {
-      return <CheckCircle2 className="text-[#745A38]" size={22} />;
-    }
-    if (notification.type === "booking" || notification.type === "payment") {
-      return <CheckCircle2 className="text-green-500" size={22} />;
-    }
-    return <Bell className="text-primary" size={22} />;
   };
 
   return (
@@ -149,19 +159,9 @@ const NotificationsPage = () => {
             opacity: 1,
             y: 0,
           }}
-          className="mb-14"
+          className="mb-14 flex items-start justify-between gap-4"
         >
-          <div
-            className="
-              flex
-
-              items-center
-
-              justify-between
-
-              gap-4
-            "
-          >
+          <div>
             <div
               className="
                 inline-flex
@@ -180,73 +180,70 @@ const NotificationsPage = () => {
               Notifications
             </div>
 
-            {unreadCount > 0 && (
-              <button
-                onClick={handleMarkAllRead}
-                disabled={markingAll}
-                className="
-                  inline-flex items-center gap-1.5
-                  text-sm font-medium
-                  text-[#745A38]
-                  hover:opacity-80
-                  transition
-                  disabled:opacity-50
-                "
-              >
-                <CheckCheck size={16} />
-                {markingAll ? "Marking…" : "Mark all as read"}
-              </button>
-            )}
+            <h1
+              className="
+                mt-4
+
+                text-5xl
+
+                font-semibold
+
+                text-primary
+              "
+            >
+              Stay Updated
+            </h1>
+
+            <p
+              className="
+                mt-3
+
+                text-lg
+
+                text-muted
+              "
+            >
+              Booking updates, service alerts
+              and important activity.
+            </p>
           </div>
 
-          <h1
-            className="
-              mt-4
+          {notifications.length > 0 && (
+            <button
+              onClick={handleMarkAllRead}
+              className="
+                px-5
+                py-3
 
-              text-5xl
+                rounded-xl
 
-              font-semibold
+                border
+                border-theme
 
-              text-primary
-            "
-          >
-            Stay Updated
-          </h1>
+                text-primary
 
-          <p
-            className="
-              mt-3
+                whitespace-nowrap
 
-              text-lg
+                hover:bg-surface
 
-              text-muted
-            "
-          >
-            Booking updates, service alerts
-            and important activity.
-          </p>
+                transition
+              "
+            >
+              Mark All Read
+            </button>
+          )}
         </motion.div>
+
+        {loading && (
+          <p className="text-center text-muted">Loading notifications...</p>
+        )}
+
+        {!loading && notifications.length === 0 && (
+          <p className="text-center text-muted">No notifications yet.</p>
+        )}
 
         {/* Notification Feed */}
 
-        {loading ? (
-          <div className="space-y-6">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="py-6 border-b border-theme flex gap-5 animate-pulse">
-                <div className="w-6 h-6 rounded-full bg-[#745A38]/10" />
-                <div className="flex-1">
-                  <div className="h-4 w-1/3 rounded bg-[#745A38]/10" />
-                  <div className="mt-3 h-4 w-2/3 rounded bg-[#745A38]/5" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : notifications.length === 0 ? (
-          <div className="py-24 text-center">
-            <Bell size={40} className="mx-auto text-muted opacity-40" />
-            <p className="mt-4 text-muted">You have no notifications yet.</p>
-          </div>
-        ) : (
         <div className="space-y-12">
           {Object.entries(grouped).map(
             ([day, items]) => (
@@ -301,7 +298,9 @@ const NotificationsPage = () => {
                         key={
                           notification._id
                         }
-                        onClick={() => handleMarkRead(notification)}
+                        onClick={() =>
+                          handleNotificationClick(notification)
+                        }
                         initial={{
                           opacity: 0,
                           y: 15,
@@ -314,7 +313,7 @@ const NotificationsPage = () => {
                           delay:
                             index * 0.1,
                         }}
-                        className="
+                        className={`
                           py-6
 
                           border-b
@@ -324,20 +323,15 @@ const NotificationsPage = () => {
 
                           gap-5
 
+                          cursor-pointer
+
                           hover:translate-x-1
 
                           transition
 
-                          cursor-pointer
-
-                          relative
-                        "
+                          ${notification.isRead ? "" : "bg-[#745A38]/5"}
+                        `}
                       >
-                        {/* Unread dot */}
-                        {!notification.isRead && (
-                          <span className="absolute left-[-14px] top-9 w-2 h-2 rounded-full bg-[#745A38]" />
-                        )}
-
                         {/* Icon */}
 
                         <div
@@ -346,7 +340,7 @@ const NotificationsPage = () => {
                           "
                         >
                           {getIcon(
-                            notification
+                            notification.type
                           )}
                         </div>
 
@@ -363,24 +357,45 @@ const NotificationsPage = () => {
                             "
                           >
                             <h3
-                              className={`font-semibold ${notification.isRead ? "text-muted" : "text-primary"}`}
+                              className="
+                                font-semibold
+
+                                text-primary
+
+                                flex
+                                items-center
+                                gap-2
+                              "
                             >
                               {
                                 notification.title
                               }
+
+                              {!notification.isRead && (
+                                <span className="w-2 h-2 rounded-full bg-[#745A38]" />
+                              )}
                             </h3>
 
-                            <span
-                              className="
-                                text-sm
+                            <div className="flex items-center gap-3 shrink-0">
+                              <span
+                                className="
+                                  text-sm
 
-                                text-muted
+                                  text-muted
 
-                                whitespace-nowrap
-                              "
-                            >
-                              {timeAgo(notification.createdAt)}
-                            </span>
+                                  whitespace-nowrap
+                                "
+                              >
+                                {getRelativeTime(notification.createdAt)}
+                              </span>
+
+                              <button
+                                onClick={(e) => handleDelete(notification._id, e)}
+                                className="text-muted hover:text-red-500 transition"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
 
                           <p
@@ -397,23 +412,6 @@ const NotificationsPage = () => {
                             }
                           </p>
                         </div>
-
-                        {/* Delete */}
-
-                        <button
-                          type="button"
-                          onClick={(event) => { event.stopPropagation(); handleDelete(notification); }}
-                          className="
-                            mt-1
-                            text-muted
-                            hover:text-red-500
-                            transition
-                            self-start
-                          "
-                          aria-label="Delete notification"
-                        >
-                          <Trash2 size={16} />
-                        </button>
                       </motion.div>
                     )
                   )}
@@ -422,7 +420,6 @@ const NotificationsPage = () => {
             )
           )}
         </div>
-        )}
 
         {/* Bottom */}
 

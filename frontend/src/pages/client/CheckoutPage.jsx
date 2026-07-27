@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import {
   ShieldCheck,
@@ -12,13 +14,222 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+import { getServiceById } from "@/services/publicService";
+import { createBooking } from "@/services/customerService";
+import {
+  createOrder,
+  verifyPayment,
+  loadRazorpayScript,
+} from "@/services/paymentService";
+import { AuthContext } from "@/context/authContext";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800";
+
 const CheckoutPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
-  const [paymentMethod, setPaymentMethod] =
-    useState("cash");
+  const draft = location.state || {};
+  const { serviceId, bookingDate, bookingTime, address, notes } = draft;
 
-  const [agree, setAgree] =
-    useState(false);
+  const [service, setService] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [agree, setAgree] = useState(false);
+
+  useEffect(() => {
+    if (!serviceId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchService = async () => {
+      try {
+        setLoading(true);
+        const response = await getServiceById(serviceId);
+
+        if (response.success) {
+          setService(response.data.service);
+        } else {
+          setError(response.message || "Service not found.");
+        }
+      } catch (err) {
+        setError("Failed to load service details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchService();
+  }, [serviceId]);
+
+  const handleConfirm = async () => {
+    if (!agree) return;
+
+    setSubmitting(true);
+
+    try {
+      // Step 1 — always create the booking first (cash or online — the
+      // payment gateway needs an existing booking to create an order for).
+      const bookingResponse = await createBooking({
+        serviceId,
+        bookingDate,
+        bookingTime,
+        address,
+        notes,
+        paymentMethod: paymentMethod === "cash" ? "cash" : "online",
+      });
+
+      if (!bookingResponse.success) {
+        toast.error(bookingResponse.message || "Failed to create booking.");
+        setSubmitting(false);
+        return;
+      }
+
+      const booking = bookingResponse.data;
+
+      // Cash — booking is already created, nothing further to pay now.
+      if (paymentMethod === "cash") {
+        navigate("/booking-success", {
+          state: {
+            bookingNumber: booking.bookingNumber,
+            bookingId: booking._id,
+          },
+        });
+        return;
+      }
+
+      // Online (UPI/Card) — go through Razorpay.
+      const orderResponse = await createOrder(booking._id);
+
+      if (!orderResponse.success) {
+        toast.error(
+          orderResponse.message ||
+            "Could not start payment for this booking.",
+        );
+        setSubmitting(false);
+        return;
+      }
+
+      const scriptLoaded = await loadRazorpayScript();
+
+      if (!scriptLoaded) {
+        toast.error("Failed to load payment gateway. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+
+      const { orderId, amount, currency, key } = orderResponse.data;
+
+      const razorpayOptions = {
+        key,
+        amount,
+        currency,
+        name: "KaamSetu",
+        description: service?.serviceName || "Service Booking",
+        order_id: orderId,
+        method: paymentMethod === "upi" ? { upi: true } : undefined,
+        prefill: {
+          name: user?.fullName || "",
+          email: user?.email || "",
+        },
+        theme: {
+          color: "#745A38",
+        },
+        handler: async (paymentResult) => {
+          const verifyResponse = await verifyPayment({
+            bookingId: booking._id,
+            razorpay_order_id: paymentResult.razorpay_order_id,
+            razorpay_payment_id: paymentResult.razorpay_payment_id,
+            razorpay_signature: paymentResult.razorpay_signature,
+          });
+
+          if (verifyResponse.success) {
+            navigate("/booking-success", {
+              state: {
+                bookingNumber: booking.bookingNumber,
+                bookingId: booking._id,
+              },
+            });
+          } else {
+            toast.error(
+              verifyResponse.message ||
+                "Payment verification failed. Please contact support.",
+            );
+          }
+        },
+        modal: {
+          ondismiss: () => setSubmitting(false),
+        },
+      };
+
+      const razorpay = new window.Razorpay(razorpayOptions);
+      razorpay.open();
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!serviceId || !bookingDate) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center">
+          <p className="text-muted">
+            No booking in progress. Please start from a service or expert
+            profile.
+          </p>
+
+          <button
+            onClick={() => navigate("/experts")}
+            className="
+              mt-6
+              px-6
+              py-3
+              rounded-2xl
+              bg-[#745A38]
+              text-white
+              font-medium
+            "
+          >
+            Browse Experts
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (loading) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center text-muted">
+          Loading checkout...
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !service) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center text-red-500">
+          {error || "Service not found."}
+        </div>
+      </section>
+    );
+  }
+
+  const formattedDate = new Date(bookingDate).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <section
@@ -143,19 +354,19 @@ const CheckoutPage = () => {
                 <InfoRow
                   icon={<User size={18} />}
                   label="Expert"
-                  value="Rajesh Electric Works"
+                  value={service.vendorId?.businessName}
                 />
 
                 <InfoRow
                   icon={<Calendar size={18} />}
                   label="Date"
-                  value="12 June 2026"
+                  value={formattedDate}
                 />
 
                 <InfoRow
                   icon={<Clock3 size={18} />}
                   label="Time"
-                  value="10:00 AM"
+                  value={bookingTime}
                 />
               </div>
             </div>
@@ -200,18 +411,7 @@ const CheckoutPage = () => {
                   "
                 />
 
-                <div>
-                  <p className="text-primary">
-                    A-262 Azad Nagar,
-                    Kumbha Circle
-                  </p>
-
-                  <p className="text-muted">
-                    Bhilwara,
-                    Rajasthan,
-                    311001
-                  </p>
-                </div>
+                <p className="text-primary">{address}</p>
               </div>
             </div>
 
@@ -374,7 +574,9 @@ const CheckoutPage = () => {
               {/* Expert */}
 
               <img
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800"
+                src={
+                  service.vendorId?.userId?.profileImage || FALLBACK_IMAGE
+                }
                 alt=""
                 className="
                   w-full
@@ -396,8 +598,10 @@ const CheckoutPage = () => {
                   text-primary
                 "
               >
-                Rajesh Electric Works
+                {service.vendorId?.businessName}
               </h3>
+
+              <p className="mt-1 text-muted">{service.serviceName}</p>
 
               <div
                 className="
@@ -432,18 +636,8 @@ const CheckoutPage = () => {
                 "
               >
                 <PriceRow
-                  label="Visit Charge"
-                  value="₹499"
-                />
-
-                <PriceRow
-                  label="Platform Fee"
-                  value="₹49"
-                />
-
-                <PriceRow
-                  label="GST"
-                  value="₹18"
+                  label="Service Charge"
+                  value={`₹${service.startingPrice}`}
                 />
               </div>
 
@@ -481,13 +675,14 @@ const CheckoutPage = () => {
                       text-primary
                     "
                   >
-                    ₹566
+                    ₹{service.startingPrice}
                   </span>
                 </div>
               </div>
 
               <button
-                disabled={!agree}
+                disabled={!agree || submitting}
+                onClick={handleConfirm}
                 className="
                   w-full
 
@@ -510,7 +705,7 @@ const CheckoutPage = () => {
                   transition
                 "
               >
-                Confirm Booking
+                {submitting ? "Please wait..." : "Confirm Booking"}
               </button>
 
               <p

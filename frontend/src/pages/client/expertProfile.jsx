@@ -2,61 +2,75 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import ExpertProfileHero from "@/components/client/expertProfile/ExpertProfileHero";
-import ServicesOffered from "@/components/client/expertProfile/ServicesOffered";
 import ReviewsSection from "@/components/client/expertProfile/ExpertReview";
-
-// import { getExpertProfile } from "@/services/customerService";
+import ServicesOffered from "@/components/client/expertProfile/ServicesOffered";
+import { getVendorPublicProfile } from "@/services/publicService";
 
 const ExpertProfile = () => {
   const { id } = useParams();
 
-  const [expertData, setExpertData] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // useEffect(() => {
-  //   let ignore = false;
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-  //   const fetchExpertProfile = async () => {
-  //     try {
-  //       const response = await getExpertProfile(id);
+        const response = await getVendorPublicProfile(id);
 
-  //       if (!ignore && response.success) {
-  //         setExpertData(response.data);
-  //       }
-  //     } catch (error) {
-  //       console.error("Failed to load expert profile:", error);
-  //     } finally {
-  //       if (!ignore) {
-  //         setLoading(false);
-  //       }
-  //     }
-  //   };
+        if (response.success) {
+          setProfile(response.data);
+        } else {
+          setError(response.message || "Expert not found.");
+        }
+      } catch (err) {
+        setError("Failed to load this expert's profile.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //   fetchExpertProfile();
+    fetchProfile();
+  }, [id]);
 
-  //   return () => {
-  //     ignore = true;
-  //   };
-  // }, [id]);
+  if (loading) {
+    return (
+      <section className="pt-32 pb-16 bg-theme">
+        <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
+          <p className="text-center text-muted">Loading expert profile...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <section className="pt-32 pb-16 bg-theme">
+        <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
+          <p className="text-center text-red-500">
+            {error || "Expert not found."}
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <>
       <ExpertProfileHero
-        expert={expertData?.expert}
-        stats={expertData?.stats}
-        loading={loading}
+        vendor={profile.vendor}
+        services={profile.services}
+        rating={profile.rating}
+        totalReviews={profile.totalReviews}
       />
-
-      <ServicesOffered
-        services={expertData?.services || []}
-        loading={loading}
-      />
-
+      <ServicesOffered services={profile.services} />
       <ReviewsSection
-        reviews={expertData?.reviews || []}
-        stats={expertData?.stats}
-        ratingBreakdown={expertData?.ratingBreakdown}
-        loading={loading}
+        reviews={profile.reviews}
+        rating={profile.rating}
+        totalReviews={profile.totalReviews}
       />
     </>
   );

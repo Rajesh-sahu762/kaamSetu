@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   Calendar,
   Clock3,
@@ -7,32 +9,54 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+import { getServiceById } from "@/services/publicService";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800";
+
+const getUpcomingDates = () => {
+  const labels = ["Today", "Tomorrow"];
+  const dates = [];
+
+  for (let i = 0; i < 4; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+
+    dates.push({
+      label: labels[i] || d.toLocaleDateString("en-IN", { weekday: "short" }),
+      display: d.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      }),
+      value: d.toISOString().split("T")[0],
+    });
+  }
+
+  return dates;
+};
+
 const BookingPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const [selectedDate, setSelectedDate] =
-    useState("Today");
+  const { serviceId, vendorId } = location.state || {};
 
-  const [selectedTime, setSelectedTime] =
-    useState("10:00 AM");
+  const [service, setService] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const dates = [
-    {
-      label: "Today",
-      date: "12 Jun",
-    },
-    {
-      label: "Tomorrow",
-      date: "13 Jun",
-    },
-    {
-      label: "Fri",
-      date: "14 Jun",
-    },
-    {
-      label: "Sat",
-      date: "15 Jun",
-    },
-  ];
+  const dates = getUpcomingDates();
+
+  const [selectedDate, setSelectedDate] = useState(dates[0].value);
+  const [selectedTime, setSelectedTime] = useState("10:00 AM");
+
+  const [addressLine, setAddressLine] = useState("");
+  const [landmark, setLandmark] = useState("");
+  const [city, setCity] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [notes, setNotes] = useState("");
 
   const timeSlots = [
     "09:00 AM",
@@ -43,6 +67,104 @@ const BookingPage = () => {
     "04:00 PM",
     "06:00 PM",
   ];
+
+  useEffect(() => {
+    if (!serviceId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchService = async () => {
+      try {
+        setLoading(true);
+        const response = await getServiceById(serviceId);
+
+        if (response.success) {
+          setService(response.data.service);
+          setRating(response.data.rating);
+          setTotalReviews(response.data.totalReviews);
+        } else {
+          setError(response.message || "Service not found.");
+        }
+      } catch (err) {
+        setError("Failed to load this service.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchService();
+  }, [serviceId]);
+
+  const handleContinue = () => {
+    if (!addressLine.trim() || !city.trim()) {
+      toast.error("Please fill in your address and city.");
+      return;
+    }
+
+    const fullAddress = [addressLine, landmark, city, pincode]
+      .filter(Boolean)
+      .join(", ");
+
+    navigate("/checkout", {
+      state: {
+        serviceId,
+        vendorId: vendorId || service?.vendorId?._id,
+        bookingDate: selectedDate,
+        bookingTime: selectedTime,
+        address: fullAddress,
+        notes,
+      },
+    });
+  };
+
+  if (!serviceId) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center">
+          <p className="text-muted">
+            No service selected. Please pick a service from an expert's
+            profile first.
+          </p>
+
+          <button
+            onClick={() => navigate("/experts")}
+            className="
+              mt-6
+              px-6
+              py-3
+              rounded-2xl
+              bg-[#745A38]
+              text-white
+              font-medium
+            "
+          >
+            Browse Experts
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (loading) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center text-muted">
+          Loading service details...
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !service) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center text-red-500">
+          {error || "Service not found."}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -161,10 +283,10 @@ const BookingPage = () => {
               >
                 {dates.map((item) => (
                   <button
-                    key={item.label}
+                    key={item.value}
                     onClick={() =>
                       setSelectedDate(
-                        item.label
+                        item.value
                       )
                     }
                     className={`
@@ -178,7 +300,7 @@ const BookingPage = () => {
 
                       ${
                         selectedDate ===
-                        item.label
+                        item.value
                           ? "bg-[#745A38] text-white border-[#745A38]"
                           : "bg-card border-theme text-primary"
                       }
@@ -189,7 +311,7 @@ const BookingPage = () => {
                     </p>
 
                     <p className="mt-1 text-sm">
-                      {item.date}
+                      {item.display}
                     </p>
                   </button>
                 ))}
@@ -323,6 +445,8 @@ const BookingPage = () => {
                 <input
                   type="text"
                   placeholder="Address Line"
+                  value={addressLine}
+                  onChange={(e) => setAddressLine(e.target.value)}
                   className="
                     w-full
 
@@ -342,6 +466,8 @@ const BookingPage = () => {
                 <input
                   type="text"
                   placeholder="Landmark"
+                  value={landmark}
+                  onChange={(e) => setLandmark(e.target.value)}
                   className="
                     w-full
 
@@ -369,6 +495,8 @@ const BookingPage = () => {
                   <input
                     type="text"
                     placeholder="City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
                     className="
                       p-4
 
@@ -384,6 +512,8 @@ const BookingPage = () => {
                   <input
                     type="text"
                     placeholder="Pincode"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
                     className="
                       p-4
 
@@ -400,6 +530,8 @@ const BookingPage = () => {
                 <textarea
                   rows="4"
                   placeholder="Special Instructions (Optional)"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
                   className="
                     w-full
 
@@ -440,7 +572,9 @@ const BookingPage = () => {
               "
             >
               <img
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800"
+                src={
+                  service.vendorId?.userId?.profileImage || FALLBACK_IMAGE
+                }
                 alt=""
                 className="
                   w-full
@@ -462,8 +596,10 @@ const BookingPage = () => {
                   text-primary
                 "
               >
-                Rajesh Electric Works
+                {service.vendorId?.businessName}
               </h3>
+
+              <p className="mt-1 text-muted">{service.serviceName}</p>
 
               <div
                 className="
@@ -484,59 +620,8 @@ const BookingPage = () => {
                 />
 
                 <span>
-                  4.9 (245 Reviews)
+                  {rating ? rating.toFixed(1) : "New"} ({totalReviews} Reviews)
                 </span>
-              </div>
-
-              <div
-                className="
-                  mt-6
-
-                  pt-6
-
-                  border-t
-                  border-theme
-                "
-              >
-                <div
-                  className="
-                    flex
-                    justify-between
-
-                    mb-3
-                  "
-                >
-                  <span>
-                    Visit Charge
-                  </span>
-
-                  <span
-                    className="
-                      font-semibold
-                    "
-                  >
-                    ₹499
-                  </span>
-                </div>
-
-                <div
-                  className="
-                    flex
-                    justify-between
-                  "
-                >
-                  <span>
-                    Platform Fee
-                  </span>
-
-                  <span
-                    className="
-                      font-semibold
-                    "
-                  >
-                    ₹49
-                  </span>
-                </div>
               </div>
 
               <div
@@ -572,12 +657,13 @@ const BookingPage = () => {
                       text-primary
                     "
                   >
-                    ₹548
+                    ₹{service.startingPrice}
                   </span>
                 </div>
               </div>
 
               <button
+                onClick={handleContinue}
                 className="
                   w-full
 

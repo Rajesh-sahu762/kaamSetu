@@ -1,26 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
 
 import {
   Star,
-  Upload,
   CheckCircle2,
 } from "lucide-react";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { getMyBookingById } from "@/services/customerService";
+import { createReview } from "@/services/customerService";
 
 const WriteReviewPage = () => {
   const navigate = useNavigate();
+  const { bookingId } = useParams();
+
+  const [booking, setBooking] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   const [rating, setRating] = useState(0);
-
   const [hover, setHover] = useState(0);
-
-  const [submitted, setSubmitted] =
-    useState(false);
-
-  const [selectedTags, setSelectedTags] =
-    useState([]);
+  const [reviewText, setReviewText] = useState("");
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const tags = [
     "Professional",
@@ -49,28 +53,95 @@ const WriteReviewPage = () => {
     5: "😍",
   };
 
+  useEffect(() => {
+    const fetchBooking = async () => {
+      try {
+        setLoading(true);
+        const response = await getMyBookingById(bookingId);
+
+        if (response.success) {
+          setBooking(response.data);
+        } else {
+          setLoadError(response.message || "Booking not found.");
+        }
+      } catch (err) {
+        setLoadError("Failed to load this booking.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooking();
+  }, [bookingId]);
+
   const toggleTag = (tag) => {
     if (selectedTags.includes(tag)) {
-      setSelectedTags(
-        selectedTags.filter(
-          (item) => item !== tag
-        )
-      );
+      setSelectedTags(selectedTags.filter((item) => item !== tag));
     } else {
-      setSelectedTags([
-        ...selectedTags,
-        tag,
-      ]);
+      setSelectedTags([...selectedTags, tag]);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!rating) return;
+    if (!rating) {
+      toast.error("Please select a rating.");
+      return;
+    }
 
-    setSubmitted(true);
+    if (booking?.status !== "completed") {
+      toast.error("You can only review a completed booking.");
+      return;
+    }
+
+    const composedReview = [
+      selectedTags.length > 0 ? selectedTags.join(", ") + "." : "",
+      reviewText.trim(),
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    try {
+      setSubmitting(true);
+
+      const response = await createReview({
+        bookingId,
+        rating,
+        review: composedReview,
+      });
+
+      if (response.success) {
+        setSubmitted(true);
+      } else {
+        toast.error(response.message || "Failed to submit review.");
+      }
+    } catch (err) {
+      toast.error("Failed to submit review.");
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-3xl mx-auto px-6 text-center text-muted">
+          Loading booking details...
+        </div>
+      </section>
+    );
+  }
+
+  if (loadError || !booking) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-3xl mx-auto px-6 text-center text-red-500">
+          {loadError || "Booking not found."}
+        </div>
+      </section>
+    );
+  }
 
   if (submitted) {
     return (
@@ -157,7 +228,7 @@ const WriteReviewPage = () => {
 
           <button
             onClick={() =>
-              navigate("/my-bookings")
+              navigate("/my-booking")
             }
             className="
               mt-10
@@ -242,8 +313,7 @@ const WriteReviewPage = () => {
               text-muted
             "
           >
-            Tell us about your service
-            experience.
+            {booking.vendorId?.businessName} — {booking.serviceId?.serviceName}
           </p>
         </motion.div>
 
@@ -342,47 +412,6 @@ const WriteReviewPage = () => {
 
           </div>
 
-          {/* Title */}
-
-          <div>
-            <label
-              className="
-                block
-
-                mb-3
-
-                text-sm
-
-                uppercase
-
-                tracking-wider
-
-                font-semibold
-              "
-            >
-              Review Title
-            </label>
-
-            <input
-              type="text"
-              placeholder="Summarize your experience"
-              className="
-                w-full
-
-                border-0
-                border-b
-
-                border-theme
-
-                bg-transparent
-
-                py-4
-
-                focus:outline-none
-              "
-            />
-          </div>
-
           {/* Description */}
 
           <div>
@@ -406,6 +435,8 @@ const WriteReviewPage = () => {
 
             <textarea
               rows="5"
+              value={reviewText}
+              onChange={(e) => setReviewText(e.target.value)}
               placeholder="Share details about the service..."
               className="
                 w-full
@@ -425,64 +456,6 @@ const WriteReviewPage = () => {
                 focus:outline-none
               "
             />
-          </div>
-
-          {/* Upload */}
-
-          <div>
-            <label
-              className="
-                block
-
-                mb-4
-
-                text-sm
-
-                uppercase
-
-                tracking-wider
-
-                font-semibold
-              "
-            >
-              Add Photos
-            </label>
-
-            <label
-              className="
-                flex
-
-                items-center
-                justify-center
-
-                gap-3
-
-                py-8
-
-                border-2
-                border-dashed
-
-                border-theme
-
-                rounded-3xl
-
-                cursor-pointer
-
-                hover:bg-surface
-
-                transition
-              "
-            >
-              <Upload size={22} />
-
-              Upload Images
-
-              <input
-                type="file"
-                multiple
-                className="hidden"
-              />
-            </label>
           </div>
 
           {/* Tags */}
@@ -556,6 +529,7 @@ const WriteReviewPage = () => {
                 y: -2,
               }}
               type="submit"
+              disabled={submitting}
               className="
                 w-full
 
@@ -570,9 +544,11 @@ const WriteReviewPage = () => {
                 text-lg
 
                 font-medium
+
+                disabled:opacity-60
               "
             >
-              Submit Review
+              {submitting ? "Submitting..." : "Submit Review"}
             </motion.button>
           </div>
 

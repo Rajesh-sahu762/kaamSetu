@@ -2,7 +2,6 @@ import {
   User,
   Mail,
   Phone,
-  MapPin,
   Bell,
   BookOpen,
   Shield,
@@ -10,72 +9,131 @@ import {
   Edit,
   CheckCircle2,
   Clock3,
+  X,
 } from 'lucide-react';
 import { AuthContext } from '@/context/authContext';
-import { getDashboardSummary } from '@/services/customerService';
 
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
-const timeAgo = (value) => {
-  const diffMs = Date.now() - new Date(value).getTime();
-  const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes} Min${minutes === 1 ? "" : "s"} Ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} Hour${hours === 1 ? "" : "s"} Ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return days === 1 ? "Yesterday" : `${days} Days Ago`;
-  const weeks = Math.floor(days / 7);
-  return `${weeks} Week${weeks === 1 ? "" : "s"} Ago`;
-};
+import {
+  getCustomerProfile,
+  updateCustomerProfile,
+  getMyBookings,
+} from '@/services/customerService';
+
+const ACTIVE_STATUSES = ["pending", "accepted", "on_the_way", "in_progress"];
 
 const CustomerProfilePage = () => {
 
-  const { user, logout } = useContext(AuthContext)
+  const { logout } = useContext(AuthContext)
   const navigate = useNavigate();
 
-  const [summary, setSummary] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValues, setEditValues] = useState({ fullName: "", mobile: "" });
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
+    const fetchData = async () => {
       try {
-        const response = await getDashboardSummary();
-        if (!cancelled) setSummary(response.data);
-      } catch (error) {
-        console.error("Failed to load dashboard summary:", error);
+        setLoading(true);
+
+        const [profileResponse, bookingsResponse] = await Promise.all([
+          getCustomerProfile(),
+          getMyBookings({ limit: 50 }),
+        ]);
+
+        if (profileResponse.success) {
+          setProfile(profileResponse.data);
+          setEditValues({
+            fullName: profileResponse.data.fullName || "",
+            mobile: profileResponse.data.mobile || "",
+          });
+        }
+
+        if (bookingsResponse.success) {
+          setBookings(bookingsResponse.data);
+        }
+      } catch (err) {
+        toast.error("Failed to load your profile.");
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
-    })();
-    return () => { cancelled = true; };
+    };
+
+    fetchData();
   }, []);
 
-  const profile = summary?.profile;
-  const stats = summary?.stats;
-  const recentActivity = summary?.recentActivity || [];
-
-  const displayName = profile?.fullName || user?.fullName || "Customer";
-  const displayEmail = profile?.email || user?.email || "";
-  const displayMobile = profile?.mobile || "";
-  const isVerified = profile?.isVerified ?? true;
-  const avatarInitial = displayName.trim().charAt(0).toUpperCase() || "U";
-
   const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
-  logout();
-
-  navigate(
-    "/login",
-    {
-      replace: true,
+  const handleSaveProfile = async () => {
+    if (!editValues.fullName.trim()) {
+      toast.error("Name cannot be empty.");
+      return;
     }
-  );
 
-};
+    try {
+      setSaving(true);
+      const response = await updateCustomerProfile(editValues);
+
+      if (response.success) {
+        setProfile((prev) => ({ ...prev, ...response.data }));
+        setIsEditing(false);
+      } else {
+        toast.error(response.message || "Failed to update profile.");
+      }
+    } catch (err) {
+      toast.error("Failed to update profile.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const totalBookings = bookings.length;
+  const activeBookings = bookings.filter((b) =>
+    ACTIVE_STATUSES.includes(b.status),
+  ).length;
+  const completedBookings = bookings.filter(
+    (b) => b.status === "completed",
+  ).length;
+  const cancelledBookings = bookings.filter((b) =>
+    ["cancelled", "rejected"].includes(b.status),
+  ).length;
+
+  const recentActivity = [...bookings]
+    .sort(
+      (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+    )
+    .slice(0, 4);
+
+  const ACTIVITY_LABELS = {
+    pending: "Booking Placed",
+    accepted: "Booking Accepted",
+    on_the_way: "Expert On The Way",
+    in_progress: "Service Started",
+    completed: "Booking Completed",
+    cancelled: "Booking Cancelled",
+    rejected: "Booking Rejected",
+  };
+
+  if (loading) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center text-muted">
+          Loading your profile...
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -156,35 +214,50 @@ const CustomerProfilePage = () => {
           >
             {/* Avatar */}
 
-            <div
-              className="
-                w-32
-                h-32
+            {profile?.profileImage ? (
+              <img
+                src={profile.profileImage}
+                alt={profile.fullName}
+                className="
+                  w-32
+                  h-32
 
-                rounded-full
+                  rounded-full
 
-                bg-gradient-to-br
-                from-[#745A38]
-                to-[#A88A64]
+                  object-cover
+                "
+              />
+            ) : (
+              <div
+                className="
+                  w-32
+                  h-32
 
-                flex
-                items-center
-                justify-center
+                  rounded-full
 
-                text-white
+                  bg-gradient-to-br
+                  from-[#745A38]
+                  to-[#A88A64]
 
-                text-5xl
-                font-bold
-              "
-            >
-              {avatarInitial}
-            </div>
+                  flex
+                  items-center
+                  justify-center
+
+                  text-white
+
+                  text-5xl
+                  font-bold
+                "
+              >
+                {profile?.fullName?.[0]?.toUpperCase() || "?"}
+              </div>
+            )}
 
             {/* Info */}
 
-            <div className="flex-1 text-center lg:text-left">
+            <div className="flex-1">
               <div
-                className={`
+                className="
                   inline-flex
 
                   items-center
@@ -196,66 +269,166 @@ const CustomerProfilePage = () => {
 
                   rounded-full
 
-                  ${isVerified ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}
+                  bg-green-100
+
+                  text-green-700
 
                   text-sm
                   font-medium
-                `}
-              >
-                <CheckCircle2 size={16} />
-                {isVerified ? "Verified Customer" : "Unverified Customer"}
-              </div>
-
-              <h1
-                className="
-                  mt-4
-
-                  text-4xl
-                  font-semibold
-
-                  text-primary
                 "
               >
-                {displayName}
-              </h1>
+                <CheckCircle2 size={16} />
+                Verified Customer
+              </div>
 
-              <p className="mt-2 text-muted">{displayEmail}</p>
+              {isEditing ? (
+                <div className="mt-4 space-y-3 max-w-sm">
+                  <input
+                    type="text"
+                    value={editValues.fullName}
+                    onChange={(e) =>
+                      setEditValues((prev) => ({
+                        ...prev,
+                        fullName: e.target.value,
+                      }))
+                    }
+                    placeholder="Full Name"
+                    className="
+                      w-full
+                      p-3
+                      rounded-xl
+                      border
+                      border-theme
+                      bg-surface
+                      outline-none
+                    "
+                  />
 
-              <p className="mt-1 text-muted">{displayMobile}</p>
+                  <input
+                    type="text"
+                    value={editValues.mobile}
+                    onChange={(e) =>
+                      setEditValues((prev) => ({
+                        ...prev,
+                        mobile: e.target.value,
+                      }))
+                    }
+                    placeholder="Mobile Number"
+                    className="
+                      w-full
+                      p-3
+                      rounded-xl
+                      border
+                      border-theme
+                      bg-surface
+                      outline-none
+                    "
+                  />
+                </div>
+              ) : (
+                <>
+                  <h1
+                    className="
+                      mt-4
+
+                      text-4xl
+                      font-semibold
+
+                      text-primary
+                    "
+                  >
+                    {profile?.fullName}
+                  </h1>
+
+                  <p className="mt-2 text-muted">{profile?.email}</p>
+
+                  <p className="mt-1 text-muted">
+                    {profile?.mobile || "No mobile number added"}
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Edit */}
 
-            <button
-              className="
-                w-full
-                lg:w-auto
+            {isEditing ? (
+              <div className="flex gap-3">
+                <button
+                  onClick={handleSaveProfile}
+                  disabled={saving}
+                  className="
+                    flex
+                    items-center
 
-                flex
-                items-center
-                justify-center
+                    gap-2
 
-                gap-2
+                    px-6
+                    py-3
 
-                px-6
-                py-3
+                    rounded-2xl
 
-                rounded-2xl
+                    bg-[#745A38]
 
-                bg-[#745A38]
+                    text-white
 
-                text-white
+                    font-medium
 
-                font-medium
+                    disabled:opacity-60
 
-                hover:scale-105
+                    transition
+                  "
+                >
+                  {saving ? "Saving..." : "Save"}
+                </button>
 
-                transition
-              "
-            >
-              <Edit size={18} />
-              Edit Profile
-            </button>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="
+                    flex
+                    items-center
+                    justify-center
+
+                    w-12
+                    h-12
+
+                    rounded-2xl
+
+                    border
+                    border-theme
+                  "
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="
+                  flex
+                  items-center
+
+                  gap-2
+
+                  px-6
+                  py-3
+
+                  rounded-2xl
+
+                  bg-[#745A38]
+
+                  text-white
+
+                  font-medium
+
+                  hover:scale-105
+
+                  transition
+                "
+              >
+                <Edit size={18} />
+                Edit Profile
+              </button>
+            )}
           </div>
         </motion.div>
 
@@ -273,13 +446,13 @@ const CustomerProfilePage = () => {
             mt-8
           "
         >
-          <StatCard number={loading ? "…" : (stats?.totalBookings ?? 0)} title="Total Bookings" />
+          <StatCard number={totalBookings} title="Total Bookings" />
 
-          <StatCard number={loading ? "…" : (stats?.activeBookings ?? 0)} title="Active Services" />
+          <StatCard number={activeBookings} title="Active Bookings" />
 
-          <StatCard number={loading ? "…" : (stats?.completedBookings ?? 0)} title="Completed" />
+          <StatCard number={completedBookings} title="Completed" />
 
-          <StatCard number={loading ? "…" : (stats?.savedAddresses ?? 0)} title="Saved Addresses" />
+          <StatCard number={cancelledBookings} title="Cancelled" />
         </div>
 
         {/* QUICK ACTIONS */}
@@ -311,13 +484,7 @@ const CustomerProfilePage = () => {
             <QuickAction
               icon={<BookOpen />}
               title="My Bookings"
-              onClick={() => navigate('/my-bookings')}
-            />
-
-            <QuickAction
-              icon={<MapPin />}
-              title="Saved Addresses"
-              onClick={() => navigate('/addresses')}
+              onClick={() => navigate('/my-booking')}
             />
 
             <QuickAction
@@ -326,7 +493,17 @@ const CustomerProfilePage = () => {
               onClick={() => navigate('/notifications')}
             />
 
-            <QuickAction icon={<Shield />} title="Support" />
+            <QuickAction
+              icon={<Shield />}
+              title="Support"
+              onClick={() => navigate('/support')}
+            />
+
+            <QuickAction
+              icon={<User />}
+              title="Browse Experts"
+              onClick={() => navigate('/experts')}
+            />
           </div>
         </div>
 
@@ -374,19 +551,19 @@ const CustomerProfilePage = () => {
               <InfoRow
                 icon={<User size={18} />}
                 label="Full Name"
-                value={displayName}
+                value={profile?.fullName}
               />
 
               <InfoRow
                 icon={<Mail size={18} />}
                 label="Email"
-                value={displayEmail}
+                value={profile?.email}
               />
 
               <InfoRow
                 icon={<Phone size={18} />}
                 label="Mobile"
-                value={displayMobile || "—"}
+                value={profile?.mobile || "Not added"}
               />
             </div>
           </div>
@@ -418,21 +595,24 @@ const CustomerProfilePage = () => {
               Recent Activity
             </h2>
 
-            <div className="space-y-5">
-              {loading ? (
-                <p className="text-muted text-sm">Loading activity…</p>
-              ) : recentActivity.length ? (
-                recentActivity.map((activity) => (
+            {recentActivity.length === 0 ? (
+              <p className="text-muted">No activity yet.</p>
+            ) : (
+              <div className="space-y-5">
+                {recentActivity.map((booking) => (
                   <ActivityItem
-                    key={activity.id}
-                    title={activity.title}
-                    time={timeAgo(activity.time)}
+                    key={booking._id}
+                    title={`${ACTIVITY_LABELS[booking.status] || booking.status} — ${
+                      booking.serviceId?.serviceName || "Service"
+                    }`}
+                    time={new Date(booking.updatedAt).toLocaleDateString(
+                      "en-IN",
+                      { day: "2-digit", month: "short" },
+                    )}
                   />
-                ))
-              ) : (
-                <p className="text-muted text-sm">No recent activity yet. Book a service to get started.</p>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

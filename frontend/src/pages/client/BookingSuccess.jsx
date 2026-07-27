@@ -2,20 +2,17 @@ import { motion } from "framer-motion";
 
 import {
   CheckCircle2,
-  Calendar,
-  Clock3,
-  User,
   ArrowRight,
   Home,
 } from "lucide-react";
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const BookingSuccess = () => {
-
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const bookingId = "KS-2026-45892";
+  const { bookingNumber, bookingId } = location.state || {};
 
   return (
     <section
@@ -143,92 +140,48 @@ const BookingSuccess = () => {
 
           {/* Booking ID */}
 
-          <div
-            className="
-              mt-8
-
-              inline-flex
-
-              items-center
-
-              px-5
-              py-3
-
-              rounded-full
-
-              bg-[#745A38]/10
-
-              border
-              border-[#745A38]/20
-            "
-          >
-            <span
+          {bookingNumber && (
+            <div
               className="
-                text-sm
-                text-muted
+                mt-8
+
+                inline-flex
+
+                items-center
+
+                px-5
+                py-3
+
+                rounded-full
+
+                bg-[#745A38]/10
+
+                border
+                border-[#745A38]/20
               "
             >
-              Booking ID :
-            </span>
+              <span
+                className="
+                  text-sm
+                  text-muted
+                "
+              >
+                Booking ID :
+              </span>
 
-            <span
-              className="
-                ml-2
+              <span
+                className="
+                  ml-2
 
-                font-semibold
+                  font-semibold
 
-                text-primary
-              "
-            >
-              {bookingId}
-            </span>
-          </div>
-        </div>
-
-        {/* Booking Details */}
-
-        <div
-          className="
-            border-t
-            border-theme
-
-            px-8
-            py-8
-          "
-        >
-          <div
-            className="
-              grid
-
-              md:grid-cols-3
-
-              gap-6
-            "
-          >
-            <InfoCard
-              icon={
-                <User size={20} />
-              }
-              title="Expert"
-              value="Rajesh Electric Works"
-            />
-
-            <InfoCard
-              icon={
-                <Calendar size={20} />
-              }
-              title="Date"
-              value="12 June 2026"
-            />
-
-            <InfoCard
-              icon={
-                <Clock3 size={20} />
-              }
-              title="Time"
-              value="10:00 AM"
-            />
-          </div>
+                  text-primary
+                "
+              >
+                {bookingNumber}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Timeline */}
@@ -303,7 +256,9 @@ const BookingSuccess = () => {
         >
           <button
             onClick={() =>
-              navigate("/bookings")
+              bookingId
+                ? navigate(`/booking/${bookingId}`)
+                : navigate("/my-booking")
             }
             className="
               flex-1
@@ -372,58 +327,6 @@ const BookingSuccess = () => {
     </section>
   );
 };
-
-const InfoCard = ({
-  icon,
-  title,
-  value,
-}) => (
-  <div
-    className="
-      p-5
-
-      rounded-2xl
-
-      border
-      border-theme
-
-      bg-surface
-    "
-  >
-    <div
-      className="
-        flex
-        items-center
-
-        gap-2
-
-        text-accent
-      "
-    >
-      {icon}
-
-      <span
-        className="
-          text-sm
-        "
-      >
-        {title}
-      </span>
-    </div>
-
-    <p
-      className="
-        mt-3
-
-        font-medium
-
-        text-primary
-      "
-    >
-      {value}
-    </p>
-  </div>
-);
 
 const StepItem = ({
   number,

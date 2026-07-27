@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+
 import {
   CheckCircle2,
   Clock3,
@@ -6,19 +9,83 @@ import {
   MapPin,
   Calendar,
   MessageCircle,
+  XCircle,
 } from "lucide-react";
 
+import { getMyBookingById } from "@/services/customerService";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000";
+
+const TIMELINE = [
+  { key: "pending", label: "Booking Placed" },
+  { key: "accepted", label: "Accepted" },
+  { key: "on_the_way", label: "On The Way" },
+  { key: "in_progress", label: "Service Started" },
+  { key: "completed", label: "Completed" },
+];
+
+const STATUS_LABELS = {
+  pending: "Pending",
+  accepted: "Accepted",
+  on_the_way: "On The Way",
+  in_progress: "In Progress",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  rejected: "Rejected",
+};
+
 const TrackBookingPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-  const currentStep = 2;
+  const [booking, setBooking] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const timeline = [
-    "Booking Placed",
-    "Accepted",
-    "On The Way",
-    "Service Started",
-    "Completed",
-  ];
+  useEffect(() => {
+    const fetchBooking = async () => {
+      try {
+        setLoading(true);
+        const response = await getMyBookingById(id);
+
+        if (response.success) {
+          setBooking(response.data);
+        } else {
+          setError(response.message || "Booking not found.");
+        }
+      } catch (err) {
+        setError("Failed to load this booking.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooking();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center text-muted">
+          Loading booking...
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !booking) {
+    return (
+      <section className="min-h-screen bg-theme pt-32 pb-20">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center text-red-500">
+          {error || "Booking not found."}
+        </div>
+      </section>
+    );
+  }
+
+  const isCancelled = ["cancelled", "rejected"].includes(booking.status);
+  const currentStep = TIMELINE.findIndex((s) => s.key === booking.status);
 
   return (
     <section
@@ -45,7 +112,7 @@ const TrackBookingPage = () => {
         <div className="mb-10">
 
           <span
-            className="
+            className={`
               inline-flex
 
               items-center
@@ -57,16 +124,22 @@ const TrackBookingPage = () => {
 
               rounded-full
 
-              bg-green-100
-
-              text-green-700
-
               text-sm
               font-medium
-            "
+
+              ${
+                isCancelled
+                  ? "bg-red-100 text-red-700"
+                  : "bg-green-100 text-green-700"
+              }
+            `}
           >
-            <CheckCircle2 size={16} />
-            Booking Accepted
+            {isCancelled ? (
+              <XCircle size={16} />
+            ) : (
+              <CheckCircle2 size={16} />
+            )}
+            Booking {STATUS_LABELS[booking.status]}
           </span>
 
           <h1
@@ -140,158 +213,164 @@ const TrackBookingPage = () => {
                   text-primary
                 "
               >
-                KS-2026-45892
+                {booking.bookingNumber}
               </h3>
             </div>
 
             <div
-              className="
+              className={`
                 px-4
                 py-2
 
                 rounded-full
 
-                bg-green-100
-
-                text-green-700
-
                 font-medium
-              "
+
+                ${
+                  isCancelled
+                    ? "bg-red-100 text-red-700"
+                    : "bg-green-100 text-green-700"
+                }
+              `}
             >
-              Accepted
+              {STATUS_LABELS[booking.status]}
             </div>
           </div>
         </div>
 
         {/* Timeline */}
 
-        <div
-          className="
-            bg-card
-
-            border
-            border-theme
-
-            rounded-3xl
-
-            p-8
-
-            mb-8
-          "
-        >
-          <h2
-            className="
-              text-2xl
-
-              font-semibold
-
-              text-primary
-
-              mb-10
-            "
-          >
-            Booking Progress
-          </h2>
-
+        {!isCancelled && (
           <div
             className="
-              flex
+              bg-card
 
-              justify-between
+              border
+              border-theme
 
-              relative
+              rounded-3xl
+
+              p-8
+
+              mb-8
             "
           >
-            {/* Line */}
+            <h2
+              className="
+                text-2xl
+
+                font-semibold
+
+                text-primary
+
+                mb-10
+              "
+            >
+              Booking Progress
+            </h2>
 
             <div
               className="
-                absolute
+                flex
 
-                top-5
+                justify-between
 
-                left-0
-                right-0
-
-                h-1
-
-                bg-gray-200
+                relative
               "
-            />
+            >
+              {/* Line */}
 
-            <div
-              className="
-                absolute
+              <div
+                className="
+                  absolute
 
-                top-5
-                left-0
+                  top-5
 
-                h-1
+                  left-0
+                  right-0
 
-                bg-green-500
-              "
-              style={{
-                width: `${(currentStep / (timeline.length - 1)) * 100}%`,
-              }}
-            />
+                  h-1
 
-            {timeline.map(
-              (step, index) => (
-                <div
-                  key={step}
-                  className="
-                    relative
+                  bg-gray-200
+                "
+              />
 
-                    flex
-                    flex-col
+              <div
+                className="
+                  absolute
 
-                    items-center
+                  top-5
+                  left-0
 
-                    z-10
-                  "
-                >
+                  h-1
+
+                  bg-green-500
+                "
+                style={{
+                  width: `${
+                    (Math.max(currentStep, 0) / (TIMELINE.length - 1)) * 100
+                  }%`,
+                }}
+              />
+
+              {TIMELINE.map(
+                (step, index) => (
                   <div
-                    className={`
-                      w-10
-                      h-10
-
-                      rounded-full
+                    key={step.key}
+                    className="
+                      relative
 
                       flex
+                      flex-col
+
                       items-center
-                      justify-center
 
-                      text-sm
-                      font-semibold
-
-                      ${
-                        index <= currentStep
-                          ? "bg-green-500 text-white"
-                          : "bg-gray-200 text-gray-500"
-                      }
-                    `}
-                  >
-                    {index + 1}
-                  </div>
-
-                  <p
-                    className="
-                      mt-3
-
-                      text-center
-
-                      text-sm
-
-                      text-primary
+                      z-10
                     "
                   >
-                    {step}
-                  </p>
-                </div>
-              )
-            )}
+                    <div
+                      className={`
+                        w-10
+                        h-10
+
+                        rounded-full
+
+                        flex
+                        items-center
+                        justify-center
+
+                        text-sm
+                        font-semibold
+
+                        ${
+                          index <= currentStep
+                            ? "bg-green-500 text-white"
+                            : "bg-gray-200 text-gray-500"
+                        }
+                      `}
+                    >
+                      {index + 1}
+                    </div>
+
+                    <p
+                      className="
+                        mt-3
+
+                        text-center
+
+                        text-sm
+
+                        text-primary
+                      "
+                    >
+                      {step.label}
+                    </p>
+                  </div>
+                )
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Grid */}
 
@@ -339,7 +418,9 @@ const TrackBookingPage = () => {
               "
             >
               <img
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000"
+                src={
+                  booking.vendorId?.userId?.profileImage || FALLBACK_IMAGE
+                }
                 alt=""
                 className="
                   w-24
@@ -360,11 +441,11 @@ const TrackBookingPage = () => {
                     text-primary
                   "
                 >
-                  Rajesh Electric Works
+                  {booking.vendorId?.businessName}
                 </h3>
 
                 <p className="text-muted">
-                  Electrician
+                  {booking.serviceId?.serviceName}
                 </p>
 
                 <div
@@ -376,7 +457,12 @@ const TrackBookingPage = () => {
                     gap-3
                   "
                 >
-                  <button
+                  <a
+                    href={
+                      booking.vendorId?.userId?.mobile
+                        ? `tel:${booking.vendorId.userId.mobile}`
+                        : undefined
+                    }
                     className="
                       flex
                       items-center
@@ -395,7 +481,7 @@ const TrackBookingPage = () => {
                   >
                     <Phone size={16} />
                     Call
-                  </button>
+                  </a>
 
                   <button
                     className="
@@ -454,25 +540,28 @@ const TrackBookingPage = () => {
               <DetailRow
                 icon={<Calendar size={18} />}
                 label="Date"
-                value="12 June 2026"
+                value={new Date(booking.bookingDate).toLocaleDateString(
+                  "en-IN",
+                  { day: "2-digit", month: "long", year: "numeric" },
+                )}
               />
 
               <DetailRow
                 icon={<Clock3 size={18} />}
                 label="Time"
-                value="10:00 AM"
+                value={booking.bookingTime}
               />
 
               <DetailRow
                 icon={<MapPin size={18} />}
                 label="Address"
-                value="Azad Nagar, Bhilwara"
+                value={booking.address}
               />
 
               <DetailRow
                 icon={<User size={18} />}
                 label="Service"
-                value="Electrical Repair"
+                value={booking.serviceId?.serviceName}
               />
             </div>
           </div>
@@ -523,6 +612,7 @@ const TrackBookingPage = () => {
           </div>
 
           <button
+            onClick={() => navigate("/support")}
             className="
               px-8
               py-4

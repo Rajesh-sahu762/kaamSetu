@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 import {
   Mail,
@@ -9,6 +10,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+
+import { submitSupportRequest } from "@/services/supportService";
 
 const faqs = [
   {
@@ -55,6 +58,41 @@ const helpTopics = [
 const SupportPage = () => {
   const [openFaq, setOpenFaq] =
     useState(null);
+
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const updateForm = (patch) => setForm((prev) => ({ ...prev, ...patch }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!form.fullName || !form.email || !form.subject || !form.message) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await submitSupportRequest(form);
+
+      if (response.success) {
+        toast.success(response.message || "Message sent successfully.");
+        setForm({ fullName: "", email: "", subject: "", message: "" });
+      } else {
+        toast.error(response.message || "Failed to send your message.");
+      }
+    } catch (err) {
+      toast.error("Failed to send your message.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <section
@@ -161,6 +199,7 @@ const SupportPage = () => {
           {helpTopics.map((topic) => (
             <button
               key={topic}
+              onClick={() => updateForm({ subject: topic })}
               className="
                 px-5
                 py-3
@@ -331,6 +370,7 @@ const SupportPage = () => {
           </h2>
 
           <form
+            onSubmit={handleSubmit}
             className="
               space-y-10
             "
@@ -338,6 +378,8 @@ const SupportPage = () => {
             <input
               type="text"
               placeholder="Full Name"
+              value={form.fullName}
+              onChange={(e) => updateForm({ fullName: e.target.value })}
               className="
                 w-full
 
@@ -357,6 +399,8 @@ const SupportPage = () => {
             <input
               type="email"
               placeholder="Email Address"
+              value={form.email}
+              onChange={(e) => updateForm({ email: e.target.value })}
               className="
                 w-full
 
@@ -376,6 +420,8 @@ const SupportPage = () => {
             <input
               type="text"
               placeholder="Subject"
+              value={form.subject}
+              onChange={(e) => updateForm({ subject: e.target.value })}
               className="
                 w-full
 
@@ -395,6 +441,8 @@ const SupportPage = () => {
             <textarea
               rows="5"
               placeholder="Tell us about your issue..."
+              value={form.message}
+              onChange={(e) => updateForm({ message: e.target.value })}
               className="
                 w-full
 
@@ -415,6 +463,7 @@ const SupportPage = () => {
 
             <button
               type="submit"
+              disabled={submitting}
               className="
                 px-8
                 py-4
@@ -428,9 +477,11 @@ const SupportPage = () => {
                 hover:-translate-y-1
 
                 transition
+
+                disabled:opacity-60
               "
             >
-              Send Message
+              {submitting ? "Sending..." : "Send Message"}
             </button>
           </form>
         </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Calendar,
@@ -11,6 +11,13 @@ import {
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
+import { getMyBookings } from "@/services/customerService";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000";
+
+const ACTIVE_STATUSES = ["pending", "accepted", "on_the_way", "in_progress"];
+const CANCELLED_STATUSES = ["cancelled", "rejected"];
 
 const MyBookingsPage = () => {
 
@@ -19,62 +26,43 @@ const MyBookingsPage = () => {
   const [activeTab, setActiveTab] =
     useState("active");
 
-  const bookings = [
-    {
-      id: "KS-2026-45892",
-      expert: "Rajesh Electric Works",
-      service: "Electrical Repair",
-      date: "12 June 2026",
-      time: "10:00 AM",
-      location: "Bhilwara",
-      status: "Accepted",
-      image:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000",
-    },
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-    {
-      id: "KS-2026-45893",
-      expert: "Mohan Plumbing Services",
-      service: "Pipe Leakage Repair",
-      date: "15 June 2026",
-      time: "02:00 PM",
-      location: "Jaipur",
-      status: "Completed",
-      image:
-        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=1000",
-    },
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        setLoading(true);
+        const response = await getMyBookings({ limit: 50 });
 
-    {
-      id: "KS-2026-45894",
-      expert: "Home Cleaning Experts",
-      service: "Deep Cleaning",
-      date: "18 June 2026",
-      time: "11:00 AM",
-      location: "Udaipur",
-      status: "Cancelled",
-      image:
-        "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=1000",
-    },
-  ];
+        if (response.success) {
+          setBookings(response.data);
+        } else {
+          setError(response.message || "Failed to load bookings.");
+        }
+      } catch (err) {
+        setError("Failed to load bookings.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, []);
 
   const filteredBookings =
     bookings.filter((booking) => {
 
       if (activeTab === "active") {
-        return (
-          booking.status === "Accepted"
-        );
+        return ACTIVE_STATUSES.includes(booking.status);
       }
 
       if (activeTab === "completed") {
-        return (
-          booking.status === "Completed"
-        );
+        return booking.status === "completed";
       }
 
-      return (
-        booking.status === "Cancelled"
-      );
+      return CANCELLED_STATUSES.includes(booking.status);
     });
 
   return (
@@ -175,6 +163,22 @@ const MyBookingsPage = () => {
           </TabButton>
         </div>
 
+        {/* Loading / Error / Empty */}
+
+        {loading && (
+          <p className="text-center text-muted">Loading bookings...</p>
+        )}
+
+        {!loading && error && (
+          <p className="text-center text-red-500">{error}</p>
+        )}
+
+        {!loading && !error && filteredBookings.length === 0 && (
+          <p className="text-center text-muted">
+            No bookings here yet.
+          </p>
+        )}
+
         {/* Booking Cards */}
 
         <div className="space-y-6">
@@ -182,7 +186,7 @@ const MyBookingsPage = () => {
           {filteredBookings.map(
             (booking) => (
               <div
-                key={booking.id}
+                key={booking._id}
                 className="
                   bg-card
 
@@ -209,7 +213,7 @@ const MyBookingsPage = () => {
                   {/* Image */}
 
                   <img
-                    src={booking.image}
+                    src={booking.serviceId?.coverImage || FALLBACK_IMAGE}
                     alt=""
                     className="
                       w-full
@@ -250,7 +254,7 @@ const MyBookingsPage = () => {
                             text-primary
                           "
                         >
-                          {booking.expert}
+                          {booking.vendorId?.businessName}
                         </h2>
 
                         <p
@@ -260,7 +264,7 @@ const MyBookingsPage = () => {
                             text-muted
                           "
                         >
-                          {booking.service}
+                          {booking.serviceId?.serviceName}
                         </p>
 
                       </div>
@@ -289,9 +293,13 @@ const MyBookingsPage = () => {
                         icon={
                           <Calendar size={18} />
                         }
-                        value={
-                          booking.date
-                        }
+                        value={new Date(
+                          booking.bookingDate,
+                        ).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        })}
                       />
 
                       <InfoItem
@@ -299,7 +307,7 @@ const MyBookingsPage = () => {
                           <Clock3 size={18} />
                         }
                         value={
-                          booking.time
+                          booking.bookingTime
                         }
                       />
 
@@ -308,7 +316,7 @@ const MyBookingsPage = () => {
                           <MapPin size={18} />
                         }
                         value={
-                          booking.location
+                          booking.vendorId?.city
                         }
                       />
                     </div>
@@ -347,7 +355,7 @@ const MyBookingsPage = () => {
                             text-primary
                           "
                         >
-                          {booking.id}
+                          {booking.bookingNumber}
                         </span>
                       </p>
 
@@ -359,8 +367,13 @@ const MyBookingsPage = () => {
                         "
                       >
                         {booking.status ===
-                          "Completed" && (
+                          "completed" && (
                           <button
+                            onClick={() =>
+                              navigate(
+                                `/review/${booking._id}`,
+                              )
+                            }
                             className="
                               px-5
                               py-3
@@ -375,12 +388,11 @@ const MyBookingsPage = () => {
                           </button>
                         )}
 
-                        {booking.status !==
-                          "Cancelled" && (
+                        {!CANCELLED_STATUSES.includes(booking.status) && (
                           <button
                             onClick={() =>
                               navigate(
-                                "/track-booking"
+                                `/booking/${booking._id}`,
                               )
                             }
                             className="
@@ -470,11 +482,23 @@ const InfoItem = ({
   </div>
 );
 
+const STATUS_LABELS = {
+  pending: "Pending",
+  accepted: "Accepted",
+  on_the_way: "On The Way",
+  in_progress: "In Progress",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  rejected: "Rejected",
+};
+
 const StatusBadge = ({
   status,
 }) => {
 
-  if (status === "Accepted") {
+  const label = STATUS_LABELS[status] || status;
+
+  if (ACTIVE_STATUSES.includes(status)) {
     return (
       <div
         className="
@@ -494,12 +518,12 @@ const StatusBadge = ({
         "
       >
         <LoaderCircle size={16} />
-        {status}
+        {label}
       </div>
     );
   }
 
-  if (status === "Completed") {
+  if (status === "completed") {
     return (
       <div
         className="
@@ -519,7 +543,7 @@ const StatusBadge = ({
         "
       >
         <CheckCircle2 size={16} />
-        {status}
+        {label}
       </div>
     );
   }
@@ -543,7 +567,7 @@ const StatusBadge = ({
       "
     >
       <XCircle size={16} />
-      {status}
+      {label}
     </div>
   );
 };
