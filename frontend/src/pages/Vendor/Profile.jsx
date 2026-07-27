@@ -6,6 +6,8 @@ import { deactivateAccount } from '@/services/authService';
 import { T, MOBILE_BOTTOM_NAV_HEIGHT } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
 import { useVendor } from '@/context/vendorContext';
+import { useContext } from 'react';
+import { AuthContext } from '@/context/authContext';
 
 
 import {
@@ -28,6 +30,7 @@ export default function Profile() {
 const bp = useBreakpoint();
 const navigate = useNavigate();
 const {updateVendorData} = useVendor();
+const { logout } = useContext(AuthContext);
 const [profile, setProfile] = useState(null);
 const [loading, setLoading] = useState(true);
 const fileInputRef = useRef(null);
@@ -278,8 +281,7 @@ const handleDeactivateAccount = async () => {
 
     alert(res.message);
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    logout();
 
     navigate("/login");
   } catch (error) {
