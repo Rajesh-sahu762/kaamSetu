@@ -114,7 +114,7 @@ const verifyEmailOtp = async (req, res) => {
 
     await user.save();
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "2h",
     });
 
@@ -231,11 +231,23 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    // userId comes from the verified JWT (req.user), set by verifyToken —
+    // NOT from req.body. That token can only exist if the OTP step
+    // (verifyEmailOtp) already confirmed ownership of this account.
+    // Trusting a plain email in the body here was the bug: anyone who
+    // knew a user's email could reset their password without ever
+    // proving they received the OTP.
+    const { userId } = req.user;
 
-    const user = await userModel.findOne({
-      email,
-    });
+    if (!password || password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters long",
+      });
+    }
+
+    const user = await userModel.findById(userId);
 
     if (!user) {
       return res.status(404).json({
@@ -312,15 +324,15 @@ const googleLogin = async (req, res) => {
       });
     }
     const token = jwt.sign(
-  {
-    userId: user._id,
-    role: user.role,
-  },
-  process.env.JWT_SECRET,
-  {
-    expiresIn: "2h",
-  }
-);
+      {
+        userId: user._id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "2h",
+      },
+    );
 
     return res.status(200).json({
       success: true,
@@ -409,6 +421,7 @@ const facebookLogin = async (req, res) => {
     const token = jwt.sign(
       {
         userId: user._id,
+        role: user.role,
       },
       process.env.JWT_SECRET,
       {

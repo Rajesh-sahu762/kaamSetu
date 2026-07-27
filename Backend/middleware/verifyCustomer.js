@@ -1,6 +1,7 @@
 // middleware/verifyCustomer.js
-// Chain AFTER verifyToken — assumes verifyToken has already set req.user = { userId, role, ... }
-// from the JWT payload. Mirrors verifyAdmin.js so vendor/admin accounts can't hit customer-only routes.
+// Chain AFTER verifyToken — assumes verifyToken has already set req.user = { userId, role }.
+// Unlike vendors, customers don't have a separate profile collection (they're
+// just a User with role === "customer"), so there's no extra doc to attach.
 
 const verifyCustomer = (req, res, next) => {
   if (!req.user) {
