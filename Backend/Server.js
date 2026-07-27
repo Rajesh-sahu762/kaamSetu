@@ -6,10 +6,12 @@ const authRoutes = require('./routes/authRoutes')
 const vendorRoutes = require('./routes/vendorRoutes')
 const adminRoutes = require("./routes/adminRoutes");
 const notificationRoutes = require('./routes/notificationRoutes')
-const customerRoutes = require('./routes/customerRoutes')
 const cors = require('cors')
 const transporter = require('./config/mail');
 const paymentRoutes = require("./routes/paymentRoutes");
+const publicRoutes = require("./routes/publicRoutes");
+const customerRoutes = require("./routes/customerRoutes");
+const supportRoutes = require("./routes/supportRoutes");
 
 app.use(cors()) // Enable CORS for all routes
 
@@ -34,11 +36,15 @@ app.use("/uploads", express.static("uploads"));
 
 app.use("/api/notifications", notificationRoutes);
 
-app.use("/api/customer", customerRoutes);
-
 app.use("/api/admin", adminRoutes);
 
 app.use("/api/payment", paymentRoutes);
+
+app.use("/api/public", publicRoutes);
+
+app.use("/api/customer", customerRoutes);
+
+app.use("/api/support", supportRoutes);
 
 
 app.listen(PORT, () => {
