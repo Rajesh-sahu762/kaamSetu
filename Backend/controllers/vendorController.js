@@ -565,6 +565,7 @@ const updateService = async (req, res) => {
   try {
     const { userId } = req.user;
     const { id } = req.params;
+    const newImages = req.files?.map((file) => file.filename) || [];
 
     const {
       categoryId,
@@ -667,6 +668,27 @@ const updateService = async (req, res) => {
 
     if (duration !== undefined) service.duration = duration;
 
+    // Only touch images if new ones were actually uploaded this request —
+    // otherwise a plain "edit price/description" save would wipe them out.
+    if (newImages.length > 0) {
+      const oldImages = service.images || [];
+
+      oldImages.forEach((filename) => {
+        const oldImagePath = path.join(
+          __dirname,
+          "..",
+          "uploads",
+          "services",
+          filename,
+        );
+
+        deleteFile(oldImagePath);
+      });
+
+      service.images = newImages;
+      service.coverImage = newImages[0];
+    }
+
     await service.save();
 
     const updatedService = await Service.findById(service._id).populate(
@@ -724,11 +746,20 @@ const deleteService = async (req, res) => {
     }
 
     // ==========================
-    // Delete Images (Future)
+    // Delete Images
     // ==========================
 
-    // coverImage
-    // images[]
+    (service.images || []).forEach((filename) => {
+      const imagePath = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        "services",
+        filename,
+      );
+
+      deleteFile(imagePath);
+    });
 
     // ==========================
     // Delete Service

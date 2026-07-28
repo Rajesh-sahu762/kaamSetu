@@ -427,7 +427,7 @@ rounded-full
                 <LayoutDashboard size={16} /> Dashboard
               </button>
               <button
-                onClick={() => { setAccountOpen(false); navigate("/my-bookings"); }}
+                onClick={() => { setAccountOpen(false); navigate("/my-booking"); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-primary hover:bg-[#745A38]/8 transition"
               >
                 <CalendarCheck size={16} /> My Bookings

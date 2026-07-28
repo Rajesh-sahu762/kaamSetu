@@ -88,6 +88,7 @@ const getServices = async (req, res) => {
       search = "",
       minPrice,
       maxPrice,
+      minRating,
       city,
       sort = "newest",
       page = 1,
@@ -108,6 +109,10 @@ const getServices = async (req, res) => {
       filter.startingPrice = {};
       if (minPrice) filter.startingPrice.$gte = Number(minPrice);
       if (maxPrice) filter.startingPrice.$lte = Number(maxPrice);
+    }
+
+    if (minRating) {
+      filter.rating = { $gte: Number(minRating) };
     }
 
     // Only show services whose vendor is actually approved & live.
