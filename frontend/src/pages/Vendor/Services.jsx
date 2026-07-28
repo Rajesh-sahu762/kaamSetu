@@ -12,6 +12,7 @@ import ImageUploader from "@/components/common/ImageUploader";
 
 import { T, MOBILE_BOTTOM_NAV_HEIGHT } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
+import { getImageUrl } from '@/utils/imageUrl';
 
 import {
   Search,
@@ -1034,9 +1035,22 @@ const menuItemStyle = {
                       filter: isHovered ? 'grayscale(0%)' : 'grayscale(35%)',
                       transition: 'filter .3s ease',
                       position: 'relative',
+                      overflow: 'hidden',
                     }}
                   >
-                    🛠️
+                    {service.coverImage ? (
+                      <img
+                        src={getImageUrl(service.coverImage, 'services')}
+                        alt={service.serviceName}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    ) : (
+                      '🛠️'
+                    )}
                     <div
                       style={{
                         position: 'absolute',
@@ -2042,6 +2056,30 @@ const menuItemStyle = {
               >
                 Service Images
               </label>
+
+              {editingService && editingService.images?.length > 0 && previewImages.length === 0 && (
+                <div style={{ marginBottom: 14 }}>
+                  <p style={{ fontSize: 12, color: T.slateGray, marginBottom: 8 }}>
+                    Current images — upload new ones below to replace these.
+                  </p>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    {editingService.images.map((filename) => (
+                      <img
+                        key={filename}
+                        src={getImageUrl(filename, 'services')}
+                        alt=""
+                        style={{
+                          width: 72,
+                          height: 72,
+                          objectFit: 'cover',
+                          borderRadius: 10,
+                          border: `1px solid ${T.border}`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <ImageUploader
     id="serviceImages"

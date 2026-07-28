@@ -8,6 +8,7 @@ import useBreakpoint from '@/utils/useBreakpoint';
 import { useVendor } from '@/context/vendorContext';
 import { useContext } from 'react';
 import { AuthContext } from '@/context/authContext';
+import { getImageUrl } from '@/utils/imageUrl';
 
 
 import {
@@ -399,7 +400,7 @@ paddingBottom:bp.isMobile
   <Avatar
     image={
         user?.profileImage
-            ? `http://localhost:3000/uploads/profile/${user?.profileImage}`
+            ? getImageUrl(user?.profileImage, "profile")
             : ""
     }
 
