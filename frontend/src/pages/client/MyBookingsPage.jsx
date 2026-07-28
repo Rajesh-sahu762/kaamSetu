@@ -12,6 +12,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import { getMyBookings } from "@/services/customerService";
+import { getImageUrl } from "@/utils/imageUrl";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000";
@@ -213,7 +214,7 @@ const MyBookingsPage = () => {
                   {/* Image */}
 
                   <img
-                    src={booking.serviceId?.coverImage || FALLBACK_IMAGE}
+                    src={getImageUrl(booking.serviceId?.coverImage, "services") || FALLBACK_IMAGE}
                     alt=""
                     className="
                       w-full

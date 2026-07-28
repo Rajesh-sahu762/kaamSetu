@@ -16,6 +16,7 @@ import {
 
 import { getServiceById } from "@/services/publicService";
 import { createBooking } from "@/services/customerService";
+import { getImageUrl } from "@/utils/imageUrl";
 import {
   createOrder,
   verifyPayment,
@@ -575,7 +576,8 @@ const CheckoutPage = () => {
 
               <img
                 src={
-                  service.vendorId?.userId?.profileImage || FALLBACK_IMAGE
+                  getImageUrl(service.vendorId?.userId?.profileImage, "profile") ||
+                  FALLBACK_IMAGE
                 }
                 alt=""
                 className="

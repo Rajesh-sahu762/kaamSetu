@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { getServiceById } from "@/services/publicService";
+import { getImageUrl } from "@/utils/imageUrl";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800";
@@ -573,7 +574,8 @@ const BookingPage = () => {
             >
               <img
                 src={
-                  service.vendorId?.userId?.profileImage || FALLBACK_IMAGE
+                  getImageUrl(service.vendorId?.userId?.profileImage, "profile") ||
+                  FALLBACK_IMAGE
                 }
                 alt=""
                 className="

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { getMyBookingById } from "@/services/customerService";
+import { getImageUrl } from "@/utils/imageUrl";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000";
@@ -419,7 +420,8 @@ const TrackBookingPage = () => {
             >
               <img
                 src={
-                  booking.vendorId?.userId?.profileImage || FALLBACK_IMAGE
+                  getImageUrl(booking.vendorId?.userId?.profileImage, "profile") ||
+                  FALLBACK_IMAGE
                 }
                 alt=""
                 className="

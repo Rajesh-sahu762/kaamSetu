@@ -17,6 +17,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { getImageUrl } from '@/utils/imageUrl';
 
 import {
   getCustomerProfile,
@@ -216,7 +217,7 @@ const CustomerProfilePage = () => {
 
             {profile?.profileImage ? (
               <img
-                src={profile.profileImage}
+                src={getImageUrl(profile.profileImage, "profile")}
                 alt={profile.fullName}
                 className="
                   w-32
