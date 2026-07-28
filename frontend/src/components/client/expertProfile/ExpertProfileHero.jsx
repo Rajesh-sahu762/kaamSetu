@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   ArrowRight,
 } from "lucide-react";
+import { getImageUrl } from "@/utils/imageUrl";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000";
@@ -60,7 +61,7 @@ const ExpertProfileHero = ({ vendor, services, rating, totalReviews }) => {
 
             <div>
               <img
-                src={vendor.userId?.profileImage || FALLBACK_IMAGE}
+                src={getImageUrl(vendor.userId?.profileImage, "profile") || FALLBACK_IMAGE}
                 alt={vendor.businessName}
                 className="
                   w-full

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ExpertCard from "./ExpertCard";
 import { getVendors } from "@/services/publicService";
+import { getImageUrl } from "@/utils/imageUrl";
 
 const mapVendorToExpert = ({ vendor, primaryService, rating, totalReviews }) => ({
   id: vendor._id,
@@ -13,7 +14,7 @@ const mapVendorToExpert = ({ vendor, primaryService, rating, totalReviews }) => 
   visitCharge: primaryService?.startingPrice ?? 0,
   verified: true,
   image:
-    vendor.userId?.profileImage ||
+    getImageUrl(vendor.userId?.profileImage, "profile") ||
     "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800",
 });
 
@@ -124,7 +125,7 @@ const ExpertGrid = ({ filters = {} }) => {
               text-muted
             "
           >
-            {totalVendors} Experts Found
+            {loading ? "Searching..." : `${totalVendors} Experts Found`}
           </span>
         </div>
 
@@ -134,33 +135,72 @@ const ExpertGrid = ({ filters = {} }) => {
           <p className="text-center text-red-500 mb-8">{error}</p>
         )}
 
+        {/* Initial loading skeleton */}
+
+        {loading && experts.length === 0 && !error && (
+          <div
+            className="
+              grid
+
+              md:grid-cols-2
+              xl:grid-cols-3
+
+              gap-8
+            "
+          >
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className="
+                  bg-card
+                  border
+                  border-theme
+                  rounded-3xl
+                  overflow-hidden
+                  shadow-theme
+                  animate-pulse
+                "
+              >
+                <div className="h-[220px] bg-[#745A38]/10" />
+                <div className="p-6 space-y-4">
+                  <div className="h-5 w-2/3 rounded bg-[#745A38]/10" />
+                  <div className="h-4 w-1/2 rounded bg-[#745A38]/5" />
+                  <div className="h-8 w-1/3 rounded bg-[#745A38]/10" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Empty State */}
 
         {!loading && !error && experts.length === 0 && (
           <p className="text-center text-muted mb-8">
-            No experts found yet. Check back soon.
+            No experts match your filters. Try widening your search.
           </p>
         )}
 
         {/* Grid */}
 
-        <div
-          className="
-            grid
+        {experts.length > 0 && (
+          <div
+            className="
+              grid
 
-            md:grid-cols-2
-            xl:grid-cols-3
+              md:grid-cols-2
+              xl:grid-cols-3
 
-            gap-8
-          "
-        >
-          {experts.map((expert) => (
-            <ExpertCard
-              key={expert.id}
-              expert={expert}
-            />
-          ))}
-        </div>
+              gap-8
+            "
+          >
+            {experts.map((expert) => (
+              <ExpertCard
+                key={expert.id}
+                expert={expert}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Load More */}
 

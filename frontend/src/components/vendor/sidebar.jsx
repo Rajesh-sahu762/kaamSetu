@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { T } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
+import { getImageUrl } from '@/utils/imageUrl';
 import ConfirmModal from '../common/ConfirmModal';
 import { useVendor } from '@/context/vendorContext';
 import Avatar from "../common/Avatar";
@@ -277,7 +278,7 @@ const vendor = vendorData?.vendor;
               <Avatar
     image={
         user?.profileImage
-            ? `http://localhost:3000/uploads/profile/${user.profileImage}`
+            ? getImageUrl(user.profileImage, "profile")
             : ""
     }
     initials={

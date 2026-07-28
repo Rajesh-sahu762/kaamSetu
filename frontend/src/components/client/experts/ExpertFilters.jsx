@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 import {
@@ -45,6 +45,7 @@ const EMPTY_DRAFT = {
 
 const ExpertFilters = ({
   categories = [],
+  filters = {},
   initialCategory = "",
   onApply,
   onReset,
@@ -52,7 +53,13 @@ const ExpertFilters = ({
   const [draft, setDraft] = useState({
     ...EMPTY_DRAFT,
     category: initialCategory,
+    ...filters,
   });
+
+  useEffect(() => {
+    setDraft((prev) => ({ ...EMPTY_DRAFT, ...prev, ...filters }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   const updateDraft = (patch) => setDraft((prev) => ({ ...prev, ...patch }));
 
@@ -64,6 +71,8 @@ const ExpertFilters = ({
   const handleApply = () => {
     onApply?.(draft);
   };
+
+  const activeCount = Object.entries(filters).filter(([, value]) => Boolean(value)).length;
 
   return (
     <section className="py-8 bg-theme">
@@ -109,15 +118,43 @@ const ExpertFilters = ({
             "
           >
             <div>
-              <h2
+              <div
                 className="
-                  text-2xl
-                  font-semibold
-                  text-primary
+                  flex
+                  items-center
+                  gap-3
                 "
               >
-                Find The Right Expert
-              </h2>
+                <h2
+                  className="
+                    text-2xl
+                    font-semibold
+                    text-primary
+                  "
+                >
+                  Find The Right Expert
+                </h2>
+
+                {activeCount > 0 && (
+                  <span
+                    className="
+                      px-2.5
+                      py-0.5
+
+                      rounded-full
+
+                      bg-[#745A38]/10
+
+                      text-[#745A38]
+
+                      text-xs
+                      font-semibold
+                    "
+                  >
+                    {activeCount} active
+                  </span>
+                )}
+              </div>
 
               <p
                 className="

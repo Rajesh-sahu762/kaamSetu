@@ -9,6 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import { getFeaturedExperts } from "@/services/publicService";
+import { getImageUrl } from "@/utils/imageUrl";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43d?w=500";
@@ -146,7 +147,7 @@ const FeaturedExperts = () => {
 
               <div className="relative">
                 <img
-                  src={expert.userId?.profileImage || FALLBACK_IMAGE}
+                  src={getImageUrl(expert.userId?.profileImage, "profile") || FALLBACK_IMAGE}
                   alt={expert.businessName}
                   className="
                     h-[280px]
