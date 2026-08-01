@@ -6,7 +6,7 @@ import { T } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
 import { getImageUrl } from '@/utils/imageUrl';
 import ConfirmModal from '../common/ConfirmModal';
-import { useVendor } from '@/context/vendorContext';
+import { useVendor } from '@/context/VendorContext';
 import Avatar from "../common/Avatar";
 
 

@@ -13,7 +13,13 @@ const publicRoutes = require("./routes/publicRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const supportRoutes = require("./routes/supportRoutes");
 
-app.use(cors()) // Enable CORS for all routes
+app.use(cors({
+    origin: [
+        "http://localhost:5173",
+        "https://kaamsetu.vercel.app"
+    ],
+    credentials: true,
+})); // Enable CORS for all routes
 
 const PORT = process.env.PORT || 3000
 

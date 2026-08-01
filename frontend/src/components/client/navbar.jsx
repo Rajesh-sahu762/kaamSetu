@@ -18,7 +18,7 @@ import SearchModal from './SearchModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useTheme } from '@/context/ThemeContext';
-import { AuthContext } from '@/context/authContext';
+import { AuthContext } from '@/context/AuthContext';
 import api from '@/services/api';
 import { Link, useLocation, useNavigate  } from "react-router-dom";
 

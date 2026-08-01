@@ -5,10 +5,10 @@ import { loginUser, googleLogin, facebookLogin } from '@/services/authService';
 
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
-import { useVendor } from "@/context/vendorContext";
+import { useVendor } from "@/context/VendorContext";
 import { getVendorProfile } from "@/services/vendorService";
 import { useContext } from 'react';
-import { AuthContext } from '@/context/authContext';
+import { AuthContext } from '@/context/AuthContext';
 
 const Login = () => {
   const location = useLocation();

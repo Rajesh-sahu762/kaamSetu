@@ -22,7 +22,7 @@ import {
   verifyPayment,
   loadRazorpayScript,
 } from "@/services/paymentService";
-import { AuthContext } from "@/context/authContext";
+import { AuthContext } from "@/context/AuthContext";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800";

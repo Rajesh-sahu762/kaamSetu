@@ -1,4 +1,4 @@
-import AuthFooter from "@/components/auth/authFooter";
+import AuthFooter from "@/components/auth/AuthFooter";
 import React from "react";
 import {
   FaCheckCircle,

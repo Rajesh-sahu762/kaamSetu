@@ -1,5 +1,5 @@
-import Sidebar from '@/components/vendor/sidebar';
-import Topbar from '@/components/vendor/topbar';
+import Sidebar from '@/components/vendor/Sidebar';
+import Topbar from '@/components/vendor/Topbar';
 import Fade from '@/components/common/Fade';
 import Avatar from '@/components/common/Avatar';
 import StatusPill from '@/components/common/StatusPill';

@@ -5,9 +5,9 @@ import Avatar from '@/components/common/Avatar';
 import { deactivateAccount } from '@/services/authService';
 import { T, MOBILE_BOTTOM_NAV_HEIGHT } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
-import { useVendor } from '@/context/vendorContext';
+import { useVendor } from '@/context/VendorContext';
 import { useContext } from 'react';
-import { AuthContext } from '@/context/authContext';
+import { AuthContext } from '@/context/AuthContext';
 import { getImageUrl } from '@/utils/imageUrl';
 
 

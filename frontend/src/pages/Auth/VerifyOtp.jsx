@@ -8,7 +8,7 @@ import { resendOtp } from '@/services/authService';
 import { toast } from 'react-toastify';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthFooter from '../../components/auth/AuthFooter';
-import { AuthContext } from '@/context/authContext';
+import { AuthContext } from '@/context/AuthContext';
 
 
 const VerifyOtp = () => {

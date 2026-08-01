@@ -1,10 +1,10 @@
-import AuthFooter from '@/components/auth/authFooter';
-import AuthHeader from '@/components/auth/authHeader';
+import AuthFooter from '@/components/auth/AuthFooter';
+import AuthHeader from '@/components/auth/AuthHeader';
 import ProgressBar from '@/components/auth/ProgressBar';
 import React, { useEffect, useState } from 'react';
 import { FaArrowLeft, FaShieldAlt, FaCloudUploadAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useVendor } from '@/context/vendorContext';
+import { useVendor } from '@/context/VendorContext';
 
 const VendorDocuments = () => {
 
