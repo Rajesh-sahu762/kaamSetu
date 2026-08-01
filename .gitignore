@@ -43,7 +43,6 @@ Thumbs.db
 # Misc
 npm-debug.log*
 yarn-error.log*
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -69,3 +68,7 @@ temp/
 *.ntvs*
 *.njsproj
 *.sln
+
+
+# Local uploads
+uploads/
