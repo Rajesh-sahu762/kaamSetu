@@ -1,105 +1,42 @@
 const multer = require("multer");
-
-const path = require("path");
-
-const fs = require("fs");
-
-const { generateFileName } = require("../utils/fileHelper");
-
-
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 
 const upload = (folder) => {
+  const storage = new CloudinaryStorage({
+    cloudinary,
+    params: async () => ({
+      folder: `kaamsetu/${folder}`,
+      allowed_formats: ["jpg", "jpeg", "png", "webp"],
+      resource_type: "image",
+    }),
+  });
 
-    const uploadPath = path.join(__dirname, "..", "uploads", folder);
+  const fileFilter = (req, file, cb) => {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
 
-
-    // Folder automatically create ho jayega
-
-    if (!fs.existsSync(uploadPath)) {
-
-        fs.mkdirSync(uploadPath, { recursive: true });
-
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error("Only JPG, JPEG, PNG and WEBP images are allowed."),
+        false
+      );
     }
+  };
 
-
-    const storage = multer.diskStorage({
-
-        destination: (req, file, cb) => {
-
-            cb(null, uploadPath);
-
-        },
-
-        filename: (req, file, cb) => {
-
-            const fileName = generateFileName(
-
-                uploadPath,
-
-                file.originalname
-
-            );
-
-            cb(null, fileName);
-
-        },
-
-    });
-
-
-    const fileFilter = (req, file, cb) => {
-
-        const allowedTypes = [
-
-            "image/jpeg",
-
-            "image/jpg",
-
-            "image/png",
-
-            "image/webp",
-
-        ];
-
-
-        if (allowedTypes.includes(file.mimetype)) {
-
-            cb(null, true);
-
-        } else {
-
-            cb(
-
-                new Error(
-
-                    "Only JPG, JPEG, PNG and WEBP images are allowed."
-
-                ),
-
-                false
-
-            );
-
-        }
-
-    };
-
-
-    return multer({
-
-        storage,
-
-        fileFilter,
-
-        limits: {
-
-            fileSize: 2 * 1024 * 1024,
-
-        },
-
-    });
-
+  return multer({
+    storage,
+    fileFilter,
+    limits: {
+      fileSize: 2 * 1024 * 1024,
+    },
+  });
 };
-
 
 module.exports = upload;

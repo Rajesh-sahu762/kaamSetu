@@ -66,7 +66,6 @@ const HeroSection = ({ stats, categories = [], loading = false }) => {
             transition={{ duration: 0.7 }}
           >
             <p className="uppercase tracking-[0.25em] text-xs font-semibold text-[#745a38] mb-6">
-              Verified Professionals
             </p>
 
             <h1
