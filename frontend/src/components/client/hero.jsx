@@ -2,6 +2,7 @@ import { motion, useScroll, useTransform, useInView, animate } from "framer-moti
 import { Wrench, Hammer, Paintbrush, ArrowRight, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import successImage from "../../assets/images/success-artisan.png";
 
 // Counts up from 0 to `value` once the number scrolls into view — a small
 // premium touch that also makes the (now real) stats feel alive.
@@ -263,7 +264,7 @@ const HeroSection = ({ stats, categories = [], loading = false }) => {
                 "
               >
                 <img
-                  src="/src/assets/images/success-artisan.png"
+                  src={successImage}
                   alt="artisan"
                   className="w-full h-[260px] object-cover"
                 />
