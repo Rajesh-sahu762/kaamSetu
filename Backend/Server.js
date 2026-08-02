@@ -16,7 +16,7 @@ const supportRoutes = require("./routes/supportRoutes");
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://kaamsetu.vercel.app"
+        "https://kaam-setu-bice.vercel.app/"
     ],
     credentials: true,
 })); // Enable CORS for all routes
