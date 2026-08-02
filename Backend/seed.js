@@ -1,13 +1,22 @@
 // Backend/seed.js
-// One-time script to populate the DB with test data covering every panel
-// (admin / vendor / customer) and every status/flow you'd want to click
-// through for a demo or resume walkthrough.
+// Populates every collection with 5-7 realistic dummy records so you can
+// click through the customer, vendor, and admin panels end-to-end.
 //
-// Run with:  node seed.js
-// (reads Backend/.env for MONGO_URI, so run it from inside Backend/)
+// IMAGES: schema fields just store an image URL string - the app doesn't
+// care where it comes from as long as it's a valid https URL (this is the
+// same assumption the Cloudinary migration relies on). So instead of
+// uploading through Cloudinary during seeding, this script points
+// directly at two free, stable public image services:
+//   - https://i.pravatar.cc/... for profile/face photos
+//   - https://picsum.photos/id/<id>/... for service/category/document photos
+// Both are real, always-on URLs - nothing here is a fake/broken link.
 //
-// Safe to re-run: it wipes only the collections it seeds (see WIPE_COLLECTIONS)
-// so you don't end up with duplicates on a second run.
+// Run with:
+//   cd Backend
+//   node seed.js
+//
+// Safe to re-run - it wipes only the collections it seeds, so re-running
+// after changes won't leave duplicates.
 
 require("dotenv").config();
 const mongoose = require("mongoose");
@@ -23,16 +32,18 @@ const Transaction = require("./models/transaction");
 const Notification = require("./models/notification");
 const generateBookingNumber = require("./utils/generateBookingNumber");
 
-const PASSWORD = "Test@1234"; // same password for every seeded account, for demo convenience
+const PASSWORD = "Test@1234"; // same password on every seeded account, for demo convenience
 
 const toSlug = (str) =>
   str.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+const avatar = (id) => `https://i.pravatar.cc/300?img=${id}`;
+const photo = (id) => `https://picsum.photos/id/${id}/800/600`;
 
 async function run() {
   await mongoose.connect(process.env.MONGO_URI);
   console.log("Connected to MongoDB:", mongoose.connection.name);
 
-  // --- wipe only what we're about to reseed ---
   await Promise.all([
     Notification.deleteMany({}),
     Transaction.deleteMany({}),
@@ -47,7 +58,8 @@ async function run() {
   const hashedPassword = await bcrypt.hash(PASSWORD, 10);
 
   // ---------------------------------------------------------------------
-  // 1. ADMIN (no public registration route by design — created directly)
+  // 1. ADMIN - only one; there's no public admin-register route by design,
+  //    so this account has to be created directly like this.
   // ---------------------------------------------------------------------
   const admin = await User.create({
     fullName: "Rajesh Admin",
@@ -57,82 +69,113 @@ async function run() {
     role: "admin",
     isVerified: true,
     provider: "local",
+    profileImage: avatar(12),
   });
 
   // ---------------------------------------------------------------------
-  // 2. CATEGORIES
+  // 2. CATEGORIES (6)
   // ---------------------------------------------------------------------
-  const categoryNames = ["Plumbing", "Electrical", "Carpentry", "Home Cleaning", "Painting"];
+  const categoryDefs = [
+    { name: "Plumbing", img: photo(1060) },
+    { name: "Electrical", img: photo(1078) },
+    { name: "Carpentry", img: photo(1080) },
+    { name: "Home Cleaning", img: photo(1040) },
+    { name: "Painting", img: photo(1050) },
+    { name: "AC Repair & Servicing", img: photo(1074) },
+  ];
   const categories = await Category.insertMany(
-    categoryNames.map((name) => ({
-      name,
-      slug: toSlug(name),
-      description: `${name} services by verified professionals`,
+    categoryDefs.map((c) => ({
+      name: c.name,
+      slug: toSlug(c.name),
+      description: `${c.name} services by verified professionals`,
+      image: c.img,
       isActive: true,
     }))
   );
-  const [plumbing, electrical, carpentry, cleaning, painting] = categories;
+  const [plumbing, electrical, carpentry, cleaning, painting, acRepair] = categories;
 
   // ---------------------------------------------------------------------
-  // 3. VENDORS — one of each status so you can test the admin approval
-  //    flow AND the "approved vendor" customer-facing flow
+  // 3. VENDORS (6) - 4 approved (with services/bookings), 1 pending
+  //    (test the admin-approval flow), 1 rejected (test the rejected UI)
   // ---------------------------------------------------------------------
   const vendorDefs = [
     {
-      key: "approved1",
+      key: "suresh",
       fullName: "Suresh Kumar",
-      email: "vendor.approved@kaamsetu.test",
+      email: "vendor.suresh@kaamsetu.test",
       mobile: "9000000010",
       businessName: "Suresh Plumbing Works",
-      businessType: "Individual",
       city: "Jaipur",
-      state: "Rajasthan",
       pincode: "302001",
       experience: 6,
       status: "approved",
-      categoryFocus: plumbing,
+      category: plumbing,
+      avatarId: 15,
     },
     {
-      key: "approved2",
+      key: "meena",
       fullName: "Meena Devi",
-      email: "vendor.approved2@kaamsetu.test",
+      email: "vendor.meena@kaamsetu.test",
       mobile: "9000000011",
       businessName: "Meena Home Cleaning Co.",
-      businessType: "Individual",
       city: "Jaipur",
-      state: "Rajasthan",
       pincode: "302004",
       experience: 4,
       status: "approved",
-      categoryFocus: cleaning,
+      category: cleaning,
+      avatarId: 45,
     },
     {
-      key: "pending",
-      fullName: "Aman Verma",
-      email: "vendor.pending@kaamsetu.test",
+      key: "ramesh",
+      fullName: "Ramesh Yadav",
+      email: "vendor.ramesh@kaamsetu.test",
       mobile: "9000000012",
-      businessName: "Aman Electricals",
-      businessType: "Individual",
+      businessName: "RY Electricals",
       city: "Jaipur",
-      state: "Rajasthan",
+      pincode: "302017",
+      experience: 8,
+      status: "approved",
+      category: electrical,
+      avatarId: 33,
+    },
+    {
+      key: "farhan",
+      fullName: "Farhan Khan",
+      email: "vendor.farhan@kaamsetu.test",
+      mobile: "9000000013",
+      businessName: "Khan Paint Works",
+      city: "Jaipur",
+      pincode: "302020",
+      experience: 5,
+      status: "approved",
+      category: painting,
+      avatarId: 51,
+    },
+    {
+      key: "aman",
+      fullName: "Aman Verma",
+      email: "vendor.aman@kaamsetu.test",
+      mobile: "9000000014",
+      businessName: "Aman Electricals",
+      city: "Jaipur",
       pincode: "302012",
       experience: 2,
       status: "pending",
-      categoryFocus: electrical,
+      category: electrical,
+      avatarId: 22,
     },
     {
-      key: "rejected",
+      key: "vikram",
       fullName: "Vikram Singh",
-      email: "vendor.rejected@kaamsetu.test",
-      mobile: "9000000013",
+      email: "vendor.vikram@kaamsetu.test",
+      mobile: "9000000015",
       businessName: "Vikram Carpentry",
-      businessType: "Individual",
       city: "Jaipur",
-      state: "Rajasthan",
       pincode: "302015",
       experience: 1,
       status: "rejected",
-      categoryFocus: carpentry,
+      category: carpentry,
+      avatarId: 60,
     },
   ];
 
@@ -146,24 +189,25 @@ async function run() {
       role: "vendor",
       isVerified: true,
       provider: "local",
+      profileImage: avatar(v.avatarId),
     });
 
     const vendor = await Vendor.create({
       userId: user._id,
       businessName: v.businessName,
-      businessType: v.businessType,
+      businessType: "Individual",
       experience: v.experience,
       address: `${v.businessName}, Main Market`,
       city: v.city,
-      state: v.state,
+      state: "Rajasthan",
       pincode: v.pincode,
-      aadhaarImage: "seed/aadhaar-placeholder.jpg",
-      panImage: "seed/pan-placeholder.jpg",
+      aadhaarImage: photo(1025),
+      panImage: photo(1026),
       status: v.status,
       approvedAt: v.status === "approved" ? new Date() : null,
-      rejectionReason: v.status === "rejected" ? "Incomplete documents" : "",
-      bio: `${v.experience} years experience in ${v.categoryFocus.name.toLowerCase()}.`,
-      skills: [v.categoryFocus.name],
+      rejectionReason: v.status === "rejected" ? "Incomplete KYC documents" : "",
+      bio: `${v.experience} years experience in ${v.category.name.toLowerCase()}.`,
+      skills: [v.category.name],
       serviceAreas: [v.city],
       bankDetails: {
         bankName: "State Bank of India",
@@ -174,36 +218,75 @@ async function run() {
       },
     });
 
-    vendors[v.key] = { user, vendor, category: v.categoryFocus };
+    vendors[v.key] = { user, vendor, category: v.category };
   }
 
   // ---------------------------------------------------------------------
-  // 4. SERVICES — only for approved vendors (matches requireApprovedVendor)
+  // 4. SERVICES (7) - only for approved vendors
   // ---------------------------------------------------------------------
   const serviceDefs = [
     {
-      vendorKey: "approved1",
+      vendorKey: "suresh",
       serviceName: "Tap & Pipe Leak Repair",
       description: "Fixing leaking taps, pipes and joints at your home.",
       priceType: "fixed",
       startingPrice: 349,
       duration: 60,
+      images: [photo(1060), photo(1061)],
     },
     {
-      vendorKey: "approved1",
+      vendorKey: "suresh",
       serviceName: "Bathroom Fitting Installation",
       description: "Installation of wash basins, geysers and shower fittings.",
       priceType: "variable",
       startingPrice: 799,
       duration: 120,
+      images: [photo(1062), photo(1063)],
     },
     {
-      vendorKey: "approved2",
+      vendorKey: "meena",
       serviceName: "Deep Home Cleaning",
       description: "Full-home deep cleaning including kitchen and bathrooms.",
       priceType: "fixed",
       startingPrice: 1499,
       duration: 180,
+      images: [photo(1040), photo(1041)],
+    },
+    {
+      vendorKey: "meena",
+      serviceName: "Kitchen Deep Cleaning",
+      description: "Degreasing, chimney cleaning and cabinet wipe-down.",
+      priceType: "fixed",
+      startingPrice: 999,
+      duration: 90,
+      images: [photo(1042), photo(1043)],
+    },
+    {
+      vendorKey: "ramesh",
+      serviceName: "Wiring & Switchboard Repair",
+      description: "Rewiring, switchboard replacement and safety checks.",
+      priceType: "variable",
+      startingPrice: 499,
+      duration: 90,
+      images: [photo(1078), photo(1079)],
+    },
+    {
+      vendorKey: "ramesh",
+      serviceName: "Ceiling Fan Installation",
+      description: "Fan mounting, wiring and balancing.",
+      priceType: "fixed",
+      startingPrice: 349,
+      duration: 45,
+      images: [photo(1080), photo(1081)],
+    },
+    {
+      vendorKey: "farhan",
+      serviceName: "Full Home Interior Painting",
+      description: "Premium emulsion painting for 2-3 BHK homes.",
+      priceType: "variable",
+      startingPrice: 5999,
+      duration: 480,
+      images: [photo(1050), photo(1051)],
     },
   ];
 
@@ -219,20 +302,27 @@ async function run() {
       priceType: s.priceType,
       startingPrice: s.startingPrice,
       duration: s.duration,
+      images: s.images,
+      coverImage: s.images[0],
       isActive: true,
       slug: toSlug(`${s.serviceName}-${vendor._id.toString().slice(-5)}`),
     });
     services.push(service);
   }
+  const [svcTap, svcBathroom, svcDeepClean, svcKitchen, svcWiring, svcFan, svcPaint] = services;
 
   // ---------------------------------------------------------------------
-  // 5. CUSTOMERS
+  // 5. CUSTOMERS (6)
   // ---------------------------------------------------------------------
   const customerDefs = [
-    { fullName: "Priya Sharma", email: "customer1@kaamsetu.test", mobile: "9000000020" },
-    { fullName: "Rohit Gupta", email: "customer2@kaamsetu.test", mobile: "9000000021" },
+    { fullName: "Priya Sharma", email: "customer.priya@kaamsetu.test", mobile: "9000000020", avatarId: 5 },
+    { fullName: "Rohit Gupta", email: "customer.rohit@kaamsetu.test", mobile: "9000000021", avatarId: 8 },
+    { fullName: "Anjali Mehta", email: "customer.anjali@kaamsetu.test", mobile: "9000000022", avatarId: 9 },
+    { fullName: "Karan Malhotra", email: "customer.karan@kaamsetu.test", mobile: "9000000023", avatarId: 14 },
+    { fullName: "Sneha Reddy", email: "customer.sneha@kaamsetu.test", mobile: "9000000024", avatarId: 20 },
+    { fullName: "Vikas Chawla", email: "customer.vikas@kaamsetu.test", mobile: "9000000025", avatarId: 25 },
   ];
-  const customers = [];
+  const customers = {};
   for (const c of customerDefs) {
     const user = await User.create({
       fullName: c.fullName,
@@ -242,98 +332,51 @@ async function run() {
       role: "customer",
       isVerified: true,
       provider: "local",
+      profileImage: avatar(c.avatarId),
     });
-    customers.push(user);
+    customers[c.fullName.split(" ")[0].toLowerCase()] = user;
   }
-  const [customer1, customer2] = customers;
+  const { priya, rohit, anjali, karan, sneha, vikas } = customers;
 
   // ---------------------------------------------------------------------
-  // 6. BOOKINGS — one per status, spread across vendors/customers, so the
-  //    vendor bookings page, customer bookings page and admin bookings
-  //    page all have something in every filter/tab
+  // 6. BOOKINGS (11) - one for every status in the schema's enum
+  //    (pending / accepted / on_the_way / in_progress / cancelled /
+  //    rejected) plus 5 completed ones so there's enough data for 5
+  //    reviews and a handful of transactions.
   // ---------------------------------------------------------------------
-  const approvedVendor1 = vendors.approved1.vendor;
-  const approvedVendor2 = vendors.approved2.vendor;
+  const sureshVendor = vendors.suresh.vendor;
+  const meenaVendor = vendors.meena.vendor;
+  const rameshVendor = vendors.ramesh.vendor;
+  const farhanVendor = vendors.farhan.vendor;
+
+  const daysFromNow = (n) => {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return d;
+  };
 
   const bookingDefs = [
-    {
-      customer: customer1,
-      vendor: approvedVendor1,
-      service: services[0],
-      status: "pending",
-      paymentStatus: "pending",
-      paymentMethod: "cash",
-      daysFromNow: 2,
-    },
-    {
-      customer: customer1,
-      vendor: approvedVendor1,
-      service: services[1],
-      status: "accepted",
-      paymentStatus: "pending",
-      paymentMethod: "cash",
-      daysFromNow: 3,
-    },
-    {
-      customer: customer2,
-      vendor: approvedVendor2,
-      service: services[2],
-      status: "in_progress",
-      paymentStatus: "paid",
-      paymentMethod: "online",
-      daysFromNow: 0,
-    },
-    {
-      customer: customer2,
-      vendor: approvedVendor1,
-      service: services[0],
-      status: "completed",
-      paymentStatus: "paid",
-      paymentMethod: "online",
-      daysFromNow: -5,
-    },
-    {
-      customer: customer1,
-      vendor: approvedVendor2,
-      service: services[2],
-      status: "completed",
-      paymentStatus: "paid",
-      paymentMethod: "cash",
-      daysFromNow: -10,
-    },
-    {
-      customer: customer2,
-      vendor: approvedVendor1,
-      service: services[1],
-      status: "cancelled",
-      paymentStatus: "failed",
-      paymentMethod: "online",
-      daysFromNow: -2,
-      cancelledBy: "customer",
-      cancelReason: "Change of plans",
-    },
-    {
-      customer: customer1,
-      vendor: approvedVendor2,
-      service: services[2],
-      status: "rejected",
-      paymentStatus: "pending",
-      paymentMethod: "cash",
-      daysFromNow: -1,
-    },
+    { customer: priya, vendor: sureshVendor, service: svcTap, status: "pending", paymentStatus: "pending", paymentMethod: "cash", date: daysFromNow(2) },
+    { customer: rohit, vendor: sureshVendor, service: svcBathroom, status: "accepted", paymentStatus: "pending", paymentMethod: "cash", date: daysFromNow(3) },
+    { customer: anjali, vendor: rameshVendor, service: svcWiring, status: "on_the_way", paymentStatus: "pending", paymentMethod: "cash", date: daysFromNow(0) },
+    { customer: karan, vendor: meenaVendor, service: svcDeepClean, status: "in_progress", paymentStatus: "paid", paymentMethod: "online", date: daysFromNow(0) },
+    { customer: sneha, vendor: sureshVendor, service: svcTap, status: "completed", paymentStatus: "paid", paymentMethod: "online", date: daysFromNow(-4) },
+    { customer: vikas, vendor: meenaVendor, service: svcKitchen, status: "completed", paymentStatus: "paid", paymentMethod: "cash", date: daysFromNow(-6) },
+    { customer: priya, vendor: rameshVendor, service: svcFan, status: "completed", paymentStatus: "paid", paymentMethod: "online", date: daysFromNow(-8) },
+    { customer: rohit, vendor: farhanVendor, service: svcPaint, status: "completed", paymentStatus: "paid", paymentMethod: "online", date: daysFromNow(-15) },
+    { customer: anjali, vendor: sureshVendor, service: svcBathroom, status: "completed", paymentStatus: "paid", paymentMethod: "cash", date: daysFromNow(-20) },
+    { customer: karan, vendor: meenaVendor, service: svcDeepClean, status: "cancelled", paymentStatus: "failed", paymentMethod: "online", date: daysFromNow(-2), cancelledBy: "customer", cancelReason: "Change of plans" },
+    { customer: sneha, vendor: rameshVendor, service: svcWiring, status: "rejected", paymentStatus: "pending", paymentMethod: "cash", date: daysFromNow(-1) },
   ];
 
   const bookings = [];
   for (const b of bookingDefs) {
-    const bookingDate = new Date();
-    bookingDate.setDate(bookingDate.getDate() + b.daysFromNow);
-
     const booking = await Booking.create({
       customerId: b.customer._id,
       vendorId: b.vendor._id,
       serviceId: b.service._id,
       bookingNumber: generateBookingNumber(),
-      bookingDate,
+      bookingDate: b.date,
       bookingTime: "11:00 AM",
       status: b.status,
       paymentStatus: b.paymentStatus,
@@ -347,29 +390,38 @@ async function run() {
   }
 
   // ---------------------------------------------------------------------
-  // 7. REVIEWS — for the two completed bookings
+  // 7. REVIEWS (5) - one per completed booking
   // ---------------------------------------------------------------------
   const completedBookings = bookings.filter((b) => b.status === "completed");
-  const reviewTexts = [
+  const reviewDefs = [
     { rating: 5, review: "Excellent work, fixed the leak in 30 minutes. Highly recommend!" },
     { rating: 4, review: "Good cleaning service, slightly late but thorough job." },
+    { rating: 5, review: "Fan installed perfectly, very professional." },
+    { rating: 4, review: "Painting quality was great, finished a day early too.", reply: "Thank you so much for the kind words! Look forward to serving you again." },
+    { rating: 3, review: "Job was fine, could've cleaned up after finishing better." },
   ];
+  const reviews = [];
   for (let i = 0; i < completedBookings.length; i++) {
     const b = completedBookings[i];
-    await Review.create({
+    const r = reviewDefs[i];
+    const review = await Review.create({
       customerId: b.customer._id,
       vendorId: b.vendor._id,
       serviceId: b.service._id,
       bookingId: b.booking._id,
-      rating: reviewTexts[i].rating,
-      review: reviewTexts[i].review,
+      rating: r.rating,
+      review: r.review,
+      vendorReply: r.reply || "",
+      vendorRepliedAt: r.reply ? new Date() : null,
     });
+    reviews.push(review);
   }
 
   // ---------------------------------------------------------------------
-  // 8. TRANSACTIONS — for the paid/online bookings
+  // 8. TRANSACTIONS (7) - one for every paid booking (online or cash),
+  //    plus a refunded one for the cancelled online booking
   // ---------------------------------------------------------------------
-  const paidBookings = bookings.filter((b) => b.paymentStatus === "paid" && b.paymentMethod === "online");
+  const paidBookings = bookings.filter((b) => b.paymentStatus === "paid");
   for (const b of paidBookings) {
     const commission = Math.round(b.service.startingPrice * 0.1);
     await Transaction.create({
@@ -380,42 +432,62 @@ async function run() {
       vendorAmount: b.service.startingPrice - commission,
       commission,
       commissionRate: 10,
-      paymentMethod: "online",
-      paymentGateway: "razorpay",
-      gatewayTransactionId: `pay_seed_${b.booking._id.toString().slice(-8)}`,
-      gatewayOrderId: `order_seed_${b.booking._id.toString().slice(-8)}`,
-      settlementStatus: "settled",
+      paymentMethod: b.paymentMethod,
+      paymentGateway: b.paymentMethod === "online" ? "razorpay" : "cash",
+      gatewayTransactionId: b.paymentMethod === "online" ? `pay_seed_${b.booking._id.toString().slice(-8)}` : "",
+      gatewayOrderId: b.paymentMethod === "online" ? `order_seed_${b.booking._id.toString().slice(-8)}` : "",
+      settlementStatus: b.status === "completed" ? "settled" : "pending",
       status: "completed",
     });
   }
 
+  const cancelledOnlineBooking = bookings.find((b) => b.status === "cancelled" && b.paymentMethod === "online");
+  if (cancelledOnlineBooking) {
+    const commission = Math.round(cancelledOnlineBooking.service.startingPrice * 0.1);
+    await Transaction.create({
+      bookingId: cancelledOnlineBooking.booking._id,
+      customerId: cancelledOnlineBooking.customer._id,
+      vendorId: cancelledOnlineBooking.vendor._id,
+      amount: cancelledOnlineBooking.service.startingPrice,
+      vendorAmount: cancelledOnlineBooking.service.startingPrice - commission,
+      commission,
+      commissionRate: 10,
+      paymentMethod: "online",
+      paymentGateway: "razorpay",
+      gatewayTransactionId: `pay_seed_${cancelledOnlineBooking.booking._id.toString().slice(-8)}`,
+      gatewayOrderId: `order_seed_${cancelledOnlineBooking.booking._id.toString().slice(-8)}`,
+      settlementStatus: "pending",
+      status: "refunded",
+    });
+  }
+
   // ---------------------------------------------------------------------
-  // 9. NOTIFICATIONS — a few for each role so the bell icon isn't empty
+  // 9. NOTIFICATIONS (7) - spread across roles and types
   // ---------------------------------------------------------------------
   await Notification.insertMany([
     {
-      userId: customer1._id,
-      title: "Booking Confirmed",
-      message: "Your booking for Bathroom Fitting Installation has been accepted.",
+      userId: sneha._id,
+      title: "Service Completed",
+      message: "Your booking for Tap & Pipe Leak Repair has been completed successfully.",
       type: "booking",
       isRead: false,
     },
     {
-      userId: customer2._id,
+      userId: karan._id,
       title: "Payment Successful",
       message: "Your payment for Deep Home Cleaning was successful.",
       type: "payment",
       isRead: false,
     },
     {
-      userId: vendors.approved1.user._id,
+      userId: sureshVendor.userId,
       title: "New Booking Received",
       message: "You have a new booking request for Tap & Pipe Leak Repair.",
       type: "booking",
       isRead: false,
     },
     {
-      userId: vendors.pending.user._id,
+      userId: vendors.aman.user._id,
       title: "Application Under Review",
       message: "Your vendor application is being reviewed by our team.",
       type: "vendor",
@@ -428,19 +500,43 @@ async function run() {
       type: "vendor",
       isRead: false,
     },
+    {
+      userId: rohit._id,
+      title: "Vendor Replied",
+      message: "Khan Paint Works replied to your review.",
+      type: "review",
+      isRead: false,
+    },
+    {
+      userId: meenaVendor.userId,
+      title: "New Review Received",
+      message: "You received a new 4-star review on Kitchen Deep Cleaning.",
+      type: "review",
+      isRead: false,
+    },
   ]);
 
+  // ---------------------------------------------------------------------
   console.log("\nSeed complete.\n");
   console.log("========== TEST LOGIN CREDENTIALS ==========");
   console.log(`Password for ALL accounts below: ${PASSWORD}\n`);
-  console.log("ADMIN         :", admin.email);
-  console.log("VENDOR approved(1) :", vendors.approved1.user.email, "(Plumbing, has services+bookings+reviews)");
-  console.log("VENDOR approved(2) :", vendors.approved2.user.email, "(Cleaning, has services+bookings+reviews)");
-  console.log("VENDOR pending     :", vendors.pending.user.email, "(no services yet — test admin approval flow)");
-  console.log("VENDOR rejected    :", vendors.rejected.user.email, "(test rejected-vendor UI state)");
-  console.log("CUSTOMER 1         :", customer1.email);
-  console.log("CUSTOMER 2         :", customer2.email);
+  console.log("ADMIN               :", admin.email);
+  console.log("VENDOR approved     :", vendors.suresh.user.email, "(Plumbing)");
+  console.log("VENDOR approved     :", vendors.meena.user.email, "(Home Cleaning)");
+  console.log("VENDOR approved     :", vendors.ramesh.user.email, "(Electrical)");
+  console.log("VENDOR approved     :", vendors.farhan.user.email, "(Painting)");
+  console.log("VENDOR pending      :", vendors.aman.user.email, "(test admin approval flow)");
+  console.log("VENDOR rejected     :", vendors.vikram.user.email, "(test rejected-vendor UI)");
+  console.log("CUSTOMER            :", priya.email);
+  console.log("CUSTOMER            :", rohit.email);
+  console.log("CUSTOMER            :", anjali.email);
+  console.log("CUSTOMER            :", karan.email);
+  console.log("CUSTOMER            :", sneha.email);
+  console.log("CUSTOMER            :", vikas.email);
   console.log("=============================================\n");
+  console.log(
+    `Seeded: 6 categories, 6 vendors, 7 services, 6 customers, ${bookings.length} bookings, ${reviews.length} reviews, transactions, 7 notifications.\n`
+  );
 
   await mongoose.disconnect();
 }
