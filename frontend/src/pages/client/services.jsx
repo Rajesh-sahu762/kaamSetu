@@ -3,8 +3,8 @@ import { useSearchParams } from "react-router-dom";
 
 import ServiceFilters from "@/components/client/services/ServiceFilters";
 import ServiceGrid from "@/components/client/services/ServiceGrid";
-import ServiceHero from "@/components/client/services/ServiceHero";
-import KaamSetuLoader from "@/components/Loader/FullLoader";
+import ServiceHero from "@/components/client/services/serviceHero";
+import KaamSetuLoader from "@/components/Loader/fullLoader";
 import { getServices, getCategories } from "@/services/publicService";
 
 const EMPTY_FILTERS = {

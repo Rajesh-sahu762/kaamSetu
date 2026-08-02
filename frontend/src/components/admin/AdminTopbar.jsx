@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Bell, CheckCheck, Menu, RefreshCw } from "lucide-react";
 import { useLocation } from "react-router-dom";
-import { AuthContext } from "@/context/AuthContext";
+import { AuthContext } from "@/context/authContext";
 import api from "@/services/api";
 import { T } from "@/utils/vendorTheme";
 import useBreakpoint from "@/utils/useBreakpoint";

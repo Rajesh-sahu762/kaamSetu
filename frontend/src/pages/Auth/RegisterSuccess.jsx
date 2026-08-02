@@ -8,8 +8,8 @@ import { FaCheckCircle } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 
-import AuthHeader from '../../components/auth/AuthHeader';
-import AuthFooter from '../../components/auth/AuthFooter';
+import AuthHeader from '../../components/auth/authHeader';
+import AuthFooter from '../../components/auth/authFooter';
 
 import successImage from '../../assets/images/success-artisan.png';
 

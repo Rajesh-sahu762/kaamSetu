@@ -6,8 +6,8 @@ import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import AuthHeader from '../../components/auth/AuthHeader';
-import AuthFooter from '../../components/auth/AuthFooter';
+import AuthHeader from '../../components/auth/authHeader';
+import AuthFooter from '../../components/auth/authFooter';
 import { resetPassword } from '@/services/authService';
 
 const ResetPassword = () => {

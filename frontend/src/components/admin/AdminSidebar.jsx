@@ -16,7 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AuthContext } from '@/context/AuthContext';
+import { AuthContext } from '@/context/authContext';
 import { T } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
 

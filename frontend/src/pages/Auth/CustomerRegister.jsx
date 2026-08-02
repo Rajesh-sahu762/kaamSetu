@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import AuthHeader from '../../components/auth/AuthHeader';
-import AuthFooter from '../../components/auth/AuthFooter';
+import AuthHeader from '../../components/auth/authHeader';
+import AuthFooter from '../../components/auth/authFooter';
 import { toast } from 'react-toastify';
 import { registerUser } from '@/services/authService';
 

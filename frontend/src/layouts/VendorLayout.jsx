@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import Sidebar from '@/components/vendor/Sidebar';
-import Topbar from '@/components/vendor/Topbar';
+import Sidebar from '@/components/vendor/sidebar';
+import Topbar from '@/components/vendor/topbar';
 import { useEffect } from "react";
-import { useVendor } from "@/context/VendorContext";
+import { useVendor } from "@/context/vendorContext";
 import { getVendorProfile } from "@/services/vendorService";
 
 import { T } from '@/utils/vendorTheme';

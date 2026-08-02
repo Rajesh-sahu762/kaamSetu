@@ -1,10 +1,10 @@
-import AuthFooter from "@/components/auth/AuthFooter";
-import AuthHeader from "@/components/auth/AuthHeader";
+import AuthFooter from "@/components/auth/authFooter";
+import AuthHeader from "@/components/auth/authHeader";
 import ProgressBar from "@/components/auth/ProgressBar";
 import React, { useState } from "react";
 import { FaShieldAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useVendor } from "@/context/VendorContext";
+import { useVendor } from "@/context/vendorContext";
 import { useEffect } from "react";
 
 

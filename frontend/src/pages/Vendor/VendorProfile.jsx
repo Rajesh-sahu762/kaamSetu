@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { FaShieldAlt } from 'react-icons/fa';
 import { IoChevronDown } from 'react-icons/io5';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AuthHeader from '@/components/auth/AuthHeader';
+import AuthHeader from '@/components/auth/authHeader';
 import ProgressBar from '@/components/auth/ProgressBar';
-import AuthFooter from '@/components/auth/AuthFooter';
-import { useVendor } from '@/context/VendorContext';
+import AuthFooter from '@/components/auth/authFooter';
+import { useVendor } from '@/context/vendorContext';
 import { toast } from 'react-toastify';
 const VendorProfileStep1 = () => {
   const navigate = useNavigate(); 

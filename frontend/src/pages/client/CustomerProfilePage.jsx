@@ -11,7 +11,7 @@ import {
   Clock3,
   X,
 } from 'lucide-react';
-import { AuthContext } from '@/context/AuthContext';
+import { AuthContext } from '@/context/authContext';
 
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
