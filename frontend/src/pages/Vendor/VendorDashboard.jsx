@@ -7,162 +7,70 @@ import StatusPill from '@/components/common/StatusPill';
 import { T } from '@/utils/vendorTheme';
 import useBreakpoint from '@/utils/useBreakpoint';
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  getVendorProfile,
+  getVendorBookings,
+  getVendorReviews,
+  getVendorEarnings,
+} from '@/services/vendorService';
 
-/* ── Mock data ─────────────────────────────────────────────────── */
-const STATS = [
-  {
-    label: 'Total Earnings',
-    value: '₹1,24,800',
-    delta: '+18.4%',
-    up: true,
-    sub: 'vs last month',
-    icon: '₹',
-  },
-  {
-    label: 'Active Bookings',
-    value: '14',
-    delta: '+3',
-    up: true,
-    sub: '2 starting today',
-    icon: '📋',
-  },
-  {
-    label: 'Avg. Rating',
-    value: '4.92',
-    delta: '+0.04',
-    up: true,
-    sub: '138 reviews',
-    icon: '★',
-  },
-  {
-    label: 'Profile Views',
-    value: '2,341',
-    delta: '-6.1%',
-    up: false,
-    sub: 'last 30 days',
-    icon: '👁',
-  },
-];
-
-const BOOKINGS = [
-  {
-    id: 'KS-4821',
-    client: 'Meera Joshi',
-    service: 'Interior Painting',
-    date: 'Today, 10:00 AM',
-    amount: '₹8,500',
-    status: 'confirmed',
-    avatar: 'MJ',
-  },
-  {
-    id: 'KS-4820',
-    client: 'Arjun Kapoor',
-    service: 'Plumbing Repair',
-    date: 'Today, 2:00 PM',
-    amount: '₹3,200',
-    status: 'in-progress',
-    avatar: 'AK',
-  },
-  {
-    id: 'KS-4818',
-    client: 'Sunita Rao',
-    service: 'Electrical Wiring',
-    date: 'Tomorrow, 9:00 AM',
-    amount: '₹12,000',
-    status: 'confirmed',
-    avatar: 'SR',
-  },
-  {
-    id: 'KS-4815',
-    client: 'Ravi Malhotra',
-    service: 'Carpentry Work',
-    date: 'Jun 19, 11:00 AM',
-    amount: '₹6,800',
-    status: 'pending',
-    avatar: 'RM',
-  },
-  {
-    id: 'KS-4810',
-    client: 'Priya Nair',
-    service: 'False Ceiling',
-    date: 'Jun 20, 10:00 AM',
-    amount: '₹22,000',
-    status: 'pending',
-    avatar: 'PN',
-  },
-];
-
-const REVIEWS = [
-  {
-    name: 'Deepa Sharma',
-    rating: 5,
-    text: 'Exceptional work, very professional and timely. Will definitely hire again.',
-    date: '2 days ago',
-    avatar: 'DS',
-  },
-  {
-    name: 'Vikram Singh',
-    rating: 5,
-    text: 'Quality of work was outstanding. Clean, precise, and hassle-free experience.',
-    date: '5 days ago',
-    avatar: 'VS',
-  },
-  {
-    name: 'Anita Bose',
-    rating: 4,
-    text: 'Good work overall, minor delay in arrival but the output was excellent.',
-    date: '1 week ago',
-    avatar: 'AB',
-  },
-];
-
-const EARNINGS_BARS = [
-  { month: 'Jan', value: 68 },
-  { month: 'Feb', value: 82 },
-  { month: 'Mar', value: 59 },
-  { month: 'Apr', value: 91 },
-  { month: 'May', value: 74 },
-  { month: 'Jun', value: 100 },
-];
-
-const ACTIVITY = [
-  {
-    icon: '✓',
-    color: T.green,
-    text: 'Booking KS-4821 confirmed by client',
-    time: '9:32 AM',
-  },
-  {
-    icon: '★',
-    color: T.bronze,
-    text: 'New 5-star review from Deepa Sharma',
-    time: 'Yesterday',
-  },
-  {
-    icon: '₹',
-    color: T.blue,
-    text: 'Payment of ₹8,500 received',
-    time: 'Yesterday',
-  },
-  {
-    icon: '📋',
-    color: T.amber,
-    text: 'New booking request from Priya Nair',
-    time: 'Jun 15',
-  },
-  {
-    icon: '✓',
-    color: T.green,
-    text: 'Booking KS-4810 marked complete',
-    time: 'Jun 14',
-  },
-];
-
-const STATUS_CONFIG = {
-  confirmed: { label: 'Confirmed', bg: T.greenDim, color: T.green },
-  'in-progress': { label: 'In Progress', bg: T.blueDim, color: T.blue },
-  pending: { label: 'Pending', bg: T.amberDim, color: T.amber },
+/* ── Helpers ───────────────────────────────────────────────────── */
+// Same "N days ago" convention already used for review dates in
+// components/client/expertProfile/ExpertReview.jsx — repeated here
+// (no shared util module exists in this codebase to import it from).
+const formatRelative = (dateString) => {
+  if (!dateString) return '';
+  const diffMs = Date.now() - new Date(dateString).getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays <= 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week(s) ago`;
+  return `${Math.floor(diffDays / 30)} month(s) ago`;
 };
+
+// Same `new Date(...).toLocaleDateString()` convention used for dates
+// elsewhere (e.g. pages/Vendor/Bookings.jsx), extended to show
+// Today/Tomorrow for near-term bookings plus the booking's time slot.
+const formatBookingWhen = (dateString, time) => {
+  if (!dateString) return time || '-';
+  const d = new Date(dateString);
+  const today = new Date();
+  const tomorrow = new Date();
+  tomorrow.setDate(today.getDate() + 1);
+  const sameDay = (a, b) => a.toDateString() === b.toDateString();
+  const dayLabel = sameDay(d, today)
+    ? 'Today'
+    : sameDay(d, tomorrow)
+      ? 'Tomorrow'
+      : d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+  return time ? `${dayLabel}, ${time}` : dayLabel;
+};
+
+// Same initials-from-fullName convention already used in
+// pages/Vendor/Bookings.jsx and pages/Vendor/Reviews.jsx.
+const initialsOf = (name = '') =>
+  name
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+// Same `₹${value.toLocaleString()}` convention already used in
+// pages/Vendor/Profile.jsx and pages/Vendor/Earnings.jsx.
+const formatCurrency = (n) => `₹${Math.round(n || 0).toLocaleString('en-IN')}`;
+
+// Same month-name lookup already used in pages/Vendor/Earnings.jsx to
+// turn the API's numeric `monthName` (1-12) into a short label.
+const MONTH_NAMES = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+const ACTIVE_BOOKING_STATUSES = ['pending', 'accepted', 'in_progress', 'on_the_way'];
 
 /* ── Icons ─────────────────────────────────────────────────────── */
 
@@ -325,17 +233,19 @@ function StatCard({ stat, index }) {
           flexWrap: 'wrap',
         }}
       >
-        {stat.up ? <TrendUp /> : <TrendDown />}
-        <span
-          style={{
-            fontFamily: 'Geist,sans-serif',
-            fontSize: 12,
-            fontWeight: 600,
-            color: stat.up ? T.green : T.red,
-          }}
-        >
-          {stat.delta}
-        </span>
+        {stat.delta && (stat.up ? <TrendUp /> : <TrendDown />)}
+        {stat.delta && (
+          <span
+            style={{
+              fontFamily: 'Geist,sans-serif',
+              fontSize: 12,
+              fontWeight: 600,
+              color: stat.up ? T.green : T.red,
+            }}
+          >
+            {stat.delta}
+          </span>
+        )}
         <span
           style={{
             fontFamily: 'Inter,sans-serif',
@@ -351,7 +261,25 @@ function StatCard({ stat, index }) {
 }
 
 /* ── Earnings bar chart ────────────────────────────────────────── */
-function EarningsChart({ inView }) {
+function EarningsChart({ inView, bars }) {
+  if (!bars || bars.length === 0) {
+    return (
+      <div
+        style={{
+          height: 72,
+          marginTop: 8,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'Inter,sans-serif',
+          fontSize: 12,
+          color: T.slateGray,
+        }}
+      >
+        No earnings yet
+      </div>
+    );
+  }
   return (
     <div
       style={{
@@ -362,9 +290,9 @@ function EarningsChart({ inView }) {
         marginTop: 8,
       }}
     >
-      {EARNINGS_BARS.map((b, i) => (
+      {bars.map((b, i) => (
         <div
-          key={b.month}
+          key={`${b.month}-${i}`}
           style={{
             flex: 1,
             display: 'flex',
@@ -377,13 +305,13 @@ function EarningsChart({ inView }) {
             style={{
               width: '100%',
               borderRadius: '3px 3px 0 0',
-              background: i === EARNINGS_BARS.length - 1 ? T.bronze : T.border,
+              background: i === bars.length - 1 ? T.bronze : T.border,
               height: inView ? `${b.value * 0.56}px` : '0px',
               transition: `height 0.6s cubic-bezier(.22,1,.36,1) ${i * 0.07}s`,
               position: 'relative',
             }}
           >
-            {i === EARNINGS_BARS.length - 1 && (
+            {i === bars.length - 1 && (
               <div
                 style={{
                   position: 'absolute',
@@ -400,7 +328,7 @@ function EarningsChart({ inView }) {
                   whiteSpace: 'nowrap',
                 }}
               >
-                Best
+                This month
               </div>
             )}
           </div>
@@ -517,6 +445,7 @@ function BookingCard({ b, index }) {
 export default function VendorDashboard() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { isMobile, isTablet } = useBreakpoint();
+  const navigate = useNavigate();
 
   const [chartRef, chartInView] = useInView();
   // grid columns based on breakpoint
@@ -528,6 +457,172 @@ export default function VendorDashboard() {
   const midCols = isMobile ? '1fr' : isTablet ? '1fr' : '1fr 320px';
   const bottomCols = isMobile ? '1fr' : isTablet ? '1fr' : '1fr 340px';
   const contentPad = isMobile ? '16px' : isTablet ? '20px' : '28px 32px';
+
+  /* ── Real data ────────────────────────────────────────────────── */
+  const [profile, setProfile] = useState(null);
+  const [bookingsRes, setBookingsRes] = useState(null);
+  const [reviewsRes, setReviewsRes] = useState(null);
+  const [earnings, setEarnings] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [monthsFilter, setMonthsFilter] = useState(6); // 6M / 1Y('12') / All(0 = no cap)
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const [profileRes, bookingsData, reviewsData, earningsRes] = await Promise.all([
+          getVendorProfile(),
+          getVendorBookings({ page: 1, limit: 20, sort: 'newest' }),
+          getVendorReviews({ page: 1, limit: 3 }),
+          getVendorEarnings(),
+        ]);
+
+        if (profileRes?.success) setProfile(profileRes.data);
+        if (bookingsData?.success) setBookingsRes(bookingsData);
+        if (reviewsData?.success) setReviewsRes(reviewsData);
+        if (earningsRes?.success) setEarnings(earningsRes.data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  const user = profile?.user;
+  const vendor = profile?.vendor;
+  const stats = profile?.stats;
+
+  const bookingList = bookingsRes?.data || [];
+  const bookingStats = bookingsRes?.stats || {};
+  const activeBookingsCount =
+    (bookingStats.pending || 0) + (bookingStats.accepted || 0) + (bookingStats.inProgress || 0);
+
+  const bookingsToday = bookingList.filter(
+    (b) => new Date(b.bookingDate).toDateString() === new Date().toDateString(),
+  ).length;
+
+  // "Upcoming" = not yet finished, soonest first — the bookings API itself
+  // has no dedicated "upcoming" filter, so this reuses the same
+  // newest-sorted list already fetched above and re-sorts client-side.
+  const upcomingBookings = [...bookingList]
+    .filter((b) => ACTIVE_BOOKING_STATUSES.includes(b.status))
+    .sort((a, b) => new Date(a.bookingDate) - new Date(b.bookingDate))
+    .slice(0, 5)
+    .map((b) => ({
+      id: b.bookingNumber,
+      client: b.customerId?.fullName || 'Customer',
+      service: b.serviceId?.serviceName || 'Service',
+      date: formatBookingWhen(b.bookingDate, b.bookingTime),
+      amount: formatCurrency(b.totalAmount),
+      status: b.status,
+      avatar: initialsOf(b.customerId?.fullName || 'C'),
+      _createdAt: b.createdAt,
+    }));
+
+  const reviewStats = reviewsRes?.stats || {};
+  const reviewsList = (reviewsRes?.data || []).map((r) => ({
+    name: r.customerId?.fullName || 'Customer',
+    rating: r.rating,
+    text: r.review || '',
+    date: formatRelative(r.createdAt),
+    avatar: initialsOf(r.customerId?.fullName || 'C'),
+    _createdAt: r.createdAt,
+  }));
+  const ratingDistribution = reviewStats.ratingDistribution || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  const ratingTotal = Object.values(ratingDistribution).reduce((a, b) => a + b, 0) || 1;
+
+  const monthlyAnalytics = earnings?.monthlyAnalytics || [];
+  const visibleMonths =
+    monthsFilter === 0 ? monthlyAnalytics : monthlyAnalytics.slice(-monthsFilter);
+  const maxEarnings = Math.max(...visibleMonths.map((m) => m.earnings), 1);
+  const earningsBars = visibleMonths.map((m) => ({
+    month: MONTH_NAMES[m.monthName - 1] || '',
+    value: Math.round((m.earnings / maxEarnings) * 100),
+  }));
+
+  // Delta vs the previous month — only shown when there are at least two
+  // months of real data to compare, so nothing is ever guessed.
+  let earningsDelta = null;
+  if (monthlyAnalytics.length >= 2) {
+    const last = monthlyAnalytics[monthlyAnalytics.length - 1].earnings;
+    const prev = monthlyAnalytics[monthlyAnalytics.length - 2].earnings;
+    if (prev > 0) {
+      const pct = ((last - prev) / prev) * 100;
+      earningsDelta = { up: pct >= 0, label: `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%` };
+    }
+  }
+
+  const STATS = [
+    {
+      label: 'Total Earnings',
+      value: formatCurrency(stats?.totalEarnings),
+      delta: earningsDelta?.label,
+      up: earningsDelta?.up,
+      sub: earningsDelta ? 'vs last month' : 'all-time',
+      icon: '₹',
+    },
+    {
+      label: 'Active Bookings',
+      value: String(activeBookingsCount),
+      sub: `${bookingStats.pending || 0} pending response${(bookingStats.pending || 0) === 1 ? '' : 's'}`,
+      icon: '📋',
+    },
+    {
+      label: 'Avg. Rating',
+      value: stats?.averageRating ? stats.averageRating.toFixed(2) : '0.00',
+      sub: `${stats?.totalReviews || 0} reviews`,
+      icon: '★',
+    },
+    {
+      label: 'Business Health',
+      value: `${stats?.businessHealth || 0}%`,
+      sub: 'profile completion score',
+      icon: '✓',
+    },
+  ];
+
+  // Recent activity feed: merges real records from the three sources
+  // already fetched above (recent transactions, recent reviews, recent
+  // bookings) into one timeline, sorted by when they actually happened —
+  // there is no dedicated activity-log API in the backend.
+  const activityItems = [
+    ...(earnings?.recentTransactions || []).map((t) => ({
+      icon: '₹',
+      color: T.blue,
+      text: `Payment of ${formatCurrency(t.amount)} received from ${t.customerName}`,
+      time: formatRelative(t.createdAt),
+      _at: t.createdAt,
+    })),
+    ...reviewsList.map((r) => ({
+      icon: '★',
+      color: T.bronze,
+      text: `New ${r.rating}-star review from ${r.name}`,
+      time: r.date,
+      _at: r._createdAt,
+    })),
+    ...bookingList.slice(0, 5).map((b) => ({
+      icon: b.status === 'completed' ? '✓' : '📋',
+      color: b.status === 'completed' ? T.green : T.amber,
+      text: `Booking ${b.bookingNumber} is ${b.status.replace('_', ' ')}`,
+      time: formatRelative(b.updatedAt || b.createdAt),
+      _at: b.updatedAt || b.createdAt,
+    })),
+  ]
+    .sort((a, b) => new Date(b._at) - new Date(a._at))
+    .slice(0, 5);
+
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  })();
+
+  if (loading) {
+    return <h2 style={{ padding: 28, fontFamily: 'Inter,sans-serif' }}>Loading...</h2>;
+  }
 
   return (
     <>
@@ -618,7 +713,7 @@ export default function VendorDashboard() {
                       marginBottom: 6,
                     }}
                   >
-                    Good morning
+                    {greeting}
                   </p>
                   <h2
                     style={{
@@ -630,7 +725,7 @@ export default function VendorDashboard() {
                       marginBottom: 4,
                     }}
                   >
-                    Ramesh Kumar
+                    {user?.fullName || vendor?.businessName || 'Vendor'}
                   </h2>
                   <p
                     style={{
@@ -641,11 +736,11 @@ export default function VendorDashboard() {
                     }}
                   >
                     <span style={{ color: T.bronzeLight, fontWeight: 600 }}>
-                      2 bookings
+                      {bookingsToday} booking{bookingsToday === 1 ? '' : 's'}
                     </span>{' '}
                     today ·{' '}
                     <span style={{ color: T.bronzeLight, fontWeight: 600 }}>
-                      1 pending
+                      {bookingStats.pending || 0} pending
                     </span>{' '}
                     response
                   </p>
@@ -660,6 +755,7 @@ export default function VendorDashboard() {
                 >
                   <button
                     className="ks-abtn"
+                    onClick={() => navigate('/vendor/bookings')}
                     style={{
                       background: T.bronze,
                       color: T.white,
@@ -669,6 +765,7 @@ export default function VendorDashboard() {
                       fontFamily: 'Geist,sans-serif',
                       fontSize: 13,
                       fontWeight: 600,
+                      cursor: 'pointer',
                     }}
                   >
                     View Bookings
@@ -753,20 +850,25 @@ export default function VendorDashboard() {
                           marginTop: 3,
                         }}
                       >
-                        ₹1,24,800
+                        {formatCurrency(earnings?.thisMonthEarnings)}
                       </p>
                     </div>
                     <div style={{ display: 'flex', gap: 4 }}>
-                      {['6M', '1Y', 'All'].map((f, i) => (
+                      {[
+                        { label: '6M', value: 6 },
+                        { label: '1Y', value: 12 },
+                        { label: 'All', value: 0 },
+                      ].map((f) => (
                         <button
-                          key={f}
+                          key={f.label}
+                          onClick={() => setMonthsFilter(f.value)}
                           style={{
                             border:
-                              i === 0
+                              monthsFilter === f.value
                                 ? `1px solid ${T.bronze}`
                                 : `1px solid ${T.border}`,
-                            background: i === 0 ? T.bronzeLight : 'transparent',
-                            color: i === 0 ? T.slateMid : T.slateGray,
+                            background: monthsFilter === f.value ? T.bronzeLight : 'transparent',
+                            color: monthsFilter === f.value ? T.slateMid : T.slateGray,
                             borderRadius: 4,
                             padding: '4px 9px',
                             fontFamily: 'Geist,sans-serif',
@@ -775,41 +877,43 @@ export default function VendorDashboard() {
                             cursor: 'pointer',
                           }}
                         >
-                          {f}
+                          {f.label}
                         </button>
                       ))}
                     </div>
                   </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 5,
-                      marginBottom: 16,
-                    }}
-                  >
-                    <TrendUp />
-                    <span
+                  {earningsDelta && (
+                    <div
                       style={{
-                        fontFamily: 'Geist,sans-serif',
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: T.green,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        marginBottom: 16,
                       }}
                     >
-                      +18.4%
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: 'Inter,sans-serif',
-                        fontSize: 12,
-                        color: T.slateGray,
-                      }}
-                    >
-                      vs previous period
-                    </span>
-                  </div>
-                  <EarningsChart inView={chartInView} />
+                      {earningsDelta.up ? <TrendUp /> : <TrendDown />}
+                      <span
+                        style={{
+                          fontFamily: 'Geist,sans-serif',
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: earningsDelta.up ? T.green : T.red,
+                        }}
+                      >
+                        {earningsDelta.label}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: 'Inter,sans-serif',
+                          fontSize: 12,
+                          color: T.slateGray,
+                        }}
+                      >
+                        vs previous month
+                      </span>
+                    </div>
+                  )}
+                  <EarningsChart inView={chartInView} bars={earningsBars} />
                 </div>
               </Fade>
 
@@ -854,7 +958,19 @@ export default function VendorDashboard() {
                         View all
                       </span>
                     </div>
-                    {ACTIVITY.map((a, i) => (
+                    {activityItems.length === 0 ? (
+                      <p
+                        style={{
+                          fontFamily: 'Inter,sans-serif',
+                          fontSize: 12,
+                          color: T.slateGray,
+                          padding: '8px 0',
+                        }}
+                      >
+                        No recent activity yet.
+                      </p>
+                    ) : (
+                      activityItems.map((a, i) => (
                       <div
                         key={i}
                         style={{
@@ -863,7 +979,7 @@ export default function VendorDashboard() {
                           alignItems: 'flex-start',
                           padding: '9px 0',
                           borderBottom:
-                            i < ACTIVITY.length - 1
+                            i < activityItems.length - 1
                               ? `1px solid ${T.border}`
                               : 'none',
                         }}
@@ -890,7 +1006,7 @@ export default function VendorDashboard() {
                           >
                             {a.icon}
                           </span>
-                          {i < ACTIVITY.length - 1 && (
+                          {i < activityItems.length - 1 && (
                             <div
                               style={{
                                 width: 1,
@@ -925,7 +1041,8 @@ export default function VendorDashboard() {
                           </p>
                         </div>
                       </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </Fade>
               )}
@@ -970,6 +1087,7 @@ export default function VendorDashboard() {
                     </p>
                     <button
                       className="ks-abtn"
+                      onClick={() => navigate('/vendor/bookings')}
                       style={{
                         background: T.bronzeLight,
                         color: T.slateMid,
@@ -979,9 +1097,10 @@ export default function VendorDashboard() {
                         fontFamily: 'Geist,sans-serif',
                         fontSize: 12,
                         fontWeight: 600,
+                        cursor: 'pointer',
                       }}
                     >
-                      + Add
+                      View All
                     </button>
                   </div>
 
@@ -1020,7 +1139,19 @@ export default function VendorDashboard() {
                           </span>
                         ))}
                       </div>
-                      {BOOKINGS.map((b, i) => (
+                      {upcomingBookings.length === 0 ? (
+                        <div
+                          style={{
+                            padding: '20px',
+                            fontFamily: 'Inter,sans-serif',
+                            fontSize: 12,
+                            color: T.slateGray,
+                          }}
+                        >
+                          No upcoming bookings.
+                        </div>
+                      ) : (
+                      upcomingBookings.map((b, i) => (
                         <div
                           key={b.id}
                           className="ks-row"
@@ -1030,7 +1161,7 @@ export default function VendorDashboard() {
                             padding: '13px 20px',
                             alignItems: 'center',
                             borderBottom:
-                              i < BOOKINGS.length - 1
+                              i < upcomingBookings.length - 1
                                 ? `1px solid ${T.border}`
                                 : 'none',
                             background: T.white,
@@ -1094,14 +1225,28 @@ export default function VendorDashboard() {
                           </span>
                           <StatusPill status={b.status} />
                         </div>
-                      ))}
+                      ))
+                      )}
                     </>
                   ) : (
                     /* Mobile/tablet: stacked cards */
                     <div style={{ padding: '12px' }}>
-                      {BOOKINGS.map((b, i) => (
-                        <BookingCard key={b.id} b={b} index={i} />
-                      ))}
+                      {upcomingBookings.length === 0 ? (
+                        <p
+                          style={{
+                            fontFamily: 'Inter,sans-serif',
+                            fontSize: 12,
+                            color: T.slateGray,
+                            padding: '8px 4px',
+                          }}
+                        >
+                          No upcoming bookings.
+                        </p>
+                      ) : (
+                        upcomingBookings.map((b, i) => (
+                          <BookingCard key={b.id} b={b} index={i} />
+                        ))
+                      )}
                     </div>
                   )}
                 </div>
@@ -1142,6 +1287,7 @@ export default function VendorDashboard() {
                         Client Reviews
                       </p>
                       <span
+                        onClick={() => navigate('/vendor/reviews')}
                         style={{
                           fontFamily: 'Geist,sans-serif',
                           fontSize: 11,
@@ -1149,7 +1295,7 @@ export default function VendorDashboard() {
                           cursor: 'pointer',
                         }}
                       >
-                        See all 138
+                        See all {reviewStats.totalReviews || 0}
                       </span>
                     </div>
                     <div
@@ -1166,7 +1312,7 @@ export default function VendorDashboard() {
                             lineHeight: 1,
                           }}
                         >
-                          4.92
+                          {reviewStats.averageRating || '0.0'}
                         </div>
                         <div
                           style={{
@@ -1193,17 +1339,14 @@ export default function VendorDashboard() {
                             marginTop: 4,
                           }}
                         >
-                          138 reviews
+                          {reviewStats.totalReviews || 0} reviews
                         </div>
                       </div>
                       <div style={{ flex: 1 }}>
-                        {[
-                          [5, 88],
-                          [4, 9],
-                          [3, 2],
-                          [2, 1],
-                          [1, 0],
-                        ].map(([star, pct]) => (
+                        {[5, 4, 3, 2, 1].map((star) => {
+                          const count = ratingDistribution[star] || 0;
+                          const pct = Math.round((count / ratingTotal) * 100);
+                          return (
                           <div
                             key={star}
                             style={{
@@ -1242,17 +1385,30 @@ export default function VendorDashboard() {
                               />
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
-                  {REVIEWS.map((r, i) => (
+                  {reviewsList.length === 0 ? (
+                    <p
+                      style={{
+                        fontFamily: 'Inter,sans-serif',
+                        fontSize: 12,
+                        color: T.slateGray,
+                        padding: '14px 20px',
+                      }}
+                    >
+                      No reviews yet.
+                    </p>
+                  ) : (
+                  reviewsList.map((r, i) => (
                     <div
                       key={r.name}
                       style={{
                         padding: '14px 20px',
                         borderBottom:
-                          i < REVIEWS.length - 1
+                          i < reviewsList.length - 1
                             ? `1px solid ${T.border}`
                             : 'none',
                       }}
@@ -1323,7 +1479,8 @@ export default function VendorDashboard() {
                         {r.text}
                       </p>
                     </div>
-                  ))}
+                  ))
+                  )}
                 </div>
               </Fade>
             </div>
