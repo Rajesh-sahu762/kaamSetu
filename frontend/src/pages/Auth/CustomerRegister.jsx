@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import AuthHeader from '../../components/auth/authHeader';
 import AuthFooter from '../../components/auth/authFooter';
 import { toast } from 'react-toastify';
 import { registerUser } from '@/services/authService';
+import { AuthContext } from '@/context/authContext';
 
 const CustomerRegister = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const googleData = location.state?.googleSignup;
+  const { login } = useContext(AuthContext);
+  const socialData = location.state?.socialSignup;
 
   const [formData, setFormData] = useState({
      fullName:
@@ -31,13 +33,28 @@ const CustomerRegister = () => {
     e.preventDefault();
 
     try {
-      // Here you would typically send formData to your backend API to create the user account. For this example, we'll just log it.
       const response = await registerUser({
         fullName: formData.fullName,
         email: formData.email,
         mobile: formData.mobile,
-        password: formData.password,
+        ...(socialData
+          ? {
+              googleId: location.state?.googleId,
+              facebookId: location.state?.facebookId,
+              profileImage: location.state?.profileImage,
+            }
+          : { password: formData.password }),
       });
+
+      if (response.token) {
+        // Social signup: account is already verified and linked, log
+        // straight in instead of asking for an OTP that was never sent.
+        localStorage.setItem('token', response.token);
+        login(response.user);
+        toast.success('Account created successfully!');
+        navigate('/');
+        return;
+      }
 
       navigate('/verify-email', {
         state: {
@@ -89,7 +106,7 @@ const CustomerRegister = () => {
                   </label>
 
                   <input
-                  readOnly={googleData}
+                  readOnly={socialData}
                     type="text"
                     name="fullName"
                     value={formData.fullName}
@@ -115,7 +132,7 @@ const CustomerRegister = () => {
                   </label>
 
                   <input
-                  readOnly={googleData}
+                  readOnly={socialData}
                     type="email"
                     name="email"
                     value={formData.email}
@@ -159,7 +176,8 @@ const CustomerRegister = () => {
                   />
                 </div>
 
-                {/* Password */}
+                {/* Password (not needed for Google/Facebook signup) */}
+                {!socialData && (
                 <div className="mt-8">
                   <label className="block text-xs font-semibold uppercase tracking-wider mb-4">
                     Password
@@ -183,6 +201,7 @@ const CustomerRegister = () => {
                     "
                   />
                 </div>
+                )}
 
                 {/* Terms */}
                 <p className="mt-10 text-xs text-muted leading-6">

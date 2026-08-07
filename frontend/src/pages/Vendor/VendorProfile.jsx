@@ -12,7 +12,7 @@ const VendorProfileStep1 = () => {
 
   const { updateVendorData } = useVendor();
    const location = useLocation();
-  const googleData = location.state?.googleSignup;
+  const socialData = location.state?.socialSignup;
 
   const [formData, setFormData] = useState({
     fullName: location.state?.fullName || "",
@@ -35,14 +35,14 @@ const VendorProfileStep1 = () => {
     !formData.fullName ||
     !formData.email ||
     !formData.mobile ||
-    !formData.password ||
+    (!socialData && !formData.password) ||
     !formData.businessType
   ) {
     toast.error("Please fill all required fields");
     return;
   }
 
-  if (formData.password !== formData.confirmPassword) {
+  if (!socialData && formData.password !== formData.confirmPassword) {
   toast.error("Passwords do not match");
   return;
 }
@@ -54,7 +54,13 @@ const VendorProfileStep1 = () => {
     mobile: formData.mobile,
     businessName: formData.businessName,
     businessType: formData.businessType,
-    password: formData.password,
+    ...(socialData
+      ? {
+          googleId: location.state?.googleId,
+          facebookId: location.state?.facebookId,
+          profileImage: location.state?.profileImage,
+        }
+      : { password: formData.password }),
   });
 
 
@@ -156,7 +162,7 @@ const VendorProfileStep1 = () => {
                 </label>
 
                 <input
-                readOnly={googleData}
+                readOnly={socialData}
                   required
                   type="text"
                   placeholder="Enter Your Email"
@@ -171,7 +177,8 @@ const VendorProfileStep1 = () => {
                 />
               </div>
 
-                   {/* Password */}
+                   {/* Password (not needed for Google/Facebook signup) */}
+                 {!socialData && (
                  <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider">
                     Password
@@ -201,8 +208,10 @@ const VendorProfileStep1 = () => {
                     "
                   />
                 </div>
+                 )}
 
                     {/* confirm Password */}
+                    {!socialData && (
                                      <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider">
                     Confirm Password
@@ -232,6 +241,7 @@ const VendorProfileStep1 = () => {
                     "
                   />
                 </div>
+                    )}
 
 
               {/* Category */}

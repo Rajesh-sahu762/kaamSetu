@@ -9,18 +9,18 @@ const JoinKaamsetu = () => {
 
   const location = useLocation();
 
-  const googleData = location.state?.googleSignup;
+  const socialData = location.state?.socialSignup;
 
   const handleContinue = () => {
     if (selectedRole === 'customer') {
       navigate('/register/customer', {
-        state: googleData ? location.state : null,
+        state: socialData ? location.state : null,
       });
     }
 
     if (selectedRole === 'vendor') {
       navigate('/register/vendor/Profile', {
-        state: googleData ? location.state : null,
+        state: socialData ? location.state : null,
       });
     }
   };
