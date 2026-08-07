@@ -10,8 +10,10 @@ const generateOtp = require("../utils/generateOtp");
 
 const registerUser = async (req, res) => {
   try {
-    const { fullName, email, mobile, password } = req.body;
-    if (!fullName || !email || !mobile || !password) {
+    const { fullName, email, mobile, password, googleId, facebookId, profileImage } = req.body;
+    const isSocialSignup = Boolean(googleId || facebookId);
+
+    if (!fullName || !email || !mobile || (!isSocialSignup && !password)) {
       return res.status(400).json({
         success: false,
         message: "please provide all the required fields",
@@ -25,6 +27,41 @@ const registerUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "user already exists",
+      });
+    }
+
+    if (isSocialSignup) {
+      // Google/Facebook already verified this email address for us —
+      // create the account fully linked and active, no OTP step needed.
+      const newUser = new userModel({
+        fullName,
+        email,
+        mobile,
+        role: "customer",
+        provider: googleId ? "google" : "facebook",
+        googleId: googleId || null,
+        facebookId: facebookId || null,
+        profileImage: profileImage || "",
+        isVerified: true,
+      });
+
+      await newUser.save();
+
+      const token = jwt.sign({ userId: newUser._id, role: newUser.role }, process.env.JWT_SECRET, {
+        expiresIn: "2h",
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Registration successful",
+        token,
+        user: {
+          id: newUser._id,
+          fullName: newUser.fullName,
+          email: newUser.email,
+          role: newUser.role,
+          profileImage: newUser.profileImage,
+        },
       });
     }
 
@@ -303,11 +340,25 @@ const googleLogin = async (req, res) => {
 
     // Existing User
     if (user) {
+      if (!user.isActive) {
+        return res.status(403).json({
+          success: false,
+          message: "Your account has been deactivated. Please contact support if you want to reactivate it.",
+        });
+      }
+
       // Google account link
       if (!user.googleId) {
         user.googleId = googleId;
         user.provider = "google";
 
+        await user.save();
+      }
+      // Google has already confirmed ownership of this email address,
+      // so there is no need to keep the account blocked on our own
+      // (unrelated) OTP verification step.
+      if (!user.isVerified) {
+        user.isVerified = true;
         await user.save();
       }
     } else {
@@ -397,11 +448,25 @@ const facebookLogin = async (req, res) => {
 
     // Existing User
     if (user) {
+      if (!user.isActive) {
+        return res.status(403).json({
+          success: false,
+          message: "Your account has been deactivated. Please contact support if you want to reactivate it.",
+        });
+      }
+
       if (!user.facebookId) {
         user.facebookId = facebookId;
 
         user.provider = "facebook";
 
+        await user.save();
+      }
+      // Facebook has already confirmed ownership of this email address,
+      // so there is no need to keep the account blocked on our own
+      // (unrelated) OTP verification step.
+      if (!user.isVerified) {
+        user.isVerified = true;
         await user.save();
       }
     } else {
@@ -535,12 +600,16 @@ const vendorRegister = async (req, res) => {
       panImage,
       radius,
       profileImage,
+      googleId,
+      facebookId,
     } = req.body;
+    const isSocialSignup = Boolean(googleId || facebookId);
+
     if (
       !fullName ||
       !email ||
       !mobile ||
-      !password ||
+      (!isSocialSignup && !password) ||
       !businessName ||
       !businessType ||
       !address ||
@@ -569,17 +638,22 @@ const vendorRegister = async (req, res) => {
         message: "user already exists",
       });
     }
-    // hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     // create new user
     const newUser = await userModel.create({
       fullName,
       email,
       mobile,
-      password: hashedPassword,
+      ...(isSocialSignup
+        ? {
+            provider: googleId ? "google" : "facebook",
+            googleId: googleId || null,
+            facebookId: facebookId || null,
+          }
+        : { password: await bcrypt.hash(password, 10) }),
       role: "vendor",
       profileImage,
+      isVerified: true,
     });
 
     const newVendor = await vendorModel.create({

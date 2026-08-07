@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FaFacebook } from 'react-icons/fa';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { loginUser, googleLogin, facebookLogin } from '@/services/authService';
@@ -15,17 +15,6 @@ const Login = () => {
   const { login } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-
-  useEffect(() => {
-    window.fbAsyncInit = function () {
-      window.FB.init({
-        appId: import.meta.env.VITE_FACEBOOK_APP_ID,
-        cookie: true,
-        xfbml: true,
-        version: 'v23.0',
-      });
-    };
-  }, []);
 
   const from = location.state?.from?.pathname;
 
@@ -57,7 +46,8 @@ const Login = () => {
 
         navigate('/join', {
           state: {
-            googleSignup: true,
+            socialSignup: true,
+            provider: 'google',
 
             fullName: response.fullName,
 
@@ -121,12 +111,20 @@ const Login = () => {
 
       // New User
       else {
-        toast.info('Account not found. Please register first.');
+        toast.info('Welcome to KaamSetu! Complete your registration.');
 
         navigate('/join', {
           state: {
-            socialUser: result,
+            socialSignup: true,
             provider: 'facebook',
+
+            fullName: result.fullName,
+
+            email: result.email,
+
+            facebookId: result.facebookId,
+
+            profileImage: result.profileImage,
           },
         });
       }
@@ -139,6 +137,11 @@ const Login = () => {
 
   const handleFacebookLogin = () => {
     if (isLoading) return;
+
+    if (!window.FB) {
+      toast.error('Facebook is still loading, please try again in a moment.');
+      return;
+    }
 
     window.FB.login(
       function (response) {
@@ -281,12 +284,21 @@ const Login = () => {
         {/* Social */}
         <div className="grid grid-cols-2 gap-4">
           {!isGoogleLoading && (
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => {
-                toast.error('Google Login Failed');
-              }}
-            />
+            <div className="h-10 w-full overflow-hidden rounded-md flex items-center justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => {
+                  toast.error('Google Login Failed');
+                }}
+                type="standard"
+                theme="outline"
+                size="large"
+                shape="rectangular"
+                text="signin_with"
+                logo_alignment="left"
+                width="220"
+              />
+            </div>
           )}
 
           {isGoogleLoading && (

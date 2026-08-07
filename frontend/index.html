@@ -12,6 +12,16 @@
 
     <div id="fb-root"></div>
 
+<script>
+  window.fbAsyncInit = function () {
+    window.FB.init({
+      appId: '%VITE_FACEBOOK_APP_ID%',
+      cookie: true,
+      xfbml: true,
+      version: 'v23.0',
+    });
+  };
+</script>
 <script async defer crossorigin="anonymous"
 src="https://connect.facebook.net/en_US/sdk.js"></script>
     <script type="module" src="/src/main.jsx"></script>

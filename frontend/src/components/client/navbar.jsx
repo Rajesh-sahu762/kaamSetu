@@ -32,6 +32,11 @@ const [searchOpen, setSearchOpen] =
 
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useContext(AuthContext);
+  // The client-facing navbar must only reflect a *customer* session — a
+  // vendor or admin browsing the public site should see the logged-out
+  // state here, not their vendor/admin account (this was the source of
+  // the "client panel shows vendor/admin login" bug).
+  const isCustomer = !!user && user.role === 'customer';
   const [unreadCount, setUnreadCount] = useState(0);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef(null);
@@ -55,7 +60,7 @@ useEffect(() => {
 
   // Live unread notification count for the logged-in customer (reuses the existing self-notifications API)
   useEffect(() => {
-    if (!user) { setUnreadCount(0); return; }
+    if (!isCustomer) { setUnreadCount(0); return; }
     let cancelled = false;
     const fetchUnread = async () => {
       try {
@@ -68,7 +73,7 @@ useEffect(() => {
     fetchUnread();
     const interval = setInterval(fetchUnread, 60000);
     return () => { cancelled = true; clearInterval(interval); };
-  }, [user, location.pathname]);
+  }, [isCustomer, location.pathname]);
 
   // Close the account dropdown on outside click
   useEffect(() => {
@@ -288,7 +293,7 @@ rounded-full
       gap-5
     "
   >
-    {user && (
+    {isCustomer && (
       <button
         onClick={() => navigate("/notifications")}
         className="relative hover:text-[#745A38] transition"
@@ -374,7 +379,7 @@ rounded-full
       )}
     </button>
 
-    {user ? (
+    {isCustomer ? (
       <div className="relative" ref={accountRef}>
         <button
           onClick={() => setAccountOpen((open) => !open)}
@@ -623,7 +628,7 @@ rounded-full
       )}
     </button>
 
-  {user && (
+  {isCustomer && (
     <button
       onClick={() => navigate("/notifications")}
       className="relative hover:text-[#745A38] transition"
@@ -650,10 +655,10 @@ rounded-full
 
   <button
     onClick={() =>
-      navigate(user ? "/profile" : "/login")
+      navigate(isCustomer ? "/profile" : "/login")
     }
   >
-    {user ? (
+    {isCustomer ? (
       <span
         className="
           w-8 h-8 rounded-full
@@ -683,7 +688,7 @@ rounded-full
       <Search size={20} />
     </button>
 
-  {user && (
+  {isCustomer && (
     <button onClick={handleLogout} className="hover:text-red-500 transition" aria-label="Logout">
       <LogOut size={22} />
     </button>

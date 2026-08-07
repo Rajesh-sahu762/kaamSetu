@@ -9,8 +9,11 @@ export const VendorProvider = ({ children }) => {
 });
 
   const updateVendorData = (newData) => {
-  setVendorData(newData);
-  localStorage.setItem("vendorData", JSON.stringify(newData));
+  setVendorData((prev) => {
+    const merged = { ...(prev || {}), ...newData };
+    localStorage.setItem("vendorData", JSON.stringify(merged));
+    return merged;
+  });
 };
 
 const clearVendorData = () => {
