@@ -12,7 +12,7 @@ import Avatar from "../common/Avatar";
 
 const NAV_ITEMS = [
   { icon: HomeIcon, label: "Dashboard", to: "/vendor/dashboard" },
-  { icon: BookingIcon, label: "Bookings", badge: 14, to: "/vendor/bookings" },
+  { icon: BookingIcon, label: "Bookings", to: "/vendor/bookings" },
   { icon: EarningsIcon, label: "Earnings", to: "/vendor/earnings" },
   { icon: ServicesIcon, label: "Services", to: "/vendor/services" },
   { icon: ProfileIcon, label: "Profile", to: "/vendor/profile" },
@@ -195,6 +195,7 @@ function SidebarContent({
 
 const user = vendorData?.user;
 const vendor = vendorData?.vendor;
+const pendingBookings = vendorData?.stats?.pendingBookings || 0;
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -369,7 +370,8 @@ const vendor = vendorData?.vendor;
 
       {/* Nav */}
       <nav style={{ flex: 1, padding: '10px 0', overflowY: 'auto' }}>
-        {NAV_ITEMS.map(({ icon: Icon, label, badge, to }) => {
+        {NAV_ITEMS.map(({ icon: Icon, label, badge: staticBadge, to }) => {
+          const badge = label === 'Bookings' ? pendingBookings : staticBadge;
           const active = activeNav === label;
           return (
             <div
@@ -575,7 +577,8 @@ const Sidebar = ({ drawerOpen, setDrawerOpen }) => {
 
   const showDesktopSidebar = !isMobile;
   const sideW = sidebarCollapsed ? 68 : 240;
-const { clearVendorData } = useVendor();
+const { clearVendorData, vendorData } = useVendor();
+const pendingBookings = vendorData?.stats?.pendingBookings || 0;
 
 
   const handleLogout = () => {
@@ -679,7 +682,8 @@ const { clearVendorData } = useVendor();
             zIndex: 30,
           }}
         >
-          {NAV_ITEMS.slice(0, 5).map(({ icon: Icon, label, badge, to }) => {
+          {NAV_ITEMS.slice(0, 5).map(({ icon: Icon, label, badge: staticBadge, to }) => {
+            const badge = label === 'Bookings' ? pendingBookings : staticBadge;
             const active = activeNav === label;
             return (
               <div
