@@ -14,7 +14,7 @@ const VendorDocuments = () => {
   }
 }, []);
   const navigate = useNavigate();
-  const { vendorData, updateVendorData } = useVendor();
+  const { vendorData, updateVendorData, updateVendorFiles } = useVendor();
 
   const [documents, setDocuments] = useState({
     profilePhoto: null,
@@ -45,6 +45,11 @@ const VendorDocuments = () => {
       aadhaarImage: documents.aadhaar?.name,
       profileImage: documents.profilePhoto?.name,
       panImage: documents.pan?.name,
+    });
+    updateVendorFiles({
+      aadhaarImage: documents.aadhaar,
+      profileImage: documents.profilePhoto,
+      panImage: documents.pan,
     });
 
     console.log('Documents Page:', vendorData);

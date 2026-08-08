@@ -16,6 +16,7 @@ const {
 
 // import token
 const verifyToken = require("../middleware/verifyToken");
+const upload = require("../middleware/upload");
 
 // Register Route
 
@@ -28,7 +29,15 @@ router.post("/login", LoginUser);
 router.patch("/deactivate-account", verifyToken, deactivateAccount);
 
 // Vendor Register Route
-router.post("/vendor/register", vendorRegister);
+router.post(
+  "/vendor/register",
+  upload("vendor-documents").fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "aadhaarImage", maxCount: 1 },
+    { name: "panImage", maxCount: 1 },
+  ]),
+  vendorRegister,
+);
 
 // email verification
 router.post("/verify-email", verifyEmailOtp);

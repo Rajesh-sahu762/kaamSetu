@@ -21,17 +21,34 @@ const VendorReview = () => {
     }
   }, []);
   const navigate = useNavigate();
-  const { vendorData } = useVendor();
+  const { vendorData, vendorFiles, clearVendorData, clearVendorFiles } = useVendor();
 
   console.log('REVIEW DATA', vendorData);
 
   const handleSubmit = async () => {
+    if (!vendorFiles?.profileImage || !vendorFiles?.aadhaarImage || !vendorFiles?.panImage) {
+      toast.error('Please re-select your documents before submitting.');
+      navigate('/register/vendor/documents');
+      return;
+    }
+
     try {
-      const response = await vendorRegister(vendorData);
+      const formData = new FormData();
+      const FILE_KEYS = ['profileImage', 'aadhaarImage', 'panImage'];
+      Object.entries(vendorData).forEach(([key, value]) => {
+        if (FILE_KEYS.includes(key)) return;
+        if (value !== undefined && value !== null) formData.append(key, value);
+      });
+      formData.append('profileImage', vendorFiles.profileImage);
+      formData.append('aadhaarImage', vendorFiles.aadhaarImage);
+      formData.append('panImage', vendorFiles.panImage);
+
+      await vendorRegister(formData);
 
       toast.success('Application submitted successfully');
 
-      console.log('Review Page:', vendorData);
+      clearVendorData();
+      clearVendorFiles();
 
       navigate('/register/vendor/pending');
     } catch (error) {

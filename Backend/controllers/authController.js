@@ -596,14 +596,15 @@ const vendorRegister = async (req, res) => {
       pincode,
       aadhaarNumber,
       panNumber,
-      aadhaarImage,
-      panImage,
       radius,
-      profileImage,
       googleId,
       facebookId,
     } = req.body;
     const isSocialSignup = Boolean(googleId || facebookId);
+
+    const profileImage = req.files?.profileImage?.[0]?.path;
+    const aadhaarImage = req.files?.aadhaarImage?.[0]?.path;
+    const panImage = req.files?.panImage?.[0]?.path;
 
     if (
       !fullName ||

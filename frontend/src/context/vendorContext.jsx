@@ -20,12 +20,27 @@ const clearVendorData = () => {
   setVendorData(null);
   localStorage.removeItem("vendorData");
 };
+
+  // Actual File objects for the KYC documents picked during vendor
+  // registration. Kept separate from vendorData/localStorage because
+  // File objects cannot be JSON-serialized.
+  const [vendorFiles, setVendorFiles] = useState({});
+
+  const updateVendorFiles = (newFiles) => {
+    setVendorFiles((prev) => ({ ...prev, ...newFiles }));
+  };
+
+  const clearVendorFiles = () => setVendorFiles({});
+
   return (
     <VendorContext.Provider
       value={{
         vendorData,
         updateVendorData,
         clearVendorData,
+        vendorFiles,
+        updateVendorFiles,
+        clearVendorFiles,
       }}
     >
       {children}
