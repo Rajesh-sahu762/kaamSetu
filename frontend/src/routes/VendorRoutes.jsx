@@ -15,14 +15,14 @@ const VendorRoutes = () => (
   <>
     <Route element={<ProtectedRoute allowedRoles={["vendor"]} />}>
     <Route element={<VendorLayout />}>
-    <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-    <Route path="/vendor/bookings" element={<Bookings />} />
-    <Route path="/vendor/review" element={<VendorReview />} />
-    <Route path="/vendor/services" element={<ServicesPage />} />
-    <Route path="/vendor/reviews" element={<Reviews />} />
-    <Route path="/vendor/profile" element={<Profile />} />
-    <Route path="/vendor/earnings" element={<Earnings />} />
-    <Route path="/vendor/notifications" element={<Notifications />} />
+    <Route path="/vendor/dashboard" element={<VendorDashboard />} title="Dashboard" />
+    <Route path="/vendor/bookings" element={<Bookings />} title="Bookings" />
+    <Route path="/vendor/review" element={<VendorReview />} title="Vendor Review" />
+    <Route path="/vendor/services" element={<ServicesPage />} title="Services" />
+    <Route path="/vendor/reviews" element={<Reviews />} title="Reviews" />
+    <Route path="/vendor/profile" element={<Profile />} title="Profile" />
+    <Route path="/vendor/earnings" element={<Earnings />} title="Earnings" />
+    <Route path="/vendor/notifications" element={<Notifications />} title="Notifications" />
     </Route>
     </Route>
   </>

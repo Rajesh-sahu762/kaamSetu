@@ -65,26 +65,28 @@ const AppRoutes = () => {
       {adminRoutes()}
 
       {/* Auth Routes */}
-      <Route path="/login" element={<LoginView />} />
-      <Route path="/join" element={<JoinKaamsetu />} />
-      <Route path="/register/vendor/Profile" element={<VendorProfileStep1 />} />
+      <Route path="/login" element={<LoginView />} title="Login" />
+      <Route path="/join" element={<JoinKaamsetu />} title="Join KaamSetu" />
+      <Route path="/register/vendor/Profile" element={<VendorProfileStep1 />} title="Vendor Profile" />
       <Route
         path="/register/vendor/business"
         element={<VendorBusinessDetails />}
+        title="Vendor Business Details"
       />
-      <Route path="/register/vendor/documents" element={<VendorDocuments />} />
-      <Route path="/register/vendor/review" element={<VendorReview />} />
+      <Route path="/register/vendor/documents" element={<VendorDocuments />} title="Vendor Documents" />
+      <Route path="/register/vendor/review" element={<VendorReview />} title="Vendor Review" />
       <Route
         path="/register/vendor/pending"
         element={<VendorPendingApproval />}
+        title="Vendor Pending Approval"
       />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} title="Forgot Password" />
       {/* <Route path="*" element={<LoginView /
       >} /> */} 
-      <Route path="/verify-email" element={<VerifyOtp />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/register/customer" element={<CustomerRegister />} />
-      <Route path="/register/success" element={<RegisterSuccess />} />
+      <Route path="/verify-email" element={<VerifyOtp />} title="Verify Email" />
+      <Route path="/reset-password" element={<ResetPassword />} title="Reset Password" />
+      <Route path="/register/customer" element={<CustomerRegister />} title="Customer Register" />
+      <Route path="/register/success" element={<RegisterSuccess />} title="Registration Success" />
 
     </Routes>
   );

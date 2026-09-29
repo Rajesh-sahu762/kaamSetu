@@ -15,15 +15,15 @@ const adminRoutes = () => (
     <>
     <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
       <Route element={<AdminLayout />}>
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/customers" element={<Customers />} />
-        <Route path="/admin/vendors" element={<Vendors />} />
-        <Route path="/admin/categories" element={<Categories />} />
-        <Route path="/admin/services" element={<Services />} />
-        <Route path="/admin/reviews" element={<Reviews />} />
-        <Route path="/admin/transactions" element={<Transactions />} />
-          <Route path="/admin/notifications" element={<Notifications />} />
-          <Route path="/admin/bookings" element={<BookingManagement />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} title="Dashboard" />
+        <Route path="/admin/customers" element={<Customers />} title="Customers" />
+        <Route path="/admin/vendors" element={<Vendors />} title="Vendors" />
+        <Route path="/admin/categories" element={<Categories />} title="Categories" />
+        <Route path="/admin/services" element={<Services />} title="Services" />
+        <Route path="/admin/reviews" element={<Reviews />} title="Reviews" />
+        <Route path="/admin/transactions" element={<Transactions />} title="Transactions" />
+          <Route path="/admin/notifications" element={<Notifications />} title="Notifications" />
+          <Route path="/admin/bookings" element={<BookingManagement />} title="Bookings" />
       </Route>
     </Route>
     
