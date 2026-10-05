@@ -1,17 +1,6 @@
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../config/cloudinary");
 
 const upload = (folder) => {
-  const storage = new CloudinaryStorage({
-    cloudinary,
-    params: async () => ({
-      folder: `kaamsetu/${folder}`,
-      allowed_formats: ["jpg", "jpeg", "png", "webp"],
-      resource_type: "image",
-    }),
-  });
-
   const fileFilter = (req, file, cb) => {
     const allowedTypes = [
       "image/jpeg",
@@ -31,7 +20,7 @@ const upload = (folder) => {
   };
 
   return multer({
-    storage,
+    storage: multer.memoryStorage(),
     fileFilter,
     limits: {
       fileSize: 2 * 1024 * 1024,

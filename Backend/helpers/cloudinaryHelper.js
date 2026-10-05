@@ -1,24 +1,28 @@
-// Backend/utils/cloudinaryHelper.js
-// (Same content you already have - included here just so the controller's
-// new require path -> ../utils/cloudinaryHelper -> lines up. Rename this
-// file to whatever you actually saved it as, and adjust the require in
-// vendorController.js to match.)
-
 const cloudinary = require("../config/cloudinary");
-const streamifier = require("streamifier");
+const { Readable } = require("stream");
 
-const uploadImage = (buffer, folder) => {
+const uploadBufferToCloudinary = (buffer, folder, options = {}) => {
+  if (!Buffer.isBuffer(buffer)) {
+    return Promise.reject(new TypeError("A file buffer is required for Cloudinary upload."));
+  }
+
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: `kaamsetu/${folder}`, resource_type: "image" },
+      {
+        ...options,
+        folder: `kaamsetu/${folder}`,
+        resource_type: options.resource_type || "image",
+      },
       (error, result) => {
         if (error) return reject(error);
         resolve(result);
       }
     );
-    streamifier.createReadStream(buffer).pipe(stream);
+    Readable.from([buffer]).pipe(stream);
   });
 };
+
+const uploadImage = uploadBufferToCloudinary;
 
 const deleteImage = async (publicId) => {
   if (!publicId) return;
@@ -27,10 +31,24 @@ const deleteImage = async (publicId) => {
 
 const getPublicId = (url) => {
   if (!url) return null;
-  const parts = url.split("/");
-  const file = parts.pop().split(".")[0];
-  const folder = parts.slice(parts.indexOf("upload") + 2).join("/");
-  return `${folder}/${file}`;
+  try {
+    const parsedUrl = new URL(url);
+    if (!/(^|\.)cloudinary\.com$/i.test(parsedUrl.hostname)) return null;
+
+    const segments = parsedUrl.pathname.split("/").filter(Boolean);
+    const uploadIndex = segments.indexOf("upload");
+    if (uploadIndex === -1) return null;
+
+    let assetSegments = segments.slice(uploadIndex + 1);
+    const versionIndex = assetSegments.findIndex((segment) => /^v\d+$/.test(segment));
+    if (versionIndex !== -1) assetSegments = assetSegments.slice(versionIndex + 1);
+    if (!assetSegments.length) return null;
+
+    const last = assetSegments.pop().replace(/\.[^.]+$/, "");
+    return [...assetSegments, last].join("/") || null;
+  } catch {
+    return null;
+  }
 };
 
-module.exports = { uploadImage, deleteImage, getPublicId };
+module.exports = { uploadBufferToCloudinary, uploadImage, deleteImage, getPublicId };

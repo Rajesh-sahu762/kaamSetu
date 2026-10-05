@@ -7,6 +7,7 @@ const userModel = require("../models/user");
 const vendorModel = require("../models/vendor");
 const transporter = require("../config/mail");
 const generateOtp = require("../utils/generateOtp");
+const { uploadBufferToCloudinary } = require("../helpers/cloudinaryHelper");
 
 const registerUser = async (req, res) => {
   try {
@@ -602,9 +603,9 @@ const vendorRegister = async (req, res) => {
     } = req.body;
     const isSocialSignup = Boolean(googleId || facebookId);
 
-    const profileImage = req.files?.profileImage?.[0]?.path;
-    const aadhaarImage = req.files?.aadhaarImage?.[0]?.path;
-    const panImage = req.files?.panImage?.[0]?.path;
+    const profileImageFile = req.files?.profileImage?.[0];
+    const aadhaarImageFile = req.files?.aadhaarImage?.[0];
+    const panImageFile = req.files?.panImage?.[0];
 
     if (
       !fullName ||
@@ -619,10 +620,10 @@ const vendorRegister = async (req, res) => {
       !pincode ||
       // !aadhaarNumber ||
       // !panNumber ||
-      !aadhaarImage ||
-      !panImage ||
+      !aadhaarImageFile ||
+      !panImageFile ||
       !radius ||
-      !profileImage
+      !profileImageFile
     ) {
       return res.status(400).json({
         success: false,
@@ -639,6 +640,15 @@ const vendorRegister = async (req, res) => {
         message: "user already exists",
       });
     }
+
+    const [profileUpload, aadhaarUpload, panUpload] = await Promise.all([
+      uploadBufferToCloudinary(profileImageFile.buffer, "vendor-documents"),
+      uploadBufferToCloudinary(aadhaarImageFile.buffer, "vendor-documents"),
+      uploadBufferToCloudinary(panImageFile.buffer, "vendor-documents"),
+    ]);
+    const profileImage = profileUpload.secure_url;
+    const aadhaarImage = aadhaarUpload.secure_url;
+    const panImage = panUpload.secure_url;
 
     // create new user
     const newUser = await userModel.create({

@@ -6,7 +6,7 @@ const Booking = require("../models/booking");
 const Transaction = require("../models/transaction");
 const Category = require("../models/category");
 const Notification = require("../models/notification");
-const { deleteImage, getPublicId } = require("../helpers/cloudinaryHelper");
+const { uploadBufferToCloudinary, deleteImage, getPublicId } = require("../helpers/cloudinaryHelper");
 
 // ================================
 //  Vendor Profile Controller
@@ -109,25 +109,8 @@ const getVendorProfile = async (req, res) => {
   }
 };
 
-// ---------------------------------------------------------------------
-// FIXED: was using path.join(...) + deleteFile(...) against a local
-// uploads/profile/<filename> path, but neither `path` nor `deleteFile`
-// are imported in this file anymore, and files no longer live on disk
-// at all — they live on Cloudinary. That combination meant:
-//   1) ReferenceError crash the moment a vendor who already HAS a
-//      profileImage tries to upload a new one (first-ever upload was
-//      fine since the `if (user.profileImage)` block never ran).
-//   2) Even if it didn't crash, it would never actually delete
-//      anything from Cloudinary.
-// Also switched `req.file.filename` -> `req.file.path`: with
-// CloudinaryStorage, `.filename` is just the bare public_id
-// ("kaamsetu/profile/abc123"), not a URL. Saving that to the DB would
-// silently break every <img> tag again, because frontend's
-// getImageUrl() only passes a value through untouched if it already
-// looks like a full http(s) URL - otherwise it re-prefixes it with the
-// OLD local /uploads/<folder>/ path, producing a broken link.
-// `.path` is the actual Cloudinary secure_url.
-// ---------------------------------------------------------------------
+// Profile images are uploaded from Multer's memory buffer and stored as
+// Cloudinary secure URLs. Existing Cloudinary assets are removed afterward.
 const updateProfileImage = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -141,14 +124,12 @@ const updateProfileImage = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found." });
     }
 
-    if (user.profileImage) {
-      const oldPublicId = getPublicId(user.profileImage);
-      await deleteImage(oldPublicId);
-    }
-
-    user.profileImage = req.file.path; // Cloudinary secure_url
+    const oldPublicId = getPublicId(user.profileImage);
+    const image = await uploadBufferToCloudinary(req.file.buffer, "profile");
+    user.profileImage = image.secure_url;
 
     await user.save();
+    if (oldPublicId) await deleteImage(oldPublicId);
 
     return res.status(200).json({
       success: true,
@@ -205,15 +186,10 @@ const updateVendorProfile = async (req, res) => {
   }
 };
 
-// ---------------------------------------------------------------------
-// FIXED: `file.filename` -> `file.path` for the same public_id-vs-URL
-// reason as above. This one was silent (no crash) but every uploaded
-// service image would have rendered broken on the customer side.
-// ---------------------------------------------------------------------
 const addService = async (req, res) => {
   try {
     const { userId } = req.user;
-    const images = req.files?.map((file) => file.path) || [];
+    const files = req.files || [];
     const { categoryId, serviceScope, serviceName, description, priceType, startingPrice, duration } = req.body;
 
     if (!categoryId || !serviceName || !description || !priceType || !startingPrice || !duration) {
@@ -236,6 +212,11 @@ const addService = async (req, res) => {
     if (existingService) {
       return res.status(400).json({ success: false, message: "Service already exists" });
     }
+
+    const uploadedImages = await Promise.all(
+      files.map((file) => uploadBufferToCloudinary(file.buffer, "services")),
+    );
+    const images = uploadedImages.map((image) => image.secure_url);
 
     let slug = serviceName.trim().toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
     const slugExists = await Service.findOne({ slug });
@@ -279,18 +260,11 @@ const getVendorServices = async (req, res) => {
   }
 };
 
-// ---------------------------------------------------------------------
-// FIXED: same file.filename -> file.path swap for new images, PLUS the
-// old-image cleanup below used to try deleting from local disk
-// (path.join + deleteFile, neither imported) - replaced with the
-// Cloudinary equivalent: pull the public_id back out of each stored
-// URL and destroy it on Cloudinary.
-// ---------------------------------------------------------------------
 const updateService = async (req, res) => {
   try {
     const { userId } = req.user;
     const { id } = req.params;
-    const newImages = req.files?.map((file) => file.path) || [];
+    const files = req.files || [];
 
     const { categoryId, serviceScope, serviceName, description, priceType, startingPrice, duration } = req.body;
 
@@ -330,15 +304,18 @@ const updateService = async (req, res) => {
     if (startingPrice !== undefined) service.startingPrice = startingPrice;
     if (duration !== undefined) service.duration = duration;
 
-    if (newImages.length > 0) {
-      const oldImages = service.images || [];
-      for (const oldUrl of oldImages) {
-        const oldPublicId = getPublicId(oldUrl);
-        await deleteImage(oldPublicId);
-      }
-
+    if (files.length > 0) {
+      const uploadedImages = await Promise.all(
+        files.map((file) => uploadBufferToCloudinary(file.buffer, "services")),
+      );
+      const newImages = uploadedImages.map((image) => image.secure_url);
+      const oldPublicIds = (service.images || []).map(getPublicId).filter(Boolean);
       service.images = newImages;
       service.coverImage = newImages[0];
+      await service.save();
+      await Promise.all(oldPublicIds.map(deleteImage));
+      const updatedService = await Service.findById(service._id).populate("categoryId", "name slug");
+      return res.status(200).json({ success: true, message: "Service updated successfully", data: updatedService });
     }
 
     await service.save();

@@ -15,8 +15,7 @@ const Review = require("../models/review");
 const User = require("../models/user");
 const Notification = require("../models/notification");
 const generateBookingNumber = require("../utils/generateBookingNumber");
-const path = require("path");
-const { deleteFile } = require("../utils/fileHelper");
+const { uploadBufferToCloudinary, deleteImage, getPublicId } = require("../helpers/cloudinaryHelper");
 
 const isValidId = (id) => /^[a-f\d]{24}$/i.test(id);
 
@@ -502,21 +501,12 @@ const updateCustomerProfileImage = async (req, res) => {
       });
     }
 
-    if (user.profileImage) {
-      const oldImagePath = path.join(
-        __dirname,
-        "..",
-        "uploads",
-        "profile",
-        user.profileImage,
-      );
-
-      deleteFile(oldImagePath);
-    }
-
-    user.profileImage = req.file.filename;
+    const oldPublicId = getPublicId(user.profileImage);
+    const image = await uploadBufferToCloudinary(req.file.buffer, "profile");
+    user.profileImage = image.secure_url;
 
     await user.save();
+    if (oldPublicId) await deleteImage(oldPublicId);
 
     return res.status(200).json({
       success: true,

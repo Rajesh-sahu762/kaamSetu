@@ -13,11 +13,12 @@ const publicRoutes = require("./routes/publicRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const supportRoutes = require("./routes/supportRoutes");
 
+const allowedOrigins = process.env.NODE_ENV === "production"
+    ? [process.env.FRONTEND_URL].filter(Boolean)
+    : ["http://localhost:5173", "http://localhost:8080"];
+
 app.use(cors({
-    origin: [
-        "http://localhost:5173",
-        "https://kaam-setu-bice.vercel.app"
-    ],
+    origin: allowedOrigins,
     credentials: true,
 })); // Enable CORS for all routes
 
