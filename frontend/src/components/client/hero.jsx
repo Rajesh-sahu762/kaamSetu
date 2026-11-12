@@ -49,7 +49,7 @@ const HeroSection = ({ stats, categories = [], loading = false }) => {
       {/* Background Blobs */}
       <motion.div
         style={{ y: y1 }}
-        className="absolute top-[-120px] right-[-120px] w-[420px] h-[420px] rounded-full bg-[#A88A64]/20 blur-3xl opacity-60"
+        className="absolute top-[-120px] right-[-120px] w-[420px] h-[420px] rounded-full bg-[#0B7A50]/20 blur-3xl opacity-60"
       />
 
       <motion.div
