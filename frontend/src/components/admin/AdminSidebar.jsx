@@ -243,7 +243,7 @@ const SidebarContent = ({ collapsed, onClose, onToggle }) => {
                 borderRadius: 9,
                 color: active ? T.bronzeLight : 'rgba(255,255,255,.57)',
                 background: active ? 'rgba(168,138,100,.18)' : 'transparent',
-                boxShadow: active ? 'inset 2px 0 0 #A88A64' : 'none',
+                boxShadow: active ? 'inset 2px 0 0 #0B7A50' : 'none',
                 transition: 'background .18s ease',
               }}
             >
