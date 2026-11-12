@@ -395,7 +395,7 @@ rounded-full
           <span
             className="
               w-8 h-8 rounded-full
-              bg-gradient-to-br from-[#745A38] to-[#A88A64]
+              bg-gradient-to-br from-[#745A38] to-[#0B7A50]
               text-white text-xs font-bold
               flex items-center justify-center
             "
@@ -662,7 +662,7 @@ rounded-full
       <span
         className="
           w-8 h-8 rounded-full
-          bg-gradient-to-br from-[#745A38] to-[#A88A64]
+          bg-gradient-to-br from-[#745A38] to-[#0B7A50]
           text-white text-xs font-bold
           flex items-center justify-center
         "
