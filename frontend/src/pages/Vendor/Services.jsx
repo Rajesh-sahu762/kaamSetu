@@ -38,13 +38,13 @@ import ConfirmModal from '@/components/common/ConfirmModal';
 
 /* ============================================================
    Design tokens — Artisan Precision system
-   Deep Slate #1E293B · Bronze #A88A64 · Soft Ivory #F8F5F0
+   Deep Slate #344B3B · Bronze #0B7A50 · Soft Ivory #F8FBF6
    ============================================================ */
 
-const SLATE = '#1E293B';
+const SLATE = '#344B3B';
 const SLATE_GRAY = '#64748B';
-const BRONZE = '#A88A64';
-const IVORY = '#F8F5F0';
+const BRONZE = '#0B7A50';
+const IVORY = '#F8FBF6';
 const BORDER = '#E2E8F0';
 const WHITE = '#FFFFFF';
 
@@ -54,7 +54,7 @@ const SHADOW_MODAL = '0 12px 40px rgba(30,41,59,0.20)';
 const RADIUS_INTERACTIVE = 4; // buttons, inputs, chips
 const RADIUS_CARD = 8; // cards, containers
 
-const GEIST = 'Geist, sans-serif';
+const GEIST = 'Inter, sans-serif';
 const INTER = 'Inter, sans-serif';
 
 const labelSm = {
@@ -1745,7 +1745,7 @@ const menuItemStyle = {
             <h2
               style={{
                 fontSize: 24,
-                fontFamily: 'Geist,sans-serif',
+                fontFamily: 'Inter,sans-serif',
                 marginBottom: 24,
               }}
             >
