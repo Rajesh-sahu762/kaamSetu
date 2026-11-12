@@ -1,40 +1,42 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Inter:wght@100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 
 @import "tailwindcss";
-
 
 /* =========================
    LIGHT THEME
 ========================= */
 
 :root {
-  /* Fonts */
-  --font-heading: "Geist Mono", monospace;
+  /* Typography */
+  --font-heading: "Plus Jakarta Sans", sans-serif;
   --font-body: "Inter", sans-serif;
 
-  /* Brand Colors */
-  --color-primary: #091426;
-  --color-secondary: #745a38;
+  /* Brand palette */
+  --color-primary: #0B7A50;
+  --color-secondary: #10B981;
+  --color-accent: #C5F36B;
+  --color-moss: #344B3B;
 
-  /* Backgrounds */
-  --color-bg: #f8f9ff;
-  --color-surface: #ffffff;
-  --color-card: #ffffff;
+  /* Legacy solid fills stay readable while old component classes are phased out */
+  --color-legacy-primary: #0B7A50;
+  --color-legacy-primary-text: #FFFFFF;
+
+  /* Backgrounds and surfaces */
+  --color-bg: #FFFFFF;
+  --color-surface: #F8FBF6;
+  --color-card: #FFFFFF;
+  --color-surface-elevated: #E7F5EC;
 
   /* Text */
-  --color-text: #091426;
-  --color-text-muted: #45474c;
+  --color-text: #101A14;
+  --color-text-muted: #64756A;
 
-  /* Border */
-  --color-border: #d3e4fe;
+  /* Borders and elevation */
+  --color-border: #DCE9DF;
+  --shadow-card: 0 4px 20px rgba(16, 40, 25, 0.08);
 
-  /* Shadows */
-  --shadow-card: 0 4px 20px rgba(9, 20, 38, 0.08);
-
-  /* Radius */
+  /* Shared UI */
   --radius-card: 16px;
-
-  /* Transition */
   --transition: 0.3s ease;
 }
 
@@ -43,26 +45,28 @@
 ========================= */
 
 .dark {
-  --color-primary: #ffffff;
-  --color-secondary: #c59a6a;
+  --color-primary: #39F58A;
+  --color-secondary: #10B981;
+  --color-accent: #C5F36B;
+  --color-moss: #344B3B;
 
-  --color-bg: #0b1220;
+  --color-legacy-primary: #1A261E;
+  --color-legacy-primary-text: #F4FBF5;
 
-  --color-surface: #111827;
+  --color-bg: #080B09;
+  --color-surface: #121914;
+  --color-card: #1A261E;
+  --color-surface-elevated: #24352A;
 
-  --color-card: #132033;
+  --color-text: #F4FBF5;
+  --color-text-muted: #A8B8AD;
 
-  --color-text: #ffffff;
-
-  --color-text-muted: #cbd5e1;
-
-  --color-border: #22324a;
-
+  --color-border: #2C4033;
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 /* =========================
-   GLOBAL
+   GLOBAL TYPOGRAPHY + BASE
 ========================= */
 
 html {
@@ -73,14 +77,36 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* Reusable typography hooks */
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-body {
+  font-family: var(--font-body);
 }
 
 /* =========================
-   REUSABLE UTILITY CLASSES
+   REUSABLE THEME UTILITIES
 ========================= */
 
 .bg-theme {
@@ -104,7 +130,7 @@ body {
 }
 
 .text-accent {
-  color: var(--color-secondary);
+  color: var(--color-primary);
 }
 
 .border-theme {
@@ -116,7 +142,75 @@ body {
 }
 
 /* =========================
-   CUSTOM SCROLLBAR
+   LEGACY BRAND CLASS BRIDGE
+   Keeps existing layouts/components intact while applying the new palette.
+========================= */
+
+/* Legacy brown/navy text accents */
+[class~="text-[#745A38]"],
+[class~="text-[#745a38]"],
+[class~="text-[#C59A6A]"],
+[class~="text-[#091426]"] {
+  color: var(--color-primary) !important;
+}
+
+/* Legacy solid brand backgrounds */
+[class~="bg-[#745A38]"],
+[class~="bg-[#745a38]"],
+[class~="bg-[#091426]"] {
+  background-color: var(--color-legacy-primary) !important;
+  color: var(--color-legacy-primary-text) !important;
+}
+
+/* Legacy soft brand backgrounds */
+[class~="bg-[#745A38]/5"],
+[class~="bg-[#745a38]/5"] {
+  background-color: color-mix(in srgb, var(--color-primary) 5%, transparent) !important;
+}
+
+[class~="bg-[#745A38]/10"],
+[class~="bg-[#745a38]/10"],
+[class~="bg-[#C59A6A]/10"] {
+  background-color: color-mix(in srgb, var(--color-primary) 10%, transparent) !important;
+}
+
+[class~="bg-[#745A38]/20"],
+[class~="bg-[#745a38]/20"] {
+  background-color: color-mix(in srgb, var(--color-primary) 20%, transparent) !important;
+}
+
+/* Legacy borders, rings and hover states */
+[class~="border-[#745A38]"],
+[class~="border-[#745a38]"] {
+  border-color: var(--color-primary) !important;
+}
+
+[class~="ring-[#745A38]"],
+[class~="ring-[#745a38]"] {
+  --tw-ring-color: var(--color-primary) !important;
+}
+
+[class~="hover:text-[#745A38]"]:hover,
+[class~="hover:text-[#745a38]"]:hover {
+  color: var(--color-primary) !important;
+}
+
+[class~="hover:bg-[#745A38]"]:hover,
+[class~="hover:bg-[#745a38]"]:hover {
+  background-color: var(--color-legacy-primary) !important;
+}
+
+/* Legacy dark blue secondary surfaces */
+[class~="bg-[#1b2b43]"] {
+  background-color: var(--color-surface-elevated) !important;
+}
+
+[class~="text-[#C59A6A]"] {
+  color: var(--color-primary) !important;
+}
+
+/* =========================
+   CUSTOM SCROLLBAR + SELECTION
 ========================= */
 
 ::-webkit-scrollbar {
@@ -132,11 +226,7 @@ body {
   border-radius: 999px;
 }
 
-/* =========================
-   SELECTION
-========================= */
-
 ::selection {
-  background: var(--color-secondary);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-legacy-primary-text);
 }
