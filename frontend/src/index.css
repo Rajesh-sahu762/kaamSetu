@@ -209,6 +209,20 @@ select {
   color: var(--color-primary) !important;
 }
 
+/* Keep legacy inline font declarations on the new typography system. */
+[style*="Geist"] {
+  font-family: var(--font-body) !important;
+}
+
+h1[style*="Geist"],
+h2[style*="Geist"],
+h3[style*="Geist"],
+h4[style*="Geist"],
+h5[style*="Geist"],
+h6[style*="Geist"] {
+  font-family: var(--font-heading) !important;
+}
+
 /* =========================
    CUSTOM SCROLLBAR + SELECTION
 ========================= */
