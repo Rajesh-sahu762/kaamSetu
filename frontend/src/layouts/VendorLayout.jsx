@@ -74,7 +74,7 @@ const VendorLayout = () => {
               ? <FaTimesCircle size={26} color={T.red} />
               : <FaClock size={26} color={T.amber} />}
           </div>
-          <h2 style={{ fontFamily: 'Geist,sans-serif', fontSize: 22, fontWeight: 600, color: T.slate, marginBottom: 10 }}>
+          <h2 style={{ fontFamily: 'Inter,sans-serif', fontSize: 22, fontWeight: 600, color: T.slate, marginBottom: 10 }}>
             {isRejected ? 'Application Rejected' : 'Application Under Review'}
           </h2>
           <p style={{ fontSize: 14, color: T.slateGray, lineHeight: 1.6, marginBottom: isRejected && vendorData?.vendor?.rejectionReason ? 16 : 24 }}>
@@ -91,14 +91,14 @@ const VendorLayout = () => {
             {isRejected && (
               <button
                 onClick={() => navigate('/support')}
-                style={{ background: T.bronze, color: T.white, border: 'none', borderRadius: 6, padding: '10px 20px', fontFamily: 'Geist,sans-serif', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                style={{ background: T.bronze, color: T.white, border: 'none', borderRadius: 6, padding: '10px 20px', fontFamily: 'Inter,sans-serif', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
               >
                 Contact Support
               </button>
             )}
             <button
               onClick={handleLogout}
-              style={{ background: 'transparent', color: T.slateMid, border: `1px solid ${T.border}`, borderRadius: 6, padding: '10px 20px', fontFamily: 'Geist,sans-serif', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+              style={{ background: 'transparent', color: T.slateMid, border: `1px solid ${T.border}`, borderRadius: 6, padding: '10px 20px', fontFamily: 'Inter,sans-serif', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
             >
               Log Out
             </button>
@@ -113,7 +113,7 @@ const VendorLayout = () => {
     <>
      <style>{`
      
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: ${T.border}; border-radius: 2px; }
