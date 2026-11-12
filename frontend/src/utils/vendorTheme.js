@@ -1,23 +1,23 @@
 export const T = {
-  slate: "#101A14",
-  slateMid: "#1A261E",
-  slateGray: "#64756A",
+  slate: "var(--color-text)",
+  slateMid: "var(--color-primary)",
+  slateGray: "var(--color-text-muted)",
 
-  bronze: "#0B7A50",
-  bronzeLight: "#C5F36B",
+  bronze: "var(--color-primary)",
+  bronzeLight: "var(--color-accent)",
 
-  ivory: "#F8FBF6",
+  ivory: "var(--color-bg)",
 
   white: "#FFFFFF",
 
-  surface: "#FFFFFF",
-  surfaceLow: "#E7F5EC",
+  surface: "var(--color-surface)",
+  surfaceLow: "var(--color-surface-elevated)",
 
-  border: "#DCE9DF",
-  borderDim: "#A8B8AD",
+  border: "var(--color-border)",
+  borderDim: "var(--color-border)",
 
-  green: "#0B7A50",
-  greenDim: "rgba(11,122,80,0.12)",
+  green: "var(--color-primary)",
+  greenDim: "color-mix(in srgb, var(--color-primary) 12%, transparent)",
 
   red: "#ef4444",
   redDim: "rgba(239,68,68,0.1)",
