@@ -238,7 +238,7 @@ const CustomerProfilePage = () => {
 
                   bg-gradient-to-br
                   from-[#745A38]
-                  to-[#A88A64]
+                  to-[#0B7A50]
 
                   flex
                   items-center
