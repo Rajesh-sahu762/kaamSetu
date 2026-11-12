@@ -264,7 +264,7 @@ const StatCard = ({
       <p
         className="
           mt-3
-          text-[#A88A64]
+          text-[#0B7A50]
         "
       >
         {label}
