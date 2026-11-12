@@ -1,23 +1,23 @@
 export const T = {
-  slate: "#091426",
-  slateMid: "#1E293B",
-  slateGray: "#64748B",
+  slate: "#101A14",
+  slateMid: "#1A261E",
+  slateGray: "#64756A",
 
-  bronze: "#A88A64",
-  bronzeLight: "#fedaaf",
+  bronze: "#0B7A50",
+  bronzeLight: "#C5F36B",
 
-  ivory: "#F8F5F0",
+  ivory: "#F8FBF6",
 
-  white: "#ffffff",
+  white: "#FFFFFF",
 
-  surface: "#f8f9ff",
-  surfaceLow: "#eff4ff",
+  surface: "#FFFFFF",
+  surfaceLow: "#E7F5EC",
 
-  border: "#E2E8F0",
-  borderDim: "#c5c6cd",
+  border: "#DCE9DF",
+  borderDim: "#A8B8AD",
 
-  green: "#22c55e",
-  greenDim: "rgba(34,197,94,0.12)",
+  green: "#0B7A50",
+  greenDim: "rgba(11,122,80,0.12)",
 
   red: "#ef4444",
   redDim: "rgba(239,68,68,0.1)",
