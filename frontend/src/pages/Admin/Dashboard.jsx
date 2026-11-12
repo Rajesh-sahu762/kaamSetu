@@ -57,7 +57,7 @@ const cardStyle = {
   background: T.white,
   border: `1px solid ${T.border}`,
   borderRadius: 18,
-  boxShadow: "0 2px 10px rgba(9, 20, 38, 0.025)",
+  boxShadow: "0 2px 10px rgba(16, 40, 25, 0.025)",
 };
 
 const statusStyle = (status) => {
@@ -98,7 +98,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const MetricCard = ({ icon: Icon, label, value, note, tone = T.bronze, softTone = "rgba(168, 138, 100, 0.12)" }) => (
+const MetricCard = ({ icon: Icon, label, value, note, tone = T.bronze, softTone = "rgba(11, 122, 80, 0.12)" }) => (
   <article
     style={{
       ...cardStyle,
@@ -272,12 +272,12 @@ const AdminDashboard = () => {
         minHeight: "100vh",
         background: T.ivory,
         padding: isMobile ? "16px 14px 36px" : "28px clamp(20px, 3vw, 48px) 48px",
-        fontFamily: "Geist, Inter, system-ui, sans-serif",
+        fontFamily: `Plus Jakarta Sans, Inter, system-ui, sans-serif`,
       }}
     >
       <style>{`
         @keyframes adminShimmer { 100% { transform: translateX(100%); } }
-        .admin-shimmer { background: #ece8e2; position: relative; overflow: hidden; }
+        .admin-shimmer { background: #E7F5EC; position: relative; overflow: hidden; }
         .admin-shimmer::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.62), transparent); animation: adminShimmer 1.35s infinite; }
         .admin-refresh:hover { background: ${T.slateMid} !important; transform: translateY(-1px); }
         .admin-range:hover { color: ${T.slate} !important; }
@@ -291,15 +291,15 @@ const AdminDashboard = () => {
             style={{
               ...cardStyle,
               padding: isMobile ? 18 : "21px 24px",
-              background: `linear-gradient(112deg, ${T.slate} 0%, #162945 64%, #2d405c 100%)`,
+              background: `linear-gradient(112deg, ${T.slate} 0%, #155A3E 64%, #0B7A50 100%)`,
               border: "none",
               color: T.white,
               overflow: "hidden",
               position: "relative",
             }}
           >
-            <div style={{ position: "absolute", width: 240, height: 240, right: -80, top: -132, borderRadius: "50%", background: "rgba(254, 218, 175, 0.12)" }} />
-            <div style={{ position: "absolute", width: 120, height: 120, right: 98, bottom: -90, borderRadius: "50%", background: "rgba(168, 138, 100, 0.22)" }} />
+            <div style={{ position: "absolute", width: 240, height: 240, right: -80, top: -132, borderRadius: "50%", background: "rgba(197, 243, 107, 0.12)" }} />
+            <div style={{ position: "absolute", width: 120, height: 120, right: 98, bottom: -90, borderRadius: "50%", background: "rgba(16, 185, 129, 0.22)" }} />
             <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 18, flexDirection: isMobile ? "column" : "row" }}>
               <div>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 7, color: T.bronzeLight, fontSize: 11, fontWeight: 750, letterSpacing: ".08em", textTransform: "uppercase" }}>
@@ -349,7 +349,7 @@ const AdminDashboard = () => {
               action={
                 <div style={{ display: "flex", alignItems: "center", gap: 4, padding: 3, background: T.surfaceLow, borderRadius: 9 }}>
                   {RANGE_OPTIONS.map((option) => (
-                    <button key={option.value} type="button" className="admin-range" onClick={() => setRange(option.value)} style={{ border: 0, borderRadius: 7, cursor: "pointer", padding: "6px 8px", background: range === option.value ? T.white : "transparent", color: range === option.value ? T.slate : T.slateGray, boxShadow: range === option.value ? "0 1px 3px rgba(9,20,38,.08)" : "none", fontSize: 10, fontWeight: 700 }}>
+                    <button key={option.value} type="button" className="admin-range" onClick={() => setRange(option.value)} style={{ border: 0, borderRadius: 7, cursor: "pointer", padding: "6px 8px", background: range === option.value ? T.white : "transparent", color: range === option.value ? T.slate : T.slateGray, boxShadow: range === option.value ? "0 1px 3px rgba(16,40,25,.08)" : "none", fontSize: 10, fontWeight: 700 }}>
                       {option.label}
                     </button>
                   ))}
@@ -363,7 +363,7 @@ const AdminDashboard = () => {
                     <CartesianGrid stroke={T.border} strokeDasharray="3 5" vertical={false} />
                     <XAxis dataKey="_id" tick={{ fill: T.slateGray, fontSize: 10 }} tickLine={false} axisLine={false} minTickGap={24} />
                     <YAxis tick={{ fill: T.slateGray, fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${Math.round(value / 1000)}k`} />
-                    <Tooltip formatter={(value) => [formatCurrency(value), "Revenue"]} labelStyle={{ color: T.slate, fontWeight: 700 }} contentStyle={{ border: `1px solid ${T.border}`, borderRadius: 10, fontSize: 12, boxShadow: "0 8px 20px rgba(9,20,38,.1)" }} />
+                    <Tooltip formatter={(value) => [formatCurrency(value), "Revenue"]} labelStyle={{ color: T.slate, fontWeight: 700 }} contentStyle={{ border: `1px solid ${T.border}`, borderRadius: 10, fontSize: 12, boxShadow: "0 8px 20px rgba(16,40,25,.1)" }} />
                     <Line type="monotone" dataKey="revenue" stroke={T.bronze} strokeWidth={2.7} dot={false} activeDot={{ r: 5, fill: T.bronze, stroke: T.white, strokeWidth: 2 }} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -377,7 +377,7 @@ const AdminDashboard = () => {
                     <CartesianGrid stroke={T.border} strokeDasharray="3 5" vertical={false} />
                     <XAxis dataKey="_id" tick={{ fill: T.slateGray, fontSize: 10 }} tickLine={false} axisLine={false} minTickGap={26} />
                     <YAxis allowDecimals={false} tick={{ fill: T.slateGray, fontSize: 10 }} tickLine={false} axisLine={false} />
-                    <Tooltip formatter={(value) => [formatNumber(value), "Bookings"]} labelStyle={{ color: T.slate, fontWeight: 700 }} contentStyle={{ border: `1px solid ${T.border}`, borderRadius: 10, fontSize: 12, boxShadow: "0 8px 20px rgba(9,20,38,.1)" }} cursor={{ fill: T.surfaceLow }} />
+                    <Tooltip formatter={(value) => [formatNumber(value), "Bookings"]} labelStyle={{ color: T.slate, fontWeight: 700 }} contentStyle={{ border: `1px solid ${T.border}`, borderRadius: 10, fontSize: 12, boxShadow: "0 8px 20px rgba(16,40,25,.1)" }} cursor={{ fill: T.surfaceLow }} />
                     <Bar dataKey="count" fill={T.slateMid} radius={[5, 5, 0, 0]} maxBarSize={28} />
                   </BarChart>
                 </ResponsiveContainer>
