@@ -81,8 +81,8 @@ const HomeIntro = ({ children }) => {
         gsap.set(content, { autoAlpha: 0, y: 0 });
         gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
         gsap.set(panel, {
-          width: mobile ? "90vw" : tablet ? "86vw" : "min(82vw, 1120px)",
-          height: mobile ? "72svh" : "76svh",
+          width: mobile ? "84vw" : tablet ? "78vw" : "min(72vw, 960px)",
+          height: mobile ? "64svh" : tablet ? "68svh" : "66svh",
           borderRadius: mobile ? 18 : 4,
           xPercent: -50,
           yPercent: -50,
