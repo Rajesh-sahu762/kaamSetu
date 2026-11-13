@@ -284,3 +284,68 @@
 @media (prefers-reduced-motion: reduce) {
   .ks-navbar, .ks-navbar *, .ks-mobile-menu, .ks-mobile-menu * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+
+/* =========================
+   LIGHT MODE — airy mint glass
+   Shared React structure; theme-only visual overrides.
+========================= */
+:root:not(.dark) .ks-navbar {
+  border-color: rgba(11, 122, 80, 0.16);
+  background: rgba(255, 255, 255, 0.78);
+  color: #101a14;
+  box-shadow: 0 12px 42px rgba(21, 73, 45, 0.09), inset 0 1px 0 rgba(255,255,255,0.92);
+}
+:root:not(.dark) .ks-navbar.is-scrolled {
+  border-color: rgba(11, 122, 80, 0.2);
+  background: rgba(255, 255, 255, 0.91);
+  box-shadow: 0 14px 42px rgba(21, 73, 45, 0.12), inset 0 1px 0 rgba(255,255,255,0.96);
+}
+:root:not(.dark) .ks-navbar__wordmark span:last-child { color: #0b7a50; }
+:root:not(.dark) .ks-navbar__tagline { color: #0b7a50; }
+:root:not(.dark) .ks-nav-icon-button { color: #243b2d; }
+:root:not(.dark) .ks-nav-icon-button:hover {
+  color: #0b7a50;
+  background: rgba(11, 122, 80, 0.08);
+}
+:root:not(.dark) .ks-navbar__pro-button {
+  border-color: rgba(11, 122, 80, 0.52);
+  background: rgba(11, 122, 80, 0.045);
+  color: #0b7a50;
+}
+:root:not(.dark) .ks-navbar__pro-button:hover {
+  background: #0b7a50;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(11, 122, 80, 0.2);
+}
+:root:not(.dark) .ks-navbar__divider { background: rgba(11, 122, 80, 0.2); }
+:root:not(.dark) .ks-navbar__profile-button {
+  border-color: #dce9df;
+  background: rgba(248, 251, 246, 0.78);
+  color: #64756a;
+}
+:root:not(.dark) .ks-navbar__avatar {
+  border-color: rgba(11, 122, 80, 0.12);
+  background: linear-gradient(145deg, #c5f36b, #10b981 82%);
+  color: #073b28;
+  box-shadow: 0 4px 14px rgba(11, 122, 80, 0.14);
+}
+:root:not(.dark) .ks-navbar__login-button {
+  background: #0b7a50;
+  color: #ffffff;
+}
+:root:not(.dark) .ks-navbar__account-menu {
+  border-color: #dce9df;
+  background: rgba(255,255,255,0.96);
+  box-shadow: 0 20px 55px rgba(21,73,45,0.14);
+}
+:root:not(.dark) .ks-mobile-menu {
+  background: rgba(255,255,255,0.96);
+  color: #101a14;
+}
+:root:not(.dark) .ks-mobile-menu__close,
+:root:not(.dark) .ks-navbar__mobile-toggle {
+  border-color: #dce9df;
+  background: rgba(248,251,246,0.9);
+  color: #243b2d;
+}
