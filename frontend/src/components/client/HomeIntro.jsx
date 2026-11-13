@@ -62,8 +62,12 @@ const HomeIntro = ({ children }) => {
         // Pixel-based sizing avoids vw/percentage rounding issues in iOS,
         // iPad split view and browser device emulation.
         const getPanelDimensions = () => {
-          const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-          const viewportHeight = window.innerHeight;
+          // Use the actual fixed stage box rather than screen/window width.
+          // This is reliable in iPad split view, mobile browser chrome and
+          // device emulators where the layout viewport can differ.
+          const bounds = stage.getBoundingClientRect();
+          const viewportWidth = bounds.width || document.documentElement.clientWidth || window.innerWidth;
+          const viewportHeight = bounds.height || window.innerHeight;
           const sideGutter = mobile ? 18 : tablet ? 32 : 48;
           const widthRatio = mobile ? 0.9 : tablet ? 0.8 : 0.66;
           const maxWidth = mobile ? 560 : tablet ? 720 : 860;
@@ -73,8 +77,6 @@ const HomeIntro = ({ children }) => {
           return {
             width: Math.max(0, Math.min(viewportWidth - sideGutter * 2, viewportWidth * widthRatio, maxWidth)),
             height: Math.max(0, Math.min(viewportHeight * heightRatio, maxHeight)),
-            left: viewportWidth / 2,
-            top: viewportHeight / 2,
           };
         };
         const updateTrackHeight = () => {
@@ -101,10 +103,18 @@ const HomeIntro = ({ children }) => {
         gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
         gsap.set(panel, {
           ...getPanelDimensions(),
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          margin: "auto",
           minHeight: 0,
+          x: 0,
+          y: 0,
+          xPercent: 0,
+          yPercent: 0,
           borderRadius: mobile ? 18 : 4,
-          xPercent: -50,
-          yPercent: -50,
+          transform: "none",
           transformOrigin: "center center",
         });
         gsap.set(logo, {
@@ -145,8 +155,8 @@ const HomeIntro = ({ children }) => {
         timeline.to(
           panel,
           {
-            width: () => document.documentElement.clientWidth || window.innerWidth,
-            height: () => window.innerHeight,
+            width: () => stage.getBoundingClientRect().width,
+            height: () => stage.getBoundingClientRect().height,
             borderRadius: 0,
             duration: 0.62,
             ease: "power2.inOut",
@@ -236,16 +246,23 @@ const HomeIntro = ({ children }) => {
           1.02,
         );
 
+        let resizeFrame = 0;
         const handleResize = () => {
-          updateTrackHeight();
-          gsap.set(panel, getPanelDimensions());
-          ScrollTrigger.refresh();
+          cancelAnimationFrame(resizeFrame);
+          resizeFrame = requestAnimationFrame(() => {
+            updateTrackHeight();
+            gsap.set(panel, getPanelDimensions());
+            ScrollTrigger.refresh();
+          });
         };
 
         window.addEventListener("resize", handleResize);
+        window.visualViewport?.addEventListener("resize", handleResize);
 
         return () => {
           window.removeEventListener("resize", handleResize);
+          window.visualViewport?.removeEventListener("resize", handleResize);
+          cancelAnimationFrame(resizeFrame);
         };
       },
     );
