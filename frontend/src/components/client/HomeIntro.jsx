@@ -73,6 +73,21 @@ const HomeIntro = ({ children }) => {
           return restorePage;
         }
 
+        const introScrollFactor = mobile ? 2.8 : tablet ? 2.7 : 2.6;
+        track.style.height = `${(introScrollFactor + 1) * 100}svh`;
+
+        const showIntroState = () => {
+          gsap.set(content, { autoAlpha: 0, pointerEvents: "none" });
+          gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
+          gsap.set(navbar, { autoAlpha: 0, pointerEvents: "none" });
+        };
+
+        const showWebsiteState = () => {
+          gsap.set(content, { autoAlpha: 1, pointerEvents: "auto" });
+          gsap.set(stage, { autoAlpha: 0, pointerEvents: "none" });
+          gsap.set(navbar, { autoAlpha: 1, pointerEvents: "auto" });
+        };
+
         const getLogoDestination = () => {
           const from = logo.getBoundingClientRect();
           const to = navbarLogo.getBoundingClientRect();
@@ -113,25 +128,28 @@ const HomeIntro = ({ children }) => {
             trigger: track,
             start: "top top",
             end: () =>
-              `+=${Math.round(window.innerHeight * (mobile ? 2.8 : tablet ? 2.7 : 2.6))}`,
+              `+=${Math.round(window.innerHeight * introScrollFactor)}`,
             scrub: 1.4,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             refreshPriority: 1,
             onLeave: () => {
-              // At the end of the intro, hand scrolling to the website panel.
-              // Keep this ScrollTrigger alive so scrolling back can reverse it.
+              // Switch scroll ownership only when the complete intro timeline
+              // has reached its end. No website content is revealed early.
               lockDocumentForSiteScroll();
               content.scrollTop = 0;
+              showWebsiteState();
             },
             onEnterBack: () => {
-              // Re-enable document scrolling as soon as the user reverses
-              // from the inner website scroller toward the intro.
+              // The user has reached the end of the website scroller and is
+              // reversing into the intro: return ownership to document scroll.
               restorePage();
+              showIntroState();
             },
             onLeaveBack: () => {
               restorePage();
               content.scrollTop = 0;
+              showIntroState();
             },
           },
         });
@@ -216,20 +234,9 @@ const HomeIntro = ({ children }) => {
           0.84,
         );
 
-        timeline.to(
-          content,
-          { autoAlpha: 1, pointerEvents: "auto", duration: 0.14, ease: "power1.out" },
-          0.9,
-        );
-
-        timeline.to(
-          stage,
-          { autoAlpha: 0, pointerEvents: "none", duration: 0.14, ease: "power1.out" },
-          0.9,
-        );
-
-        // Hold the completed fullscreen frame so the logo/nav handoff reads
-        // as a finished state before the site scroll container is unlocked.
+        // Keep the intro stage visible and the website hidden throughout the
+        // scrub. onLeave performs the handoff only after the entire timeline
+        // (including its final logo-settle hold) has completed.
         timeline.to({}, { duration: 0.34 });
 
         const handleInnerWheel = (event) => {
