@@ -141,10 +141,12 @@ const HomeIntro = ({ children }) => {
               showWebsiteState();
             },
             onEnterBack: () => {
-              // The user has reached the end of the website scroller and is
-              // reversing into the intro: return ownership to document scroll.
+              // Keep the real navbar visible while the intro logo retraces
+              // its path from the navbar. The timeline crossfade handles
+              // hiding the navbar only as the logo moves away from it.
               restorePage();
-              showIntroState();
+              gsap.set(content, { pointerEvents: "none" });
+              gsap.set(stage, { pointerEvents: "auto" });
             },
             onLeaveBack: () => {
               restorePage();
@@ -219,13 +221,13 @@ const HomeIntro = ({ children }) => {
             duration: 0.12,
             ease: "power1.out",
           },
-          0.82,
+          0.76,
         );
 
         timeline.to(
           logo,
-          { autoAlpha: 0, duration: 0.08 },
-          0.9,
+          { autoAlpha: 0, duration: 0.2, ease: "power1.inOut" },
+          0.88,
         );
 
         timeline.to(
@@ -234,22 +236,47 @@ const HomeIntro = ({ children }) => {
           0.84,
         );
 
-        // Keep the intro stage visible and the website hidden throughout the
-        // scrub. onLeave performs the handoff only after the entire timeline
-        // (including its final logo-settle hold) has completed.
-        timeline.to({}, { duration: 0.34 });
+        // Reveal the real site only after the box has filled the viewport
+        // and the logo has completed its navbar handoff. These tweens also
+        // reverse naturally when the user scrolls back up.
+        timeline.to(
+          content,
+          { autoAlpha: 1, pointerEvents: "auto", duration: 0.22, ease: "power1.inOut" },
+          1.02,
+        );
 
-        const handleInnerWheel = (event) => {
-          if (content.scrollTop <= 0 && event.deltaY < 0) {
-            event.preventDefault();
+        timeline.to(
+          stage,
+          { autoAlpha: 0, pointerEvents: "none", duration: 0.22, ease: "power1.inOut" },
+          1.02,
+        );
+
+        timeline.to({}, { duration: 0.18 });
+
+        // Capture wheel input at document level, not only over the content
+        // panel. This keeps scrolling responsive even when the pointer is
+        // resting over the fixed navbar at the intro-to-site handoff.
+        const handleGlobalWheel = (event) => {
+          if (!html.classList.contains("kaamsetu-site-scroll-active")) return;
+
+          event.preventDefault();
+
+          let deltaY = event.deltaY;
+          if (event.deltaMode === 1) deltaY *= 16;
+          if (event.deltaMode === 2) deltaY *= window.innerHeight;
+
+          const nextScrollTop = content.scrollTop + deltaY;
+          const maxScrollTop = content.scrollHeight - content.clientHeight;
+
+          if (deltaY < 0 && nextScrollTop < 0) {
+            content.scrollTop = 0;
             restorePage();
-
-            // Convert upward wheel movement at the top of the site panel into
-            // document scroll so ScrollTrigger can scrub the intro backwards.
-            const step = Math.min(Math.abs(event.deltaY), 140);
-            window.scrollTo(0, Math.max(0, window.scrollY - step));
+            window.scrollTo(0, Math.max(0, window.scrollY + nextScrollTop));
             ScrollTrigger.update();
+            return;
           }
+
+          content.scrollTop = Math.max(0, Math.min(maxScrollTop, nextScrollTop));
         };
 
         const handleTouchStart = (event) => {
@@ -269,12 +296,12 @@ const HomeIntro = ({ children }) => {
           }
         };
 
-        content.addEventListener("wheel", handleInnerWheel, { passive: false });
+        document.addEventListener("wheel", handleGlobalWheel, { passive: false, capture: true });
         content.addEventListener("touchstart", handleTouchStart, { passive: true });
         content.addEventListener("touchmove", handleTouchMove, { passive: false });
 
         return () => {
-          content.removeEventListener("wheel", handleInnerWheel);
+          document.removeEventListener("wheel", handleGlobalWheel, true);
           content.removeEventListener("touchstart", handleTouchStart);
           content.removeEventListener("touchmove", handleTouchMove);
           restorePage();
