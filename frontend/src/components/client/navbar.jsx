@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   Search,
   User,
@@ -12,698 +12,311 @@ import {
   LogOut,
   ChevronDown,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import SearchModal from './SearchModal';
-
-import { motion, AnimatePresence } from 'framer-motion';
-
-import { useTheme } from '@/context/ThemeContext';
-import { AuthContext } from '@/context/authContext';
-import api from '@/services/api';
-import { Link, useLocation, useNavigate  } from "react-router-dom";
+import SearchModal from "./SearchModal";
+import { useTheme } from "@/context/ThemeContext";
+import { AuthContext } from "@/context/authContext";
+import api from "@/services/api";
+import "./navbar.css";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-
   const [mobileOpen, setMobileOpen] = useState(false);
-
-const [searchOpen, setSearchOpen] =
-  useState(false);
-
-  const { theme, toggleTheme } = useTheme();
-  const { user, logout } = useContext(AuthContext);
-  // The client-facing navbar must only reflect a *customer* session — a
-  // vendor or admin browsing the public site should see the logged-out
-  // state here, not their vendor/admin account (this was the source of
-  // the "client panel shows vendor/admin login" bug).
-  const isCustomer = !!user && user.role === 'customer';
+  const [searchOpen, setSearchOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [accountOpen, setAccountOpen] = useState(false);
+
   const accountRef = useRef(null);
-
+  const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useContext(AuthContext);
   const location = useLocation();
+  const navigate = useNavigate();
 
-useEffect(() => {
-  setMobileOpen(false);
-  setAccountOpen(false);
-}, [location.pathname]);
+  // The public navbar only exposes customer account actions.
+  const isCustomer = !!user && user.role === "customer";
+
+  const navLinks = [
+    { name: "Services", to: "/services" },
+    { name: "Experts", to: "/experts" },
+    { name: "Support", to: "/support" },
+  ];
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    setMobileOpen(false);
+    setAccountOpen(false);
+  }, [location.pathname]);
 
-    window.addEventListener('scroll', handleScroll);
-
-    return () => window.removeEventListener('scroll', handleScroll);
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Live unread notification count for the logged-in customer (reuses the existing self-notifications API)
+  // Keep the existing live unread notification count and API behaviour.
   useEffect(() => {
-    if (!isCustomer) { setUnreadCount(0); return; }
+    if (!isCustomer) {
+      setUnreadCount(0);
+      return undefined;
+    }
+
     let cancelled = false;
     const fetchUnread = async () => {
       try {
-        const response = await api.get('/notifications');
+        const response = await api.get("/notifications");
         if (!cancelled) setUnreadCount(response.data?.unreadCount || 0);
       } catch {
-        // Silently ignore — the badge simply stays at its last known value.
+        // Keep the last known count if the notifications endpoint is unavailable.
       }
     };
+
     fetchUnread();
     const interval = setInterval(fetchUnread, 60000);
-    return () => { cancelled = true; clearInterval(interval); };
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [isCustomer, location.pathname]);
 
-  // Close the account dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (accountRef.current && !accountRef.current.contains(event.target)) {
         setAccountOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const initials = (user?.fullName || 'U')
-    .split(' ')
+  const initials = (user?.fullName || "U")
+    .split(" ")
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0])
-    .join('')
+    .join("")
     .toUpperCase();
 
   const handleLogout = () => {
     logout();
     setAccountOpen(false);
-    navigate('/login', { replace: true });
+    setMobileOpen(false);
+    navigate("/login", { replace: true });
   };
 
-const navLinks = [
-  {
-    name: "Services",
-    to: "/services",
-  },
-  {
-    name: "Experts",
-    to: "/experts",
-  },
-  {
-    name: "Support",
-    to: "/support",
-  },
-];
+  const isActiveLink = (to) =>
+    to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
 
-const navigate = useNavigate()
-
-const isActiveLink = (to) =>
-  to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
-
-const btnClick = (type) => {
-
-  if (type === "login") {
-    navigate("/login");
-  }
-
-  else if (type === "vendor") {
+  const handleBecomePro = () => {
+    setMobileOpen(false);
     navigate("/register/vendor/profile");
-  }
+  };
 
-};
-
-
-  return (
-    <>
-      {/* Navbar */}
-      <motion.header
-        initial={{
-          y: -100,
-          opacity: 0,
-        }}
-        animate={{
-          y: 0,
-          opacity: 1,
-        }}
-        transition={{
-          duration: 0.6,
-        }}
-        className={`
-          fixed
-          top-3
-          left-1/2
-          -translate-x-1/2
-          w-[95%]
-max-w-[1440px]
-
-h-[88px]
-
-rounded-full
-          z-50
-
-
-          transition-all
-          duration-300
-
-          ${
-           isScrolled
-? 'bg-card/75 backdrop-blur-2xl shadow-[0_15px_50px_rgba(9,20,38,0.08)] border border-theme'
-: 'bg-card/60 backdrop-blur-xl border border-theme'
-          }
-        `}
-      >
-        <div
-  className="
-    h-full
-
-    px-6
-    lg:px-10
-
-    grid
-    grid-cols-[auto_1fr_auto]
-
-    items-center
-  "
->
-  {/* LEFT */}
-
-  <nav
-    className="
-      hidden
-      lg:flex
-
-      items-center
-
-      gap-1.5
-    "
-  >
-    {navLinks.map((item) => (
-      <Link
-        key={item.name}
-        to={item.to}
-        className={`
-          relative
-          px-4 py-2
-
-          text-sm
-          font-medium
-          tracking-wide
-
-          rounded-full
-
-          transition-all
-          duration-300
-
-          ${
-            isActiveLink(item.to)
-              ? "text-[#745A38] bg-[#745A38]/10"
-              : "text-muted hover:text-primary hover:bg-[#745A38]/5"
-          }
-        `}
-      >
-        {item.name}
-      </Link>
-    ))}
-  </nav>
-
-  {/* CENTER */}
-
-  <div
-    className="
-      flex
-      justify-center
-    "
-  >
-    <Link
-      to="/"
-      className="
-        flex
-        flex-col
-
-        items-center
-      "
-    >
-      <h1
-        className="
-          text-[24px]
-          md:text-[28px]
-
-          font-semibold
-        "
-      >
-        <span className="text-primary">
-          Kaam
-        </span>
-
-        <span className="text-[#745A38]">
-          Setu
-        </span>
-      </h1>
-
-      <span
-        className="
-          hidden
-          md:block
-
-          text-[10px]
-
-          uppercase
-
-          tracking-[0.35em]
-
-          text-[#745A38]
-        "
-      >
-        Trusted Services
-      </span>
-    </Link>
-  </div>
-
-  {/* RIGHT */}
-
-  <div
-    className="
-      hidden
-      lg:flex
-
-      items-center
-
-      justify-end
-
-      gap-5
-    "
-  >
-    {isCustomer && (
-      <button
-        onClick={() => navigate("/notifications")}
-        className="relative hover:text-[#745A38] transition"
-        aria-label="Notifications"
-      >
-        <Bell size={20} />
-        {unreadCount > 0 && (
-          <span
-            className="
-              absolute -top-1.5 -right-1.5
-              min-w-[16px] h-[16px] px-1
-              rounded-full
-              bg-[#745A38] text-white
-              text-[9px] font-bold
-              flex items-center justify-center
-              leading-none
-            "
-          >
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        )}
-      </button>
-    )}
-
+  const notificationButton = (mobile = false) => (
     <button
-      onClick={() => btnClick("vendor")}
-      className="
-        hidden
-        xl:flex
-        items-center
-        gap-1.5
-
-        px-4 py-2
-
-        text-sm font-medium
-
-        rounded-full
-
-        border border-[#745A38]/30
-
-        text-[#745A38]
-
-        hover:bg-[#745A38]
-        hover:text-white
-        hover:border-[#745A38]
-
-        transition-all
-        duration-300
-      "
-    >
-      Become a Pro
-    </button>
-
-    <span className="hidden xl:block w-px h-6 bg-theme" />
-
-    <button
-      onClick={() =>
-    setSearchOpen(true)
-  }
-    
-    className="
-        hover:text-[#745A38]
-
-        transition
-      "
-    >
-      <Search size={20} />
-    </button>
-    
-
-    <button
-      onClick={toggleTheme}
-      className="
-        hover:text-[#745A38]
-
-        transition
-      "
-    >
-      {theme === "light" ? (
-        <Moon size={20} />
-      ) : (
-        <Sun size={20} />
-      )}
-    </button>
-
-    {isCustomer ? (
-      <div className="relative" ref={accountRef}>
-        <button
-          onClick={() => setAccountOpen((open) => !open)}
-          className="
-            flex items-center gap-2
-            pl-1 pr-3 py-1
-            rounded-full
-            border border-theme
-            hover:border-[#745A38]/50
-            transition
-          "
-        >
-          <span
-            className="
-              w-8 h-8 rounded-full
-              bg-gradient-to-br from-[#745A38] to-[#0B7A50]
-              text-white text-xs font-bold
-              flex items-center justify-center
-            "
-          >
-            {initials}
-          </span>
-          <ChevronDown size={14} className={`text-muted transition-transform ${accountOpen ? "rotate-180" : ""}`} />
-        </button>
-
-        <AnimatePresence>
-          {accountOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.15 }}
-              className="
-                absolute right-0 top-[calc(100%+10px)]
-                w-56
-                bg-card border border-theme
-                rounded-2xl shadow-theme
-                overflow-hidden
-                z-50
-              "
-            >
-              <div className="px-4 py-3 border-b border-theme">
-                <p className="text-sm font-semibold text-primary truncate">{user.fullName}</p>
-                <p className="text-xs text-muted truncate">{user.email}</p>
-              </div>
-              <button
-                onClick={() => { setAccountOpen(false); navigate("/profile"); }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-primary hover:bg-[#745A38]/8 transition"
-              >
-                <LayoutDashboard size={16} /> Dashboard
-              </button>
-              <button
-                onClick={() => { setAccountOpen(false); navigate("/my-booking"); }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-primary hover:bg-[#745A38]/8 transition"
-              >
-                <CalendarCheck size={16} /> My Bookings
-              </button>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-500/8 transition border-t border-theme"
-              >
-                <LogOut size={16} /> Logout
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    ) : (
-      <button
-        onClick={() => btnClick("login")}
-        className="
-          px-5 py-2
-          rounded-full
-          bg-[#745A38] text-white
-          text-sm font-medium
-          hover:scale-105
-          transition
-        "
-      >
-        Login
-      </button>
-    )}
-  </div>
-
-  {/* MOBILE */}
-
-  <button
-    className="
-      lg:hidden
-
-      justify-self-end
-    "
-    onClick={() =>
-      setMobileOpen(true)
-    }
-  >
-    <Menu size={26} />
-  </button>
-</div>
-      </motion.header>
-
-      {/* Mobile Menu */}
-
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{
-              opacity: 0,
-            }}
-            animate={{
-              opacity: 1,
-            }}
-            exit={{
-              opacity: 0,
-            }}
-            className="
-              fixed
-              inset-0
-              bg-card/98
-              backdrop-blur-2xl
-              z-[100]
-              overflow-y-auto
-            "
-          >
-            <div
-              className="
-                p-6
-
-                flex
-                items-center
-                justify-between
-
-                border-b border-theme
-              "
-            >
-              <h2
-                className="
-                  text-lg
-                  font-semibold
-                  tracking-[0.3em]
-                "
-              >
-                <span className="text-primary">KAAM</span>
-                <span className="text-[#745A38]">SETU</span>
-              </h2>
-
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="
-                  w-10 h-10
-                  rounded-full
-                  border border-theme
-                  flex items-center justify-center
-                  hover:bg-[#745A38]/10 hover:border-[#745A38]/40
-                  transition
-                "
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div
-              className="
-                min-h-screen
-
-                flex
-                flex-col
-                justify-center
-                items-center
-
-                gap-10
-              "
-            >
-              {navLinks.map((item, index) => (
-                <motion.div
-                  key={item.to}
-                  initial={{
-                    opacity: 0,
-                    y: 30,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  transition={{
-                    delay: index * 0.1,
-                  }}
-                  className="
-                      
-                      text-2xl
-                      font-medium
-                    "
-                >
-                  <Link
-                  to={item.to}
-                  className={`
-        relative
-        transition
-        ${isActiveLink(item.to) ? "text-[#745A38]" : "hover:text-primary"}
-      `}
-                  >
-                  {item.name}
-                  </Link>
-                </motion.div>
-              ))}
-
-              <motion.button
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: navLinks.length * 0.1 }}
-                onClick={() => { setMobileOpen(false); btnClick("vendor"); }}
-                className="
-                  px-6 py-3
-                  rounded-full
-                  border border-[#745A38]/30
-                  text-[#745A38]
-                  text-base font-medium
-                  hover:bg-[#745A38] hover:text-white hover:border-[#745A38]
-                  transition-all
-                "
-              >
-                Become a Pro
-              </motion.button>
-
-             <div
-  className="
-    flex
-
-    gap-8
-
-    mt-10
-  "
->
-  <button
-      onClick={toggleTheme}
-      className="
-        hover:text-[#745A38]
-
-        transition
-      "
-    >
-      {theme === "light" ? (
-        <Moon size={20} />
-      ) : (
-        <Sun size={20} />
-      )}
-    </button>
-
-  {isCustomer && (
-    <button
+      type="button"
       onClick={() => navigate("/notifications")}
-      className="relative hover:text-[#745A38] transition"
-      aria-label="Notifications"
+      className={`ks-nav-icon-button ${mobile ? "ks-nav-icon-button--mobile" : ""}`}
+      aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}
     >
-      <Bell size={24} />
+      <Bell size={19} strokeWidth={1.8} />
       {unreadCount > 0 && (
-        <span
-          className="
-            absolute -top-1.5 -right-1.5
-            min-w-[16px] h-[16px] px-1
-            rounded-full
-            bg-[#745A38] text-white
-            text-[9px] font-bold
-            flex items-center justify-center
-            leading-none
-          "
-        >
+        <span className="ks-nav-notification-count">
           {unreadCount > 9 ? "9+" : unreadCount}
         </span>
       )}
     </button>
-  )}
+  );
 
-  <button
-    onClick={() =>
-      navigate(isCustomer ? "/profile" : "/login")
-    }
-  >
-    {isCustomer ? (
-      <span
-        className="
-          w-8 h-8 rounded-full
-          bg-gradient-to-br from-[#745A38] to-[#0B7A50]
-          text-white text-xs font-bold
-          flex items-center justify-center
-        "
-      >
-        {initials}
-      </span>
-    ) : (
-      <User size={24} />
-    )}
-  </button>
-
-  <button
-      onClick={() =>
-    setSearchOpen(true)
-  }
-    
-    className="
-        hover:text-[#745A38]
-
-        transition
-      "
+  const themeButton = (mobile = false) => (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className={`ks-nav-icon-button ${mobile ? "ks-nav-icon-button--mobile" : ""}`}
+      aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
     >
-      <Search size={20} />
+      {theme === "light" ? <Moon size={19} strokeWidth={1.8} /> : <Sun size={19} strokeWidth={1.8} />}
     </button>
+  );
 
-  {isCustomer && (
-    <button onClick={handleLogout} className="hover:text-red-500 transition" aria-label="Logout">
-      <LogOut size={22} />
+  const searchButton = (mobile = false) => (
+    <button
+      type="button"
+      onClick={() => {
+        setSearchOpen(true);
+        setMobileOpen(false);
+      }}
+      className={`ks-nav-icon-button ${mobile ? "ks-nav-icon-button--mobile" : ""}`}
+      aria-label="Open search"
+    >
+      <Search size={20} strokeWidth={1.8} />
     </button>
-  )}
-</div>
+  );
+
+  return (
+    <>
+      <motion.header
+        initial={{ y: -28, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className={`ks-navbar ${isScrolled ? "is-scrolled" : ""}`}
+      >
+        <div className="ks-navbar__inner">
+          <nav className="ks-navbar__links" aria-label="Main navigation">
+            {navLinks.map((item) => (
+              <Link
+                key={item.name}
+                to={item.to}
+                className={`ks-navbar__link ${isActiveLink(item.to) ? "is-active" : ""}`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+
+          <Link to="/" className="ks-navbar__brand" aria-label="KaamSetu home">
+            <span className="ks-navbar__wordmark">
+              <span>Kaam</span><span>Setu</span>
+            </span>
+            <span className="ks-navbar__tagline">Trusted Services</span>
+          </Link>
+
+          <div className="ks-navbar__actions">
+            {isCustomer && notificationButton()}
+
+            <button type="button" onClick={handleBecomePro} className="ks-navbar__pro-button">
+              Become a Pro
+              <span aria-hidden="true">↗</span>
+            </button>
+
+            <span className="ks-navbar__divider" aria-hidden="true" />
+            {searchButton()}
+            {themeButton()}
+
+            {isCustomer ? (
+              <div className="ks-navbar__account" ref={accountRef}>
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen((open) => !open)}
+                  className={`ks-navbar__profile-button ${accountOpen ? "is-open" : ""}`}
+                  aria-expanded={accountOpen}
+                  aria-label="Open account menu"
+                >
+                  <span className="ks-navbar__avatar">{initials}</span>
+                  <ChevronDown size={15} className={accountOpen ? "is-rotated" : ""} />
+                </button>
+
+                <AnimatePresence>
+                  {accountOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.18 }}
+                      className="ks-navbar__account-menu"
+                    >
+                      <div className="ks-navbar__account-heading">
+                        <p>{user.fullName}</p>
+                        <span>{user.email}</span>
+                      </div>
+                      <button type="button" onClick={() => { setAccountOpen(false); navigate("/profile"); }}>
+                        <LayoutDashboard size={16} /> Dashboard
+                      </button>
+                      <button type="button" onClick={() => { setAccountOpen(false); navigate("/my-booking"); }}>
+                        <CalendarCheck size={16} /> My Bookings
+                      </button>
+                      <button type="button" className="is-danger" onClick={handleLogout}>
+                        <LogOut size={16} /> Logout
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <button type="button" onClick={() => navigate("/login")} className="ks-navbar__login-button">
+                Login
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="ks-navbar__mobile-toggle"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open navigation menu"
+          >
+            <Menu size={23} />
+          </button>
+        </div>
+      </motion.header>
+
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            className="ks-mobile-menu"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="ks-mobile-menu__top">
+              <Link to="/" className="ks-navbar__brand" onClick={() => setMobileOpen(false)}>
+                <span className="ks-navbar__wordmark"><span>Kaam</span><span>Setu</span></span>
+                <span className="ks-navbar__tagline">Trusted Services</span>
+              </Link>
+              <button type="button" className="ks-mobile-menu__close" onClick={() => setMobileOpen(false)} aria-label="Close menu">
+                <X size={21} />
+              </button>
+            </div>
+
+            <nav className="ks-mobile-menu__links" aria-label="Mobile navigation">
+              {navLinks.map((item, index) => (
+                <motion.div
+                  key={item.to}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.07, duration: 0.3 }}
+                >
+                  <Link
+                    to={item.to}
+                    onClick={() => setMobileOpen(false)}
+                    className={isActiveLink(item.to) ? "is-active" : ""}
+                  >
+                    {item.name}<span>↗</span>
+                  </Link>
+                </motion.div>
+              ))}
+            </nav>
+
+            <button type="button" onClick={handleBecomePro} className="ks-navbar__pro-button ks-mobile-menu__pro">
+              Become a Pro <span aria-hidden="true">↗</span>
+            </button>
+
+            <div className="ks-mobile-menu__tools">
+              {isCustomer && notificationButton(true)}
+              {searchButton(true)}
+              {themeButton(true)}
+              {isCustomer ? (
+                <button type="button" className="ks-nav-icon-button ks-nav-icon-button--mobile" onClick={() => { setMobileOpen(false); navigate("/profile"); }} aria-label="Profile">
+                  <span className="ks-navbar__avatar">{initials}</span>
+                </button>
+              ) : (
+                <button type="button" className="ks-nav-icon-button ks-nav-icon-button--mobile" onClick={() => { setMobileOpen(false); navigate("/login"); }} aria-label="Login">
+                  <User size={20} />
+                </button>
+              )}
+              {isCustomer && (
+                <button type="button" className="ks-nav-icon-button ks-nav-icon-button--mobile" onClick={handleLogout} aria-label="Logout">
+                  <LogOut size={20} />
+                </button>
+              )}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-      <SearchModal
-  isOpen={searchOpen}
-  onClose={() =>
-    setSearchOpen(false)
-  }
-/>
+
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 };
