@@ -26,7 +26,7 @@ const HomeIntro = ({ children }) => {
     const body = document.body;
     const previousHtmlOverflow = html.style.overflow;
     const previousBodyOverflow = body.style.overflow;
-    let finished = false;
+    let touchStartY = 0;
 
     html.classList.add("kaamsetu-intro-active");
 
@@ -60,6 +60,9 @@ const HomeIntro = ({ children }) => {
           html.classList.remove("kaamsetu-intro-active");
           gsap.set([stage, content, navbar], { clearProps: "all" });
           track.style.height = "0px";
+          gsap.set(content, { autoAlpha: 1, pointerEvents: "auto" });
+          gsap.set(stage, { autoAlpha: 0, pointerEvents: "none" });
+          gsap.set(navbar, { autoAlpha: 1, pointerEvents: "auto" });
           return restorePage;
         }
 
@@ -96,22 +99,6 @@ const HomeIntro = ({ children }) => {
         });
         gsap.set(video, { scale: 1.02, autoAlpha: 1 });
 
-        const finishIntro = (self) => {
-          if (finished) return;
-          finished = true;
-
-          // Stop document scrolling after the intro. The actual website now
-          // scrolls inside the expanded viewport, never underneath the intro.
-          self.kill();
-          track.style.height = "0px";
-          html.style.overflow = "hidden";
-          body.style.overflow = "hidden";
-          window.scrollTo(0, 0);
-
-          gsap.set(stage, { autoAlpha: 0, pointerEvents: "none" });
-          gsap.set(content, { autoAlpha: 1, y: 0 });
-          gsap.set(navbar, { autoAlpha: 1, pointerEvents: "auto" });
-        };
 
         const timeline = gsap.timeline({
           defaults: { ease: "none" },
@@ -119,12 +106,27 @@ const HomeIntro = ({ children }) => {
             trigger: track,
             start: "top top",
             end: () =>
-              `+=${Math.round(window.innerHeight * (mobile ? 1.55 : tablet ? 1.65 : 1.75))}`,
-            scrub: 1.1,
+              `+=${Math.round(window.innerHeight * (mobile ? 2.8 : tablet ? 2.7 : 2.6))}`,
+            scrub: 1.4,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             refreshPriority: 1,
-            onLeave: finishIntro,
+            onLeave: () => {
+              // At the end of the intro, hand scrolling to the website panel.
+              // Keep this ScrollTrigger alive so scrolling back can reverse it.
+              html.style.overflow = "hidden";
+              body.style.overflow = "hidden";
+              content.scrollTop = 0;
+            },
+            onEnterBack: () => {
+              // Re-enable document scrolling as soon as the user reverses
+              // from the inner website scroller toward the intro.
+              restorePage();
+            },
+            onLeaveBack: () => {
+              restorePage();
+              content.scrollTop = 0;
+            },
           },
         });
 
@@ -224,7 +226,46 @@ const HomeIntro = ({ children }) => {
         // as a finished state before the site scroll container is unlocked.
         timeline.to({}, { duration: 0.34 });
 
-        return restorePage;
+        const handleInnerWheel = (event) => {
+          if (content.scrollTop <= 0 && event.deltaY < 0) {
+            event.preventDefault();
+            restorePage();
+
+            // Convert upward wheel movement at the top of the site panel into
+            // document scroll so ScrollTrigger can scrub the intro backwards.
+            const step = Math.min(Math.abs(event.deltaY), 140);
+            window.scrollTo(0, Math.max(0, window.scrollY - step));
+            ScrollTrigger.update();
+          }
+        };
+
+        const handleTouchStart = (event) => {
+          touchStartY = event.touches[0]?.clientY ?? 0;
+        };
+
+        const handleTouchMove = (event) => {
+          const currentY = event.touches[0]?.clientY ?? touchStartY;
+          const delta = currentY - touchStartY;
+
+          if (content.scrollTop <= 0 && delta > 8) {
+            event.preventDefault();
+            restorePage();
+            window.scrollTo(0, Math.max(0, window.scrollY - Math.min(delta, 140)));
+            ScrollTrigger.update();
+            touchStartY = currentY;
+          }
+        };
+
+        content.addEventListener("wheel", handleInnerWheel, { passive: false });
+        content.addEventListener("touchstart", handleTouchStart, { passive: true });
+        content.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+        return () => {
+          content.removeEventListener("wheel", handleInnerWheel);
+          content.removeEventListener("touchstart", handleTouchStart);
+          content.removeEventListener("touchmove", handleTouchMove);
+          restorePage();
+        };
       },
     );
 
