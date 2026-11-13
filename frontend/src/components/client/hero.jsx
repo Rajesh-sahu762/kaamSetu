@@ -1,41 +1,42 @@
-import { motion, useScroll, useTransform, useInView, animate } from "framer-motion";
-import { Wrench, Hammer, Paintbrush, ArrowRight, Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { motion, useInView, animate } from "framer-motion";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  Hammer,
+  Paintbrush,
+  Search,
+  ShieldCheck,
+  Sofa,
+  Star,
+  Users,
+  Wrench,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import successImage from "../../assets/images/success-artisan.png";
+import "./hero.css";
 
-// Counts up from 0 to `value` once the number scrolls into view — a small
-// premium touch that also makes the (now real) stats feel alive.
 const CountUp = ({ value = 0, suffix = "" }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
-    if (!inView) return;
-    const controls = animate(0, value, {
-      duration: 1.2,
+    if (!inView) return undefined;
+    const controls = animate(0, Number(value) || 0, {
+      duration: 1.25,
       ease: "easeOut",
       onUpdate: (latest) => setDisplay(Math.round(latest)),
     });
     return () => controls.stop();
   }, [inView, value]);
 
-  return (
-    <span ref={ref}>
-      {display.toLocaleString("en-IN")}
-      {suffix}
-    </span>
-  );
+  return <span ref={ref}>{display.toLocaleString("en-IN")}{suffix}</span>;
 };
 
 const HeroSection = ({ stats, categories = [], loading = false }) => {
-  const { scrollY } = useScroll();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-
-  const y1 = useTransform(scrollY, [0, 500], [0, -120]);
-  const y2 = useTransform(scrollY, [0, 500], [0, -70]);
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -43,117 +44,72 @@ const HeroSection = ({ stats, categories = [], loading = false }) => {
     navigate(trimmed ? `/services?search=${encodeURIComponent(trimmed)}` : "/services");
   };
 
+  const statItems = [
+    { label: "Verified Experts", value: stats?.verifiedExperts || 0, suffix: "+", Icon: Users },
+    { label: "Jobs Completed", value: stats?.jobsCompleted || 0, suffix: "+", Icon: BriefcaseBusiness },
+    { label: "Satisfaction Rate", value: stats?.satisfactionRate || 0, suffix: "%", Icon: Star },
+  ];
+
   return (
-    <section className="relative overflow-hidden mt-15 bg-card min-h-screen flex items-center">
-      
-      {/* Background Blobs */}
-      <motion.div
-        style={{ y: y1 }}
-        className="absolute top-[-120px] right-[-120px] w-[420px] h-[420px] rounded-full bg-[#0B7A50]/20 blur-3xl opacity-60"
-      />
+    <section className="ks-hero">
+      <div className="ks-hero__ambient ks-hero__ambient--top" aria-hidden="true" />
+      <div className="ks-hero__ambient ks-hero__ambient--side" aria-hidden="true" />
+      <div className="ks-hero__wave ks-hero__wave--left" aria-hidden="true" />
+      <div className="ks-hero__wave ks-hero__wave--bottom" aria-hidden="true" />
+      <div className="ks-hero__particles" aria-hidden="true" />
 
-      <motion.div
-        style={{ y: y2 }}
-        className="absolute bottom-[-150px] left-[-150px] w-[380px] h-[380px] rounded-full bg-[#745A38]/10 blur-3xl opacity-70"
-      />
-
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-8 w-full relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          
-          {/* Left Content */}
+      <div className="ks-hero__container">
+        <div className="ks-hero__copy">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            className="ks-hero__content"
+            initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="uppercase tracking-[0.25em] text-xs font-semibold text-[#745a38] mb-6">
-            </p>
+            <div className="ks-hero__trust-badge">
+              <ShieldCheck size={17} fill="currentColor" strokeWidth={2.2} />
+              <span>Verified Experts</span>
+              <i />
+              <span>Trusted Service</span>
+              <i />
+              <span>At Your Doorstep</span>
+            </div>
 
-            <h1
-              className="
-                text-[42px]
-                md:text-[58px]
-                leading-[1.1]
-                font-semibold
-                text-primary
-                tracking-[-0.03em]
-              "
-            >
-              Elevate Your Space With
-              <span className="block text-[#745a38]">
-                Trusted Craftsmanship
-              </span>
+            <h1 className="ks-hero__title">
+              Elevate Your Space
+              <br />
+              With <span>Trusted</span>
+              <br />
+              <span className="ks-hero__craftsmanship">Craftsmanship</span>
+              <svg className="ks-hero__underline" viewBox="0 0 430 22" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M5 14 C105 3 260 4 414 12" />
+                <path d="M394 5 L416 12 L397 18" />
+              </svg>
             </h1>
 
-            <p
-              className="
-                mt-8
-                text-[18px]
-                leading-8
-                text-muted
-                max-w-xl
-              "
-            >
-              Connect with verified artisans, home service experts,
-              and skilled professionals committed to delivering
-              exceptional quality and reliability.
+            <p className="ks-hero__description">
+              Connect with verified artisans, home service experts, and skilled professionals committed to delivering exceptional quality and reliability.
             </p>
 
-            <form
-              onSubmit={handleSearch}
-              className="
-                mt-8
-                flex
-                items-center
-                gap-2
-                bg-card
-                border border-theme
-                rounded-full
-                p-2
-                pl-5
-                max-w-lg
-                shadow-[0_8px_24px_rgba(9,20,38,0.06)]
-                focus-within:border-[#745A38]/50
-                transition
-              "
-            >
-              <Search size={18} className="text-muted shrink-0" />
+            <form className="ks-hero__search" onSubmit={handleSearch}>
+              <Search size={21} strokeWidth={1.9} />
               <input
+                type="search"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                type="text"
-                placeholder="Search 'electrician', 'AC repair'…"
-                className="flex-1 bg-transparent outline-none text-sm text-primary placeholder:text-muted"
+                placeholder="Search 'electrician', 'AC repair'..."
+                aria-label="Search services"
               />
-              <button
-                type="submit"
-                className="
-                  bg-[#745A38] text-white text-sm font-medium
-                  px-5 py-2.5 rounded-full
-                  hover:bg-[#5f4a2e]
-                  transition
-                  shrink-0
-                "
-              >
-                Search
-              </button>
+              <button type="submit">Search</button>
             </form>
 
             {categories.length > 0 && (
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="ks-hero__categories" aria-label="Popular service categories">
                 {categories.slice(0, 5).map((category) => (
                   <button
+                    type="button"
                     key={category._id}
                     onClick={() => navigate(`/services?category=${category.slug}`)}
-                    className="
-                      text-xs font-medium
-                      text-muted
-                      border border-theme
-                      rounded-full
-                      px-3.5 py-1.5
-                      hover:text-[#745A38] hover:border-[#745A38]/40
-                      transition
-                    "
                   >
                     {category.name}
                   </button>
@@ -161,227 +117,79 @@ const HeroSection = ({ stats, categories = [], loading = false }) => {
               </div>
             )}
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              
-              <button
-              onClick={() => navigate('/services') }
-                className="
-                  bg-[#091426]
-                  text-white
-                  px-8
-                  py-4
-                  rounded-md
-                  font-medium
-                  hover:-translate-y-1
-                  hover:shadow-xl
-                  transition-all
-                  duration-300
-                "
-              >
-                Explore Services
+            <div className="ks-hero__cta-row">
+              <button type="button" className="ks-hero__cta ks-hero__cta--primary" onClick={() => navigate("/services")}>
+                Explore Services <ArrowRight size={18} />
               </button>
-
-              <button
-              onClick={() => navigate('/register/vendor/Profile')}
-                className="
-                  border
-                  border-[#c5c6cd]
-                  px-8
-                  py-4
-                  rounded-md
-                  flex
-                  items-center
-                  justify-center
-                  gap-2
-                  hover:bg-card
-                  hover:-translate-y-1
-                  transition-all
-                  duration-300
-                "
-              >
-                Become a Professional
-                <ArrowRight size={18} />
+              <button type="button" className="ks-hero__cta ks-hero__cta--secondary" onClick={() => navigate("/register/vendor/Profile")}>
+                Become a Professional <ArrowRight size={18} />
               </button>
-
             </div>
 
-            {/* Trust Indicators */}
-            <div className="mt-14 flex flex-wrap gap-10">
-              
-              <div>
-                <h3 className="text-3xl font-semibold text-primary">
-                  {loading ? "…" : <CountUp value={stats?.verifiedExperts || 0} suffix="+" />}
-                </h3>
-                <p className="text-muted mt-1">
-                  Verified Experts
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-3xl font-semibold text-primary">
-                  {loading ? "…" : <CountUp value={stats?.jobsCompleted || 0} suffix="+" />}
-                </h3>
-                <p className="text-muted mt-1">
-                  Jobs Completed
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-3xl font-semibold text-primary">
-                  {loading ? "…" : <CountUp value={stats?.satisfactionRate || 0} suffix="%" />}
-                </h3>
-                <p className="text-muted mt-1">
-                  Satisfaction Rate
-                </p>
-              </div>
-
-            </div>
-          </motion.div>
-
-          {/* Right Side */}
-          <motion.div
-            initial={{ opacity: 0, x: 60 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="relative hidden lg:block"
-          >
-            <div className="relative h-[650px]">
-
-              {/* Main Card */}
-              <div
-                className="
-                  absolute
-                  top-20
-                  left-16
-                  w-[360px]
-                  h-[420px]
-                  bg-card
-                  border
-                  border-theme
-                  rounded-xl
-                  shadow-[0_12px_40px_rgba(9,20,38,0.08)]
-                  overflow-hidden
-                "
-              >
-                <img
-                  src={successImage}
-                  alt="artisan"
-                  className="w-full h-[260px] object-cover"
-                />
-
-                <div className="p-6">
-                  <span
-                    className="
-                      inline-flex items-center gap-1.5
-                      bg-[#ffddb4]
-                      text-[#5a4222]
-                      text-xs
-                      px-3
-                      py-1
-                      rounded-full
-                    "
-                  >
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5a4222] opacity-60" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#5a4222]" />
-                    </span>
-                    VERIFIED
-                  </span>
-
-                  <h3 className="mt-4 text-xl font-semibold text-primary">
-                    Master Carpenter
-                  </h3>
-
-                  <p className="text-muted mt-2">
-                    12+ Years Experience
-                  </p>
+            <div className="ks-hero__stats">
+              {statItems.map(({ label, value, suffix, Icon }, index) => (
+                <div className="ks-hero__stat" key={label}>
+                  <Icon className="ks-hero__stat-icon" size={39} strokeWidth={1.65} />
+                  <div>
+                    <strong>{loading ? "…" : <CountUp value={value} suffix={suffix} />}</strong>
+                    <span>{label}</span>
+                  </div>
+                  {index < statItems.length - 1 && <i className="ks-hero__stat-divider" aria-hidden="true" />}
                 </div>
-              </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
 
-              {/* Floating Service Cards */}
+        <motion.div
+          className="ks-hero__visual"
+          initial={{ opacity: 0, x: 42, scale: 0.97 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 0.9, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="ks-hero__visual-glow" aria-hidden="true" />
+          <div className="ks-hero__orbit" aria-hidden="true">
+            <span /><span /><span /><span />
+          </div>
 
-              <motion.div
-                animate={{ y: [0, -12, 0] }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 4,
-                }}
-                className="
-                  absolute
-                  top-8
-                  right-0
-                  bg-card
-                  border
-                  border-theme
-                  rounded-lg
-                  px-5
-                  py-4
-                  flex
-                  items-center
-                  gap-3
-                  shadow-lg
-                "
-              >
-                <Hammer size={20} />
-                <span>Carpentry</span>
-              </motion.div>
+          <div className="ks-hero__scene ks-hero__scene--room" aria-hidden="true">
+            <div className="ks-hero__scene-window" />
+            <Sofa size={38} strokeWidth={1.2} />
+            <span>Comfortable spaces</span>
+          </div>
+          <div className="ks-hero__scene ks-hero__scene--workshop" aria-hidden="true">
+            <div className="ks-hero__tool-rack"><Hammer /><Wrench /><Paintbrush /></div>
+            <span>Skilled hands. Better homes.</span>
+          </div>
 
-              <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 5,
-                }}
-                className="
-                  absolute
-                  bottom-28
-                  right-2
-                  bg-card
-                  border
-                  border-theme
-                  rounded-lg
-                  px-5
-                  py-4
-                  flex
-                  items-center
-                  gap-3
-                  shadow-lg
-                "
-              >
-                <Wrench size={20} />
-                <span>Plumbing</span>
-              </motion.div>
-
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 4.5,
-                }}
-                className="
-                  absolute
-                  bottom-20
-                  left-0
-                  bg-card
-                  border
-                  border-theme
-                  rounded-lg
-                  px-5
-                  py-4
-                  flex
-                  items-center
-                  gap-3
-                  shadow-lg
-                "
-              >
-                <Paintbrush size={20} />
-                <span>Painting</span>
-              </motion.div>
-
+          <motion.div
+            className="ks-hero__artisan-card"
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="ks-hero__artisan-image">
+              <img src={successImage} alt="Professional home service artisan" />
+              <div className="ks-hero__artisan-image-shade" />
+            </div>
+            <div className="ks-hero__artisan-info">
+              <span className="ks-hero__verified"><i /> VERIFIED</span>
+              <h2>Master Carpenter</h2>
+              <p>12+ Years Experience</p>
             </div>
           </motion.div>
 
-        </div>
+          <motion.div className="ks-hero__service-chip ks-hero__service-chip--carpentry" animate={{ y: [0, -9, 0] }} transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}>
+            <Hammer size={21} /><span>Carpentry</span>
+          </motion.div>
+          <motion.div className="ks-hero__service-chip ks-hero__service-chip--painting" animate={{ y: [0, 8, 0] }} transition={{ duration: 5.1, repeat: Infinity, ease: "easeInOut" }}>
+            <Paintbrush size={21} /><span>Painting</span>
+          </motion.div>
+          <motion.div className="ks-hero__service-chip ks-hero__service-chip--plumbing" animate={{ y: [0, -7, 0] }} transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}>
+            <Wrench size={21} /><span>Plumbing</span>
+          </motion.div>
+
+          <div className="ks-hero__visual-dots" aria-hidden="true"><i /><i /><i /></div>
+        </motion.div>
       </div>
     </section>
   );
