@@ -302,13 +302,14 @@
   box-shadow: 0 -12px 40px rgba(11,122,80,0.045);
 }
 :root:not(.dark) .ks-hero__particles {
-  opacity: 0.34;
+  opacity: 0.48;
   background-image:
-    radial-gradient(circle, rgba(11,122,80,0.58) 1.15px, transparent 1.8px),
-    radial-gradient(circle, rgba(16,185,129,0.3) 0.8px, transparent 1.6px);
-  background-size: 76px 76px, 119px 119px;
-  background-position: 0 0, 31px 24px;
-  mask-image: radial-gradient(ellipse at 78% 46%, black 0%, rgba(0,0,0,0.82) 38%, transparent 78%);
+    radial-gradient(circle, rgba(11,122,80,0.34) 1.05px, transparent 1.7px),
+    radial-gradient(circle, rgba(16,185,129,0.25) 0.9px, transparent 1.6px),
+    radial-gradient(circle, rgba(197,243,107,0.32) 1.1px, transparent 1.8px);
+  background-size: 68px 68px, 103px 103px, 147px 147px;
+  background-position: 0 0, 31px 24px, 57px 39px;
+  mask-image: radial-gradient(ellipse at 76% 48%, black 0%, rgba(0,0,0,0.9) 46%, rgba(0,0,0,0.38) 78%, transparent 96%);
 }
 :root:not(.dark) .ks-hero__trust-badge {
   border-color: rgba(11,122,80,0.28);
@@ -434,3 +435,11 @@
 }
 :root:not(.dark) .ks-hero__visual-dots i { background: rgba(11,122,80,0.24); }
 :root:not(.dark) .ks-hero__visual-dots i:first-child { background: #10b981; }
+
+
+/* Mobile: keep the hero focused on its message; hide the showcase artwork. */
+@media (max-width: 639px) {
+  .ks-hero__visual {
+    display: none;
+  }
+}
