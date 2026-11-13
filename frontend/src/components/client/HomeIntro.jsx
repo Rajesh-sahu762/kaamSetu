@@ -131,6 +131,24 @@ const HomeIntro = ({ children }) => {
         );
 
         timeline.to(
+          logo.querySelector(".ks-intro__wordmark span:first-child"),
+          { color: "#FFFFFF", duration: 0.38 },
+          0.34,
+        );
+
+        timeline.to(
+          logo.querySelector(".ks-intro__wordmark span:last-child"),
+          { color: "#39F58A", duration: 0.38 },
+          0.34,
+        );
+
+        timeline.to(
+          logo.querySelector(".ks-intro__tagline"),
+          { color: "rgba(255,255,255,0.78)", duration: 0.38 },
+          0.34,
+        );
+
+        timeline.to(
           video,
           { scale: desktop ? 1.1 : 1.06, autoAlpha: 0.28, duration: 0.82 },
           0,
