@@ -59,9 +59,9 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(72vw, 960px);
-  height: 66svh;
-  min-height: 380px;
+  width: min(66vw, 860px);
+  height: 60svh;
+  min-height: 360px;
   overflow: hidden;
   transform: translate(-50%, -50%);
   transform-origin: center center;
@@ -255,11 +255,24 @@
   pointer-events: none;
 }
 
+/* Show only one scrollbar at a time:
+   document scrollbar during the intro, inner viewport scrollbar afterward. */
+html.kaamsetu-site-scroll-active {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+}
+
+html.kaamsetu-site-scroll-active::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 @media (max-width: 639px) {
   .ks-intro__panel {
-    width: 84vw;
-    height: 64svh;
-    min-height: 360px;
+    width: 78vw;
+    height: 58svh;
+    min-height: 320px;
     border-radius: 18px;
   }
 
