@@ -57,14 +57,14 @@
 
 .ks-intro__panel {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  inset: 0;
+  margin: auto;
   width: min(66vw, 860px);
   height: 60svh;
   min-height: 0;
   box-sizing: border-box;
   overflow: hidden;
-  transform: translate(-50%, -50%);
+  transform: none;
   transform-origin: center center;
   z-index: 2;
   will-change: width, height, border-radius;
@@ -256,6 +256,7 @@
     width: min(90vw, 560px);
     height: 58svh;
     min-height: 0;
+    margin: auto;
     border-radius: 18px;
   }
 
