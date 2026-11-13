@@ -392,3 +392,49 @@
     scroll-behavior: auto !important;
   }
 }
+
+
+/* Keep the section introduction visible even when global reveal styles are present. */
+.popular-services .popular-services__header {
+  display: block !important;
+  position: relative !important;
+  z-index: 5 !important;
+  width: 100%;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+  filter: none !important;
+}
+
+.popular-services .popular-services__eyebrow,
+.popular-services .popular-services__title,
+.popular-services .popular-services__subtitle {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+  filter: none !important;
+}
+
+.popular-services .popular-services__eyebrow {
+  display: inline-flex !important;
+  color: var(--ps-primary) !important;
+}
+
+.popular-services .popular-services__title {
+  display: block !important;
+  color: var(--ps-text) !important;
+  -webkit-text-fill-color: var(--ps-text);
+}
+
+.popular-services .popular-services__title span {
+  color: var(--ps-primary) !important;
+  -webkit-text-fill-color: var(--ps-primary);
+}
+
+.popular-services .popular-services__subtitle {
+  display: block !important;
+  color: var(--ps-muted) !important;
+  -webkit-text-fill-color: var(--ps-muted);
+}
