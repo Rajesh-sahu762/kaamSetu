@@ -2,11 +2,12 @@
 .ks-navbar {
   position: fixed;
   top: 12px;
-  left: 50%;
+  left: 0;
+  right: 0;
   z-index: 50;
   width: min(95%, 1720px);
   height: 94px;
-  transform: translateX(-50%);
+  margin-inline: auto;
   border: 1px solid color-mix(in srgb, var(--color-border) 78%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--color-bg) 72%, transparent);
