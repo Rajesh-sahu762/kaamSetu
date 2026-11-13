@@ -72,8 +72,8 @@ const HomeIntro = ({ children }) => {
           scrollTrigger: {
             trigger: root,
             start: "top top",
-            end: () => `+=${Math.round(window.innerHeight * (mobile ? 1.15 : tablet ? 1.25 : 1.4))}`,
-            scrub: 1,
+            end: () => `+=${Math.round(window.innerHeight * (mobile ? 1.4 : tablet ? 1.5 : 1.6))}`,
+            scrub: 1.15,
             pin: stage,
             pinSpacing: true,
             anticipatePin: 1,
@@ -177,11 +177,16 @@ const HomeIntro = ({ children }) => {
           0.91,
         );
 
+        // Keep the fully expanded intro pinned after the logo reaches the
+        // real navbar. This hold prevents the homepage from peeking through
+        // before the handoff is visually complete.
         timeline.to(
-          stage,
-          { autoAlpha: 0, duration: 0.12 },
-          0.96,
+          scrollHint,
+          { autoAlpha: 0, y: 12, duration: 0.12 },
+          0.88,
         );
+
+        timeline.to({}, { duration: 0.32 });
 
         const refresh = () => ScrollTrigger.refresh();
         const refreshTimer = window.setTimeout(refresh, 500);
