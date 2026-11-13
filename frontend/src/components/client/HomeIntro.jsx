@@ -23,14 +23,9 @@ const HomeIntro = ({ children }) => {
     }
 
     const html = document.documentElement;
-    const body = document.body;
-    const previousHtmlOverflow = html.style.overflow;
-    const previousBodyOverflow = body.style.overflow;
-    let touchStartY = 0;
+    const media = gsap.matchMedia();
 
     html.classList.add("kaamsetu-intro-active");
-
-    const media = gsap.matchMedia();
 
     media.add(
       {
@@ -51,54 +46,24 @@ const HomeIntro = ({ children }) => {
         const panelSurface = root.querySelector(".ks-intro__panel-surface");
         const shade = root.querySelector(".ks-intro__shade");
 
-        const restorePage = () => {
-          html.classList.remove("kaamsetu-site-scroll-active");
-          html.style.overflow = previousHtmlOverflow;
-          body.style.overflow = previousBodyOverflow;
-        };
-
-        const lockDocumentForSiteScroll = () => {
-          html.style.overflow = "hidden";
-          body.style.overflow = "hidden";
-          html.classList.add("kaamsetu-site-scroll-active");
-        };
-
         if (reduceMotion) {
-          html.classList.remove("kaamsetu-intro-active");
-          gsap.set([stage, content, navbar], { clearProps: "all" });
-          track.style.height = "0px";
-          gsap.set(content, { autoAlpha: 1, pointerEvents: "auto" });
+          gsap.set(content, { clearProps: "all", autoAlpha: 1 });
           gsap.set(stage, { autoAlpha: 0, pointerEvents: "none" });
-          gsap.set(navbar, { autoAlpha: 1, pointerEvents: "auto" });
-          return restorePage;
+          gsap.set(navbar, { clearProps: "all", autoAlpha: 1, pointerEvents: "auto" });
+          track.style.height = "0px";
+          html.classList.remove("kaamsetu-intro-active");
+          return undefined;
         }
 
         const introScrollFactor = mobile ? 2.8 : tablet ? 2.7 : 2.6;
-        track.style.height = `${(introScrollFactor + 1) * 100}svh`;
-
-        const showIntroState = () => {
-          // During the intro/reverse phase the inner website must not be
-          // visible, scrollable, or interactive. This prevents two scrollbars
-          // and prevents clicks from switching scroll ownership mid-transition.
-          gsap.set(content, {
-            autoAlpha: 0,
-            pointerEvents: "none",
-            overflow: "hidden",
-          });
-          gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
-          gsap.set(navbar, { autoAlpha: 0, pointerEvents: "none" });
+        const getIntroDistance = () => Math.round(window.innerHeight * introScrollFactor);
+        const updateTrackHeight = () => {
+          // The track ends exactly where the intro ScrollTrigger ends.
+          // Homepage content starts at that same document coordinate.
+          track.style.height = `${getIntroDistance()}px`;
         };
 
-        const showWebsiteState = () => {
-          gsap.set(content, {
-            autoAlpha: 1,
-            pointerEvents: "auto",
-            overflowX: "hidden",
-            overflowY: "auto",
-          });
-          gsap.set(stage, { autoAlpha: 0, pointerEvents: "none" });
-          gsap.set(navbar, { autoAlpha: 1, pointerEvents: "auto" });
-        };
+        updateTrackHeight();
 
         const getLogoDestination = () => {
           const from = logo.getBoundingClientRect();
@@ -112,7 +77,7 @@ const HomeIntro = ({ children }) => {
         };
 
         gsap.set(navbar, { autoAlpha: 0, pointerEvents: "none" });
-        gsap.set(content, { autoAlpha: 0, y: 0 });
+        gsap.set(content, { autoAlpha: 0, pointerEvents: "none" });
         gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
         gsap.set(panel, {
           width: mobile ? "78vw" : tablet ? "72vw" : "min(66vw, 860px)",
@@ -133,44 +98,28 @@ const HomeIntro = ({ children }) => {
         });
         gsap.set(video, { scale: 1.02, autoAlpha: 1 });
 
-
         const timeline = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
             trigger: track,
             start: "top top",
-            end: () =>
-              `+=${Math.round(window.innerHeight * introScrollFactor)}`,
+            end: () => `+=${getIntroDistance()}`,
             scrub: 1.4,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             refreshPriority: 1,
             onLeave: () => {
-              // Switch scroll ownership only when the complete intro timeline
-              // has reached its end. No website content is revealed early.
-              lockDocumentForSiteScroll();
-              content.scrollTop = 0;
-              showWebsiteState();
-            },
-            onEnterBack: () => {
-              // Keep the real navbar visible while the intro logo retraces
-              // its path from the navbar. The timeline crossfade handles
-              // hiding the navbar only as the logo moves away from it.
-              restorePage();
-              // Immediately hand the viewport back to the intro. The real
-              // navbar stays visible; the scrubbed logo tween reverses from
-              // its navbar position while the inner page scrollbar is hidden.
-              gsap.set(content, {
-                autoAlpha: 0,
-                pointerEvents: "none",
-                overflow: "hidden",
-              });
-              gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
+              // The page remains on its one native document scroller.
+              // This callback only ensures the final visual state.
+              gsap.set(content, { autoAlpha: 1, pointerEvents: "auto" });
+              gsap.set(stage, { autoAlpha: 0, pointerEvents: "none" });
+              gsap.set(navbar, { autoAlpha: 1, pointerEvents: "auto" });
             },
             onLeaveBack: () => {
-              restorePage();
-              content.scrollTop = 0;
-              showIntroState();
+              // At the very top, restore the exact initial intro state.
+              gsap.set(content, { autoAlpha: 0, pointerEvents: "none" });
+              gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
+              gsap.set(navbar, { autoAlpha: 0, pointerEvents: "none" });
             },
           },
         });
@@ -237,8 +186,8 @@ const HomeIntro = ({ children }) => {
           {
             autoAlpha: 1,
             pointerEvents: "auto",
-            duration: 0.12,
-            ease: "power1.out",
+            duration: 0.16,
+            ease: "power1.inOut",
           },
           0.76,
         );
@@ -255,9 +204,8 @@ const HomeIntro = ({ children }) => {
           0.84,
         );
 
-        // Reveal the real site only after the box has filled the viewport
-        // and the logo has completed its navbar handoff. These tweens also
-        // reverse naturally when the user scrolls back up.
+        // Both the site and intro remain in normal document flow. This
+        // crossfade reverses naturally with the same single native scrollbar.
         timeline.to(
           content,
           { autoAlpha: 1, pointerEvents: "auto", duration: 0.22, ease: "power1.inOut" },
@@ -270,60 +218,15 @@ const HomeIntro = ({ children }) => {
           1.02,
         );
 
-        timeline.to({}, { duration: 0.18 });
-
-        // Capture wheel input at document level, not only over the content
-        // panel. This keeps scrolling responsive even when the pointer is
-        // resting over the fixed navbar at the intro-to-site handoff.
-        const handleGlobalWheel = (event) => {
-          if (!html.classList.contains("kaamsetu-site-scroll-active")) return;
-
-          event.preventDefault();
-
-          let deltaY = event.deltaY;
-          if (event.deltaMode === 1) deltaY *= 16;
-          if (event.deltaMode === 2) deltaY *= window.innerHeight;
-
-          const nextScrollTop = content.scrollTop + deltaY;
-          const maxScrollTop = content.scrollHeight - content.clientHeight;
-
-          if (deltaY < 0 && nextScrollTop < 0) {
-            content.scrollTop = 0;
-            restorePage();
-            window.scrollTo(0, Math.max(0, window.scrollY + nextScrollTop));
-            ScrollTrigger.update();
-            return;
-          }
-
-          content.scrollTop = Math.max(0, Math.min(maxScrollTop, nextScrollTop));
+        const handleResize = () => {
+          updateTrackHeight();
+          ScrollTrigger.refresh();
         };
 
-        const handleTouchStart = (event) => {
-          touchStartY = event.touches[0]?.clientY ?? 0;
-        };
-
-        const handleTouchMove = (event) => {
-          const currentY = event.touches[0]?.clientY ?? touchStartY;
-          const delta = currentY - touchStartY;
-
-          if (content.scrollTop <= 0 && delta > 8) {
-            event.preventDefault();
-            restorePage();
-            window.scrollTo(0, Math.max(0, window.scrollY - Math.min(delta, 140)));
-            ScrollTrigger.update();
-            touchStartY = currentY;
-          }
-        };
-
-        document.addEventListener("wheel", handleGlobalWheel, { passive: false, capture: true });
-        content.addEventListener("touchstart", handleTouchStart, { passive: true });
-        content.addEventListener("touchmove", handleTouchMove, { passive: false });
+        window.addEventListener("resize", handleResize);
 
         return () => {
-          document.removeEventListener("wheel", handleGlobalWheel, true);
-          content.removeEventListener("touchstart", handleTouchStart);
-          content.removeEventListener("touchmove", handleTouchMove);
-          restorePage();
+          window.removeEventListener("resize", handleResize);
         };
       },
     );
@@ -331,9 +234,9 @@ const HomeIntro = ({ children }) => {
     return () => {
       media.revert();
       html.classList.remove("kaamsetu-intro-active");
-      html.style.overflow = previousHtmlOverflow;
-      body.style.overflow = previousBodyOverflow;
       gsap.set(navbar, { clearProps: "opacity,visibility,pointer-events" });
+      gsap.set(content, { clearProps: "opacity,visibility,pointer-events" });
+      gsap.set(stage, { clearProps: "opacity,visibility,pointer-events" });
     };
   }, []);
 
