@@ -102,8 +102,6 @@ const HomeIntro = ({ children }) => {
         gsap.set(panel, {
           ...getPanelDimensions(),
           minHeight: 0,
-          maxWidth: "calc(100vw - 24px)",
-          maxHeight: "calc(100svh - 24px)",
           borderRadius: mobile ? 18 : 4,
           xPercent: -50,
           yPercent: -50,
