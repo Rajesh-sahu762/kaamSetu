@@ -9,7 +9,7 @@
 
 .ks-intro__scroll-track {
   width: 100%;
-  height: 320vh;
+  height: 380svh;
   pointer-events: none;
 }
 
@@ -257,12 +257,14 @@
 
 /* Show only one scrollbar at a time:
    document scrollbar during the intro, inner viewport scrollbar afterward. */
-html.kaamsetu-site-scroll-active {
+html.kaamsetu-site-scroll-active,
+html.kaamsetu-site-scroll-active body {
   overflow: hidden !important;
   scrollbar-width: none !important;
 }
 
-html.kaamsetu-site-scroll-active::-webkit-scrollbar {
+html.kaamsetu-site-scroll-active::-webkit-scrollbar,
+html.kaamsetu-site-scroll-active body::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
