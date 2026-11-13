@@ -55,7 +55,6 @@
   width: min(82vw, 1120px);
   height: 76svh;
   min-height: 420px;
-  max-height: 760px;
   overflow: hidden;
   transform: translate(-50%, -50%);
   transform-origin: center center;
