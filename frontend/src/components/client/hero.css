@@ -26,7 +26,7 @@
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   align-items: center;
   gap: clamp(38px, 5vw, 92px);
-  width: min(100% - 64px, 1510px);
+  width: min(calc(100% - clamp(112px, 12vw, 220px)), 1440px);
   margin: 0 auto;
 }
 .ks-hero__copy { position: relative; z-index: 3; min-width: 0; }
@@ -215,7 +215,7 @@
 @keyframes ks-particles-drift { from { background-position: 0 0; } to { background-position: 82px 82px; } }
 
 @media (max-width: 1279px) {
-  .ks-hero__container { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 34px; width: min(100% - 48px, 1200px); }
+  .ks-hero__container { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 34px; width: min(calc(100% - clamp(64px, 10vw, 120px)), 1200px); }
   .ks-hero__title { font-size: clamp(40px, 4.1vw, 56px); }
   .ks-hero__visual { height: 570px; }
   .ks-hero__artisan-card { left: 20%; width: 64%; }
