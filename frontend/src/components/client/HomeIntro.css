@@ -1,22 +1,29 @@
-/* KaamSetu cinematic boxed website reveal */
+/* KaamSetu intro: fullscreen transition, then a dedicated in-viewport site scroller */
 .ks-intro {
   position: relative;
-  height: 100svh;
-  min-height: 520px;
+  width: 100%;
+  min-height: 0;
   isolation: isolate;
   background: #080b09;
 }
 
+.ks-intro__scroll-track {
+  width: 100%;
+  height: 185vh;
+  pointer-events: none;
+}
+
 .ks-intro__stage {
-  position: relative;
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100svh;
-  min-height: 520px;
   overflow: hidden;
   display: grid;
   place-items: center;
   background: #080b09;
-  z-index: 60;
+  z-index: 40;
+  will-change: opacity;
 }
 
 .ks-intro__video,
@@ -219,9 +226,27 @@
   background: linear-gradient(to bottom, #c5f36b, transparent);
 }
 
+/* The site becomes the only scrollable surface after the intro completes. */
 .ks-home-content {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  width: 100%;
+  height: 100svh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-canvas, #fff);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  scrollbar-gutter: stable;
+}
+
+.ks-home-content__inner {
+  min-height: 100%;
   position: relative;
-  z-index: 1;
 }
 
 .kaamsetu-intro-active header {
@@ -231,11 +256,6 @@
 }
 
 @media (max-width: 639px) {
-  .ks-intro,
-  .ks-intro__stage {
-    min-height: 480px;
-  }
-
   .ks-intro__panel {
     width: 90vw;
     height: 72svh;
