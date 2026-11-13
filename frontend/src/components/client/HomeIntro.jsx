@@ -57,6 +57,26 @@ const HomeIntro = ({ children }) => {
 
         const introScrollFactor = mobile ? 2.8 : tablet ? 2.7 : 2.6;
         const getIntroDistance = () => Math.round(window.innerHeight * introScrollFactor);
+
+        // Calculate the preview panel from the real viewport dimensions.
+        // Pixel-based sizing avoids vw/percentage rounding issues in iOS,
+        // iPad split view and browser device emulation.
+        const getPanelDimensions = () => {
+          const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          const sideGutter = mobile ? 18 : tablet ? 32 : 48;
+          const widthRatio = mobile ? 0.9 : tablet ? 0.8 : 0.66;
+          const maxWidth = mobile ? 560 : tablet ? 720 : 860;
+          const heightRatio = mobile ? 0.58 : tablet ? 0.62 : 0.6;
+          const maxHeight = mobile ? 520 : tablet ? 620 : 680;
+
+          return {
+            width: Math.max(0, Math.min(viewportWidth - sideGutter * 2, viewportWidth * widthRatio, maxWidth)),
+            height: Math.max(0, Math.min(viewportHeight * heightRatio, maxHeight)),
+            left: viewportWidth / 2,
+            top: viewportHeight / 2,
+          };
+        };
         const updateTrackHeight = () => {
           // The track ends exactly where the intro ScrollTrigger ends.
           // Homepage content starts at that same document coordinate.
@@ -80,13 +100,13 @@ const HomeIntro = ({ children }) => {
         gsap.set(content, { autoAlpha: 0, pointerEvents: "none" });
         gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
         gsap.set(panel, {
-          width: mobile ? "78vw" : tablet ? "72vw" : "min(66vw, 860px)",
-          height: mobile ? "58svh" : tablet ? "62svh" : "60svh",
+          ...getPanelDimensions(),
+          minHeight: 0,
+          maxWidth: "calc(100vw - 24px)",
+          maxHeight: "calc(100svh - 24px)",
           borderRadius: mobile ? 18 : 4,
           xPercent: -50,
           yPercent: -50,
-          left: "50%",
-          top: "50%",
           transformOrigin: "center center",
         });
         gsap.set(logo, {
@@ -127,8 +147,8 @@ const HomeIntro = ({ children }) => {
         timeline.to(
           panel,
           {
-            width: "100vw",
-            height: "100svh",
+            width: () => document.documentElement.clientWidth || window.innerWidth,
+            height: () => window.innerHeight,
             borderRadius: 0,
             duration: 0.62,
             ease: "power2.inOut",
@@ -220,6 +240,7 @@ const HomeIntro = ({ children }) => {
 
         const handleResize = () => {
           updateTrackHeight();
+          gsap.set(panel, getPanelDimensions());
           ScrollTrigger.refresh();
         };
 
