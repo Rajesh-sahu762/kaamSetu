@@ -1,3 +1,4 @@
+import Footer from "@/components/client/Footer";
 import Navbar from "@/components/client/navbar";
 import { Outlet, useLocation } from "react-router-dom";
 
