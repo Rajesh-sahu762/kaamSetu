@@ -83,7 +83,7 @@ const WhyChooseKaamSetu = ({ stats, loading }) => {
                 whileHover={reduceMotion ? undefined : { y: -5 }}
               >
                 <div className="why-choose-card__photo" aria-hidden="true">
-                  <img src={item.image} alt="" loading="lazy" />
+                  <img src={item.image} alt="" loading="eager" decoding="async" />
                 </div>
 
                 <div className="why-choose-card__icon">
