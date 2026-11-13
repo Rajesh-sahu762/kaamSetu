@@ -52,8 +52,15 @@ const HomeIntro = ({ children }) => {
         const shade = root.querySelector(".ks-intro__shade");
 
         const restorePage = () => {
+          html.classList.remove("kaamsetu-site-scroll-active");
           html.style.overflow = previousHtmlOverflow;
           body.style.overflow = previousBodyOverflow;
+        };
+
+        const lockDocumentForSiteScroll = () => {
+          html.style.overflow = "hidden";
+          body.style.overflow = "hidden";
+          html.classList.add("kaamsetu-site-scroll-active");
         };
 
         if (reduceMotion) {
@@ -81,8 +88,8 @@ const HomeIntro = ({ children }) => {
         gsap.set(content, { autoAlpha: 0, y: 0 });
         gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
         gsap.set(panel, {
-          width: mobile ? "84vw" : tablet ? "78vw" : "min(72vw, 960px)",
-          height: mobile ? "64svh" : tablet ? "68svh" : "66svh",
+          width: mobile ? "78vw" : tablet ? "72vw" : "min(66vw, 860px)",
+          height: mobile ? "58svh" : tablet ? "62svh" : "60svh",
           borderRadius: mobile ? 18 : 4,
           xPercent: -50,
           yPercent: -50,
@@ -114,8 +121,7 @@ const HomeIntro = ({ children }) => {
             onLeave: () => {
               // At the end of the intro, hand scrolling to the website panel.
               // Keep this ScrollTrigger alive so scrolling back can reverse it.
-              html.style.overflow = "hidden";
-              body.style.overflow = "hidden";
+              lockDocumentForSiteScroll();
               content.scrollTop = 0;
             },
             onEnterBack: () => {
