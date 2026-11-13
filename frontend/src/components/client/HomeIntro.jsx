@@ -78,7 +78,9 @@ const HomeIntro = ({ children }) => {
         timeline.to(
           logo,
           {
-            ...getLogoDestination(),
+            x: () => getLogoDestination().x,
+            y: () => getLogoDestination().y,
+            scale: () => getLogoDestination().scale,
             duration: 0.78,
             ease: "power2.inOut",
           },
@@ -142,7 +144,7 @@ const HomeIntro = ({ children }) => {
         );
 
         const refresh = () => ScrollTrigger.refresh();
-        const refreshTimer = window.setTimeout(refresh, 250);
+        const refreshTimer = window.setTimeout(refresh, 700);
         window.addEventListener("resize", refresh);
 
         return () => {
