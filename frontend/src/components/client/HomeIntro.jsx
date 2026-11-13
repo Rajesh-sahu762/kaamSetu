@@ -208,6 +208,18 @@ const HomeIntro = ({ children }) => {
           0.84,
         );
 
+        timeline.to(
+          content,
+          { autoAlpha: 1, pointerEvents: "auto", duration: 0.14, ease: "power1.out" },
+          0.9,
+        );
+
+        timeline.to(
+          stage,
+          { autoAlpha: 0, pointerEvents: "none", duration: 0.14, ease: "power1.out" },
+          0.9,
+        );
+
         // Hold the completed fullscreen frame so the logo/nav handoff reads
         // as a finished state before the site scroll container is unlocked.
         timeline.to({}, { duration: 0.34 });
