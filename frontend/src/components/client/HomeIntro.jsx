@@ -77,13 +77,25 @@ const HomeIntro = ({ children }) => {
         track.style.height = `${(introScrollFactor + 1) * 100}svh`;
 
         const showIntroState = () => {
-          gsap.set(content, { autoAlpha: 0, pointerEvents: "none" });
+          // During the intro/reverse phase the inner website must not be
+          // visible, scrollable, or interactive. This prevents two scrollbars
+          // and prevents clicks from switching scroll ownership mid-transition.
+          gsap.set(content, {
+            autoAlpha: 0,
+            pointerEvents: "none",
+            overflow: "hidden",
+          });
           gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
           gsap.set(navbar, { autoAlpha: 0, pointerEvents: "none" });
         };
 
         const showWebsiteState = () => {
-          gsap.set(content, { autoAlpha: 1, pointerEvents: "auto" });
+          gsap.set(content, {
+            autoAlpha: 1,
+            pointerEvents: "auto",
+            overflowX: "hidden",
+            overflowY: "auto",
+          });
           gsap.set(stage, { autoAlpha: 0, pointerEvents: "none" });
           gsap.set(navbar, { autoAlpha: 1, pointerEvents: "auto" });
         };
@@ -145,8 +157,15 @@ const HomeIntro = ({ children }) => {
               // its path from the navbar. The timeline crossfade handles
               // hiding the navbar only as the logo moves away from it.
               restorePage();
-              gsap.set(content, { pointerEvents: "none" });
-              gsap.set(stage, { pointerEvents: "auto" });
+              // Immediately hand the viewport back to the intro. The real
+              // navbar stays visible; the scrubbed logo tween reverses from
+              // its navbar position while the inner page scrollbar is hidden.
+              gsap.set(content, {
+                autoAlpha: 0,
+                pointerEvents: "none",
+                overflow: "hidden",
+              });
+              gsap.set(stage, { autoAlpha: 1, pointerEvents: "auto" });
             },
             onLeaveBack: () => {
               restorePage();
