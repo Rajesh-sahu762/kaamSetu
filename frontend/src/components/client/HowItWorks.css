@@ -133,17 +133,17 @@
   letter-spacing: -0.055em;
 }
 
-.how-journey__header h2 span {
+.how-journey__header h2 > .how-journey__title-highlight {
   position: relative;
   display: inline-block;
   color: var(--how-primary);
 }
 
-.dark .how-journey__header h2 span {
+.dark .how-journey__header h2 > .how-journey__title-highlight {
   color: var(--how-accent);
 }
 
-.how-journey__header h2 span::after {
+.how-journey__header h2 > .how-journey__title-highlight::after {
   content: "";
   position: absolute;
   left: 2%;
@@ -153,6 +153,44 @@
   border-radius: 99px;
   background: linear-gradient(90deg, var(--how-secondary), var(--how-accent));
   transform: rotate(-1.6deg);
+}
+
+.how-journey__title-rays {
+  position: absolute;
+  top: -25px;
+  right: -31px;
+  width: 43px;
+  height: 38px;
+  pointer-events: none;
+}
+
+.how-journey__title-rays i {
+  position: absolute;
+  display: block;
+  width: 7px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--how-accent);
+  box-shadow: 0 2px 9px color-mix(in srgb, var(--how-accent) 24%, transparent);
+}
+
+.how-journey__title-rays i:nth-child(1) {
+  top: 0;
+  left: 5px;
+  transform: rotate(-12deg);
+}
+
+.how-journey__title-rays i:nth-child(2) {
+  top: 8px;
+  left: 20px;
+  transform: rotate(42deg);
+}
+
+.how-journey__title-rays i:nth-child(3) {
+  top: 21px;
+  left: 32px;
+  height: 16px;
+  transform: rotate(75deg);
 }
 
 .how-journey__header p {
@@ -219,12 +257,6 @@
   text-align: center;
   font-size: 13px;
   line-height: 1.6;
-  animation: how-note-in 360ms ease both;
-}
-
-@keyframes how-note-in {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .how-journey__timeline {
@@ -605,6 +637,7 @@
   .how-journey { padding: 72px 0 82px; }
   .how-journey__container { width: min(100% - 36px, 560px); }
   .how-journey__header h2 { font-size: clamp(2rem, 9vw, 2.8rem); }
+  .how-journey__title-rays { top: -21px; right: -25px; transform: scale(0.82); transform-origin: left bottom; }
   .how-journey__header p { font-size: 14px; line-height: 1.7; }
   .how-journey__switcher { width: 100%; max-width: 410px; }
   .how-journey__tab { flex: 1; min-width: 0; padding-inline: 10px; font-size: 12px; }
