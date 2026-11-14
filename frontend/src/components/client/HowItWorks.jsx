@@ -1,320 +1,264 @@
-import { motion } from "framer-motion";
+import { useLayoutEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
-  Search,
-  UserCheck,
+  ArrowRight,
+  BadgeCheck,
+  BriefcaseBusiness,
   CalendarCheck,
+  CalendarDays,
+  Check,
   CheckCircle2,
-  Briefcase,
+  Clock3,
+  FileCheck2,
+  MessageCircle,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  TrendingUp,
+  UserRound,
   Wallet,
 } from "lucide-react";
+import "./HowItWorks.css";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const customerSteps = [
   {
-    icon: Search,
     title: "Find a Service",
-    desc: "Browse verified professionals and choose the service you need.",
+    desc: "Browse trusted home services and choose exactly what you need, from repairs to everyday essentials.",
+    visual: "search",
   },
   {
-    icon: UserCheck,
-    title: "Select an Expert",
-    desc: "Compare ratings, reviews and experience before booking.",
+    title: "Connect with Experts",
+    desc: "Explore verified professionals, compare their experience and reviews, and connect with the right expert.",
+    visual: "expert",
   },
   {
-    icon: CalendarCheck,
-    title: "Book Instantly",
-    desc: "Schedule a visit at your preferred date and time.",
+    title: "Book & Get It Done",
+    desc: "Pick a date and time that works for you, then let your selected professional take care of the job.",
+    visual: "booking",
   },
   {
-    icon: CheckCircle2,
-    title: "Get It Done",
-    desc: "Sit back while the expert completes the job professionally.",
+    title: "Rate & Review",
+    desc: "Share your experience after the service and help the KaamSetu community choose with confidence.",
+    visual: "review",
   },
 ];
 
 const professionalSteps = [
   {
-    icon: UserCheck,
-    title: "Create Profile",
-    desc: "Register and submit your professional details.",
+    title: "Create Your Profile",
+    desc: "Register on KaamSetu and submit your professional and business details to get started.",
+    visual: "search",
   },
   {
-    icon: Briefcase,
     title: "Get Verified",
-    desc: "Our team verifies your documents and approves your profile.",
+    desc: "Our team reviews your documents and verifies your details before approving your profile.",
+    visual: "expert",
   },
   {
-    icon: CalendarCheck,
     title: "Receive Leads",
-    desc: "Start receiving service requests from nearby customers.",
+    desc: "Start receiving relevant service requests from customers looking for experts in your area.",
+    visual: "booking",
   },
   {
-    icon: Wallet,
-    title: "Earn More",
-    desc: "Grow your business and increase your monthly income.",
+    title: "Grow & Earn More",
+    desc: "Deliver great work, build your reputation and grow your service business with every booking.",
+    visual: "review",
   },
 ];
 
-const HowItWorks = () => {
+const tracks = {
+  customer: {
+    label: "For Customers",
+    note: "From finding the right help to sharing your experience — every step stays simple.",
+    cta: "Explore Services",
+    to: "/services",
+    steps: customerSteps,
+  },
+  professional: {
+    label: "For Professionals",
+    note: "Set up your profile, get verified and turn your skills into new opportunities.",
+    cta: "Join as a Professional",
+    to: "/register/vendor/Profile",
+    steps: professionalSteps,
+  },
+};
+
+const JourneyIllustration = ({ type }) => {
+  if (type === "search") {
+    return (
+      <div className="how-visual how-visual--search" aria-hidden="true">
+        <div className="how-visual__spark how-visual__spark--one"><Sparkles size={15} /></div>
+        <div className="how-search-window">
+          <div className="how-window-dots"><i /><i /><i /></div>
+          <div className="how-search-field"><Search size={17} /><span>What service do you need?</span><span className="how-search-go"><ArrowRight size={14} /></span></div>
+          <div className="how-search-tags"><span>AC Repair</span><span>Cleaning</span><span>Plumbing</span></div>
+        </div>
+        <div className="how-visual__orbit how-visual__orbit--search" />
+      </div>
+    );
+  }
+
+  if (type === "expert") {
+    return (
+      <div className="how-visual how-visual--expert" aria-hidden="true">
+        <div className="how-expert-card">
+          <div className="how-expert-avatar"><UserRound size={25} /></div>
+          <div className="how-expert-info"><b>Verified Expert</b><span>Trusted professional</span><div className="how-mini-stars"><Star /><Star /><Star /><Star /><Star /></div></div>
+          <span className="how-verified-mark"><BadgeCheck size={18} /></span>
+        </div>
+        <div className="how-chat-bubble"><MessageCircle size={17} /><span>Let's get it done!</span></div>
+        <div className="how-visual__spark how-visual__spark--two"><ShieldCheck size={19} /></div>
+      </div>
+    );
+  }
+
+  if (type === "booking") {
+    return (
+      <div className="how-visual how-visual--booking" aria-hidden="true">
+        <div className="how-calendar-card">
+          <div className="how-calendar-head"><CalendarDays size={18} /><b>Your booking</b><span>•••</span></div>
+          <div className="how-calendar-month">Available slots <span>June 2026</span></div>
+          <div className="how-calendar-grid">{["M", "T", "W", "T", "F", "S", "S", "8", "9", "10", "11", "12", "13", "14"].map((day, index) => <span className={index === 10 ? "is-selected" : ""} key={index}>{day}</span>)}</div>
+        </div>
+        <div className="how-booking-confirm"><CheckCircle2 size={17} /><span>Booking confirmed</span></div>
+        <div className="how-time-chip"><Clock3 size={15} /> 10:30 AM</div>
+      </div>
+    );
+  }
+
   return (
-    <section className="py-2 bg-card">
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-        
-        {/* Heading */}
+    <div className="how-visual how-visual--review" aria-hidden="true">
+      <div className="how-review-card">
+        <div className="how-review-top"><span className="how-review-avatar">RS</span><div><b>Service completed</b><span>How was your experience?</span></div><CheckCircle2 size={18} /></div>
+        <div className="how-review-stars"><Star /><Star /><Star /><Star /><Star /></div>
+        <div className="how-review-lines"><i /><i /><i /></div>
+        <div className="how-review-foot"><span>Excellent work!</span><Sparkles size={16} /></div>
+      </div>
+      <div className="how-visual__spark how-visual__spark--three"><Star size={17} /></div>
+    </div>
+  );
+};
 
-        <div className="text-center max-w-3xl mx-auto">
-          <p
-            className="
-              uppercase
-              tracking-[0.25em]
-              text-xs
-              font-semibold
-              text-[#745A38]
-            "
-          >
-            How It Works
-          </p>
+const stepIcons = [Search, UserRound, CalendarCheck, Star];
 
-          <h2
-            className="
-              mt-4
-              text-4xl
-              md:text-5xl
-              font-semibold
-              text-primary
-            "
-          >
-            Simple, Fast & Reliable
-          </h2>
+const HowItWorks = () => {
+  const [activeTrack, setActiveTrack] = useState("customer");
+  const sectionRef = useRef(null);
+  const headingRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const timelineRef = useRef(null);
+  const progressRef = useRef(null);
+  const ctaRef = useRef(null);
 
-          <p
-            className="
-              mt-5
-              text-lg
-              text-muted
-              leading-8
-            "
-          >
-            Whether you're looking for a service or looking for work,
-            KaamSetu makes the process simple and transparent.
-          </p>
+  const activeJourney = tracks[activeTrack];
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    const timeline = timelineRef.current;
+    const steps = timeline?.querySelectorAll(".how-journey__step");
+    if (!section || !timeline || !steps?.length) return undefined;
+
+    const context = gsap.context(() => {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduceMotion) {
+        gsap.set([headingRef.current, subtitleRef.current, ...steps, ctaRef.current], { clearProps: "all" });
+        gsap.set(progressRef.current, { scaleX: 1, scaleY: 1 });
+        return;
+      }
+
+      const isMobile = window.matchMedia("(max-width: 767px)").matches;
+      gsap.set([headingRef.current, subtitleRef.current], { opacity: 0, y: 22 });
+      gsap.set(steps, { opacity: 0.38, y: 28 });
+      gsap.set(ctaRef.current, { opacity: 0, y: 18 });
+      gsap.set(progressRef.current, { [isMobile ? "scaleY" : "scaleX"]: 0 });
+
+      const journey = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top 76%",
+          end: "bottom 38%",
+          scrub: 0.8,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      journey
+        .to(headingRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0)
+        .to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0.08)
+        .to(progressRef.current, { [isMobile ? "scaleY" : "scaleX"]: 1, duration: 1.45, ease: "none" }, 0.12)
+        .to(steps, { opacity: 1, y: 0, duration: 0.72, stagger: 0.19, ease: "none" }, 0.16)
+        .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.25, ease: "none" }, 1.18);
+    }, section);
+
+    return () => context.revert();
+  }, [activeTrack]);
+
+  return (
+    <section className="how-journey" ref={sectionRef} aria-labelledby="how-journey-title">
+      <div className="how-journey__ambient how-journey__ambient--left" aria-hidden="true" />
+      <div className="how-journey__ambient how-journey__ambient--right" aria-hidden="true" />
+      <div className="how-journey__wave" aria-hidden="true" />
+
+      <div className="how-journey__container">
+        <header className="how-journey__header">
+          <span className="how-journey__eyebrow"><Sparkles size={14} /> HOW IT WORKS</span>
+          <h2 id="how-journey-title" ref={headingRef}>Simple, Fast &amp; <span>Reliable</span></h2>
+          <p ref={subtitleRef}>A clear, dependable journey from the first step to a job well done — for customers and professionals alike.</p>
+        </header>
+
+        <div className="how-journey__switcher" role="tablist" aria-label="Choose your KaamSetu journey">
+          {Object.entries(tracks).map(([key, track]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={activeTrack === key}
+              className={`how-journey__tab ${activeTrack === key ? "is-active" : ""}`}
+              onClick={() => setActiveTrack(key)}
+            >
+              {key === "customer" ? <UserRound size={16} /> : <BriefcaseBusiness size={16} />}
+              {track.label}
+            </button>
+          ))}
         </div>
 
-        {/* Two Columns */}
+        <p className="how-journey__track-note" key={activeTrack}>{activeJourney.note}</p>
 
-        <div className="grid lg:grid-cols-2 gap-12 mt-20">
-          
-          {/* Customer Side */}
-
-          <div
-            className="
-              bg-card
-              border
-              border-theme
-              rounded-3xl
-              p-8
-            "
-          >
-            <h3
-              className="
-                text-2xl
-                font-semibold
-                text-primary
-                mb-10
-              "
-            >
-              For Customers
-            </h3>
-
-            <div className="space-y-8">
-              {customerSteps.map((step, index) => {
-                const Icon = step.icon;
-
-                return (
-                  <motion.div
-                    key={step.title}
-                    initial={{
-                      opacity: 0,
-                      x: -20,
-                    }}
-                    whileInView={{
-                      opacity: 1,
-                      x: 0,
-                    }}
-                    viewport={{
-                      once: true,
-                    }}
-                    transition={{
-                      delay: index * 0.1,
-                    }}
-                    className="
-                      flex
-                      gap-5
-                    "
-                  >
-                    <div
-                      className="
-                        min-w-[56px]
-                        h-14
-
-                        rounded-xl
-
-                        bg-[#eff4ff]
-
-                        flex
-                        items-center
-                        justify-center
-                      "
-                    >
-                      <Icon
-                        size={24}
-                        className="text-[#745A38]"
-                      />
-                    </div>
-
-                    <div>
-                      <h4
-                        className="
-                          font-semibold
-                          text-lg
-                          text-primary
-                        "
-                      >
-                        {index + 1}. {step.title}
-                      </h4>
-
-                      <p
-                        className="
-                          mt-2
-                          text-muted
-                          leading-7
-                        "
-                      >
-                        {step.desc}
-                      </p>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+        <div className="how-journey__timeline" ref={timelineRef}>
+          <div className="how-journey__rail" aria-hidden="true">
+            <span className="how-journey__rail-base" />
+            <span className="how-journey__rail-progress" ref={progressRef} />
           </div>
 
-          {/* Professional Side */}
-
-          <div
-            className="
-              bg-[#091426]
-              rounded-3xl
-              p-8
-            "
-          >
-            <h3
-              className="
-                text-2xl
-                font-semibold
-                text-white
-                mb-10
-              "
-            >
-              For Professionals
-            </h3>
-
-            <div className="space-y-8">
-              {professionalSteps.map((step, index) => {
-                const Icon = step.icon;
-
-                return (
-                  <motion.div
-                    key={step.title}
-                    initial={{
-                      opacity: 0,
-                      x: 20,
-                    }}
-                    whileInView={{
-                      opacity: 1,
-                      x: 0,
-                    }}
-                    viewport={{
-                      once: true,
-                    }}
-                    transition={{
-                      delay: index * 0.1,
-                    }}
-                    className="
-                      flex
-                      gap-5
-                    "
-                  >
-                    <div
-                      className="
-                        min-w-[56px]
-                        h-14
-
-                        rounded-xl
-
-                        bg-[#1b2b43]
-
-                        flex
-                        items-center
-                        justify-center
-                      "
-                    >
-                      <Icon
-                        size={24}
-                        className="text-[#C59A6A]"
-                      />
-                    </div>
-
-                    <div>
-                      <h4
-                        className="
-                          font-semibold
-                          text-lg
-                          text-white
-                        "
-                      >
-                        {index + 1}. {step.title}
-                      </h4>
-
-                      <p
-                        className="
-                          mt-2
-                          text-[#d3e4fe]
-                          leading-7
-                        "
-                      >
-                        {step.desc}
-                      </p>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
+          {activeJourney.steps.map((step, index) => {
+            const Icon = stepIcons[index];
+            return (
+              <article className="how-journey__step" key={`${activeTrack}-${step.title}`}>
+                <div className="how-journey__step-marker">
+                  <span className="how-journey__number">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="how-journey__marker-icon"><Icon size={17} /></span>
+                </div>
+                <div className="how-journey__illustration"><JourneyIllustration type={step.visual} /></div>
+                <div className="how-journey__copy">
+                  <span className="how-journey__step-kicker">STEP {String(index + 1).padStart(2, "0")}</span>
+                  <h3>{step.title}</h3>
+                  <p>{step.desc}</p>
+                </div>
+                {index < activeJourney.steps.length - 1 && <ArrowRight className="how-journey__connector-arrow" size={17} aria-hidden="true" />}
+              </article>
+            );
+          })}
         </div>
 
-        {/* CTA */}
-
-        {/* <div className="mt-16 text-center">
-          <button
-            className="
-              px-8
-              py-4
-
-              rounded-xl
-
-              bg-[#091426]
-              text-white
-
-              shadow-lg
-
-              hover:-translate-y-1
-              transition-all
-            "
-          >
-            Get Started Today
-          </button>
+        <div className="how-journey__footer" ref={ctaRef}>
+          <div><span className="how-journey__footer-icon"><Check size={16} /></span><span>Ready when you are</span></div>
+          <Link to={activeJourney.to} className="how-journey__cta">{activeJourney.cta}<ArrowRight size={18} /></Link>
         </div>
-         */}
       </div>
     </section>
   );
