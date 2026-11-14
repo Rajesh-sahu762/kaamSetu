@@ -184,8 +184,14 @@ const Testimonials = () => {
   }, [testimonials.length]);
 
   const visibleCards = useMemo(() => {
-    if (testimonials.length <= 3) {
-      return testimonials.map((testimonial, index) => ({ testimonial, index, active: index === activeIndex }));
+    if (testimonials.length === 1) {
+      return [{ testimonial: testimonials[0], index: 0, active: true }];
+    }
+    if (testimonials.length === 2) {
+      return [0, 1].map((offset) => {
+        const index = (activeIndex + offset) % testimonials.length;
+        return { testimonial: testimonials[index], index, active: offset === 0 };
+      });
     }
     return [-1, 0, 1].map((offset, slot) => {
       const index = (activeIndex + offset + testimonials.length) % testimonials.length;
