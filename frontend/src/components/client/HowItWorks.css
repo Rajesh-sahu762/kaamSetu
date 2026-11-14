@@ -23,7 +23,7 @@
   background:
     radial-gradient(ellipse at 8% 10%, rgba(16, 185, 129, 0.14), transparent 34%),
     radial-gradient(ellipse at 92% 40%, rgba(57, 245, 138, 0.08), transparent 34%),
-    linear-gradient(180deg, #080b09, #101912 58%, #080b09);
+    linear-gradient(180deg, var(--color-bg), color-mix(in srgb, var(--color-surface) 76%, var(--color-bg)) 58%, var(--color-bg));
 }
 
 .how-journey::before,
