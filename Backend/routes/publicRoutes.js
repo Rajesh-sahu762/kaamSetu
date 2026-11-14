@@ -9,6 +9,7 @@ const {
   getVendorPublicProfile,
   getFeaturedExperts,
   getVendors,
+  getPublicTestimonials,
 } = require("../controllers/publicController");
 
 // =======================================
@@ -16,6 +17,7 @@ const {
 // =======================================
 
 router.get("/categories", getCategories);
+router.get("/testimonials", getPublicTestimonials);
 
 router.get("/services/popular", getPopularServices);
 router.get("/services/:id", getServiceById);
