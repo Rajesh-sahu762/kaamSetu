@@ -344,8 +344,32 @@ const getVendorPublicProfile = async (req, res) => {
 // ==========================================
 const getFeaturedExperts = async (req, res) => {
   try {
+    // Rank only active services offered by approved vendors. This prevents
+    // pending/rejected vendors from occupying the featured limit.
+    const approvedVendorIds = await Vendor.find({ status: "approved" }).distinct("_id");
+
+    if (approvedVendorIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Featured experts fetched successfully.",
+        data: [],
+      });
+    }
+
+    // Keep the existing default response size for other consumers while
+    // allowing the homepage to request exactly four professionals.
+    const requestedLimit = Math.min(
+      Math.max(Number.parseInt(req.query.limit, 10) || 8, 1),
+      8,
+    );
+
     const services = await Service.aggregate([
-      { $match: { isActive: true } },
+      {
+        $match: {
+          isActive: true,
+          vendorId: { $in: approvedVendorIds },
+        },
+      },
       {
         $group: {
           _id: "$vendorId",
@@ -354,28 +378,26 @@ const getFeaturedExperts = async (req, res) => {
         },
       },
       { $sort: { avgRating: -1, totalBookings: -1 } },
-      { $limit: 8 },
+      { $limit: requestedLimit },
     ]);
 
-    const vendorIds = services.map((s) => s._id);
+    const vendorIds = services.map((service) => service._id);
 
     const vendors = await Vendor.find({
       _id: { $in: vendorIds },
       status: "approved",
     })
-      .select("businessName city bio skills experience userId")
+      .select("businessName city bio skills experience userId status createdAt")
       .populate("userId", "fullName profileImage");
 
-    // Preserve the ranking order from the aggregation above, and attach the
-    // rating/jobs-count already computed per vendor plus one representative
-    // category (cheapest active service) for the card's category label.
+    // Preserve aggregation ranking and attach existing booking/category data.
     const orderedVendors = await Promise.all(
       vendorIds
-        .map((id) => vendors.find((v) => v._id.toString() === id.toString()))
+        .map((id) => vendors.find((vendor) => vendor._id.toString() === id.toString()))
         .filter(Boolean)
         .map(async (vendor) => {
           const stats = services.find(
-            (s) => s._id.toString() === vendor._id.toString(),
+            (service) => service._id.toString() === vendor._id.toString(),
           );
 
           const primaryService = await Service.findOne({
@@ -400,6 +422,7 @@ const getFeaturedExperts = async (req, res) => {
       data: orderedVendors,
     });
   } catch (error) {
+    console.error("Featured experts fetch failed:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error.",
