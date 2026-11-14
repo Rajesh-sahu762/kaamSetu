@@ -157,17 +157,18 @@ const HowItWorks = () => {
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
+    const header = section?.querySelector(".how-journey__header");
     const timeline = timelineRef.current;
     const steps = timeline?.querySelectorAll(".how-journey__step");
     const eyebrow = section?.querySelector(".how-journey__eyebrow");
     const switcher = section?.querySelector(".how-journey__switcher");
     const trackNote = section?.querySelector(".how-journey__track-note");
-    if (!section || !timeline || !steps?.length) return undefined;
+    if (!section || !header || !timeline || !steps?.length) return undefined;
 
     const context = gsap.context(() => {
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduceMotion) {
-        gsap.set([headingRef.current, subtitleRef.current, ...steps, ctaRef.current], { clearProps: "all" });
+        gsap.set([eyebrow, headingRef.current, subtitleRef.current, switcher, trackNote, ...steps, ctaRef.current], { clearProps: "all" });
         gsap.set([progressRef.current, mobileProgressRef.current], { clearProps: "all" });
         return;
       }
@@ -175,38 +176,51 @@ const HowItWorks = () => {
       const illustrations = timeline.querySelectorAll(".how-journey__illustration");
       const markers = timeline.querySelectorAll(".how-journey__step-marker");
       const arrows = timeline.querySelectorAll(".how-journey__connector-arrow");
-      gsap.set([eyebrow, headingRef.current, subtitleRef.current, switcher, trackNote], { opacity: 0, y: 22 });
-      gsap.set(steps, { opacity: 0.38, y: 28 });
-      gsap.set(illustrations, { scale: 0.94, y: 12 });
-      gsap.set(arrows, { opacity: 0.2, x: -5 });
-      gsap.set(ctaRef.current, { opacity: 0, y: 18 });
+
+      // Reveal the heading only as the header itself enters the viewport.
+      gsap.set([eyebrow, headingRef.current, subtitleRef.current, switcher, trackNote], { opacity: 0, y: 18 });
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: header,
+          start: "top 88%",
+          end: "top 58%",
+          scrub: 0.15,
+          invalidateOnRefresh: true,
+        },
+      })
+        .to(eyebrow, { opacity: 1, y: 0, duration: 0.45, ease: "none" }, 0)
+        .to(headingRef.current, { opacity: 1, y: 0, duration: 0.55, ease: "none" }, 0.05)
+        .to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.55, ease: "none" }, 0.12)
+        .to(switcher, { opacity: 1, y: 0, duration: 0.5, ease: "none" }, 0.18)
+        .to(trackNote, { opacity: 1, y: 0, duration: 0.45, ease: "none" }, 0.24);
+
+      // Keep the cards' scrub range local to the timeline, not the entire section.
+      gsap.set(steps, { opacity: 0.38, y: 24 });
+      gsap.set(illustrations, { scale: 0.96, y: 10 });
+      gsap.set(arrows, { opacity: 0.18, x: -4 });
+      gsap.set(ctaRef.current, { opacity: 0.25, y: 12 });
       const pathLength = progressRef.current?.getTotalLength?.() || 1000;
       gsap.set(progressRef.current, { strokeDasharray: pathLength, strokeDashoffset: pathLength });
       gsap.set(mobileProgressRef.current, { scaleY: 0 });
 
       const journey = gsap.timeline({
         scrollTrigger: {
-          trigger: section,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.8,
+          trigger: timeline,
+          start: "top 82%",
+          end: () => window.innerWidth <= 767 ? "bottom 80%" : "bottom 62%",
+          scrub: 0.12,
           invalidateOnRefresh: true,
         },
       });
 
       journey
-        .to(eyebrow, { opacity: 1, y: 0, duration: 0.2, ease: "none" }, 0)
-        .to(headingRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0.04)
-        .to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0.1)
-        .to(switcher, { opacity: 1, y: 0, duration: 0.24, ease: "none" }, 0.12)
-        .to(trackNote, { opacity: 1, y: 0, duration: 0.22, ease: "none" }, 0.16)
-        .to(progressRef.current, { strokeDashoffset: 0, duration: 1.45, ease: "none" }, 0.12)
-        .to(mobileProgressRef.current, { scaleY: 1, duration: 1.45, ease: "none" }, 0.12)
-        .to(steps, { opacity: 1, y: 0, duration: 0.72, stagger: 0.19, ease: "none" }, 0.16)
-        .to(illustrations, { scale: 1, y: 0, duration: 0.8, stagger: 0.19, ease: "none" }, 0.16)
-        .to(markers, { borderColor: "rgba(16, 185, 129, 0.78)", boxShadow: "0 0 0 7px rgba(16, 185, 129, 0.1), 0 0 24px rgba(16, 185, 129, 0.2)", duration: 0.42, stagger: 0.19, ease: "none" }, 0.2)
-        .to(arrows, { opacity: 1, x: 0, duration: 0.32, stagger: 0.19, ease: "none" }, 0.34)
-        .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.25, ease: "none" }, 1.18);
+        .to(progressRef.current, { strokeDashoffset: 0, duration: 1.35, ease: "none" }, 0)
+        .to(mobileProgressRef.current, { scaleY: 1, duration: 1.35, ease: "none" }, 0)
+        .to(steps, { opacity: 1, y: 0, duration: 0.7, stagger: 0.2, ease: "none" }, 0.04)
+        .to(illustrations, { scale: 1, y: 0, duration: 0.72, stagger: 0.2, ease: "none" }, 0.04)
+        .to(markers, { borderColor: "rgba(16, 185, 129, 0.78)", boxShadow: "0 0 0 7px rgba(16, 185, 129, 0.1), 0 0 24px rgba(16, 185, 129, 0.2)", duration: 0.42, stagger: 0.2, ease: "none" }, 0.08)
+        .to(arrows, { opacity: 1, x: 0, duration: 0.3, stagger: 0.2, ease: "none" }, 0.22)
+        .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.22, ease: "none" }, 1.32);
     }, section);
 
     return () => context.revert();
