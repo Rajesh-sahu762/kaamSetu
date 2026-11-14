@@ -14,7 +14,7 @@ const HomeIntro = ({ children }) => {
     const root = rootRef.current;
     const track = root?.querySelector(".ks-intro__scroll-track");
     const stage = root?.querySelector(".ks-intro__stage");
-    const navbar = document.querySelector("header");
+    const navbar = document.querySelector(".ks-navbar");
     const navbarLogo = navbar?.querySelector('a[href="/"]');
     const content = root?.querySelector(".ks-home-content");
 
