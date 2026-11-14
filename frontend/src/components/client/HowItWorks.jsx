@@ -184,8 +184,8 @@ const HowItWorks = () => {
       const journey = gsap.timeline({
         scrollTrigger: {
           trigger: section,
-          start: "top 76%",
-          end: "bottom 38%",
+          start: "top bottom",
+          end: "bottom top",
           scrub: 0.8,
           invalidateOnRefresh: true,
         },
@@ -215,7 +215,7 @@ const HowItWorks = () => {
       <div className="how-journey__container">
         <header className="how-journey__header">
           <span className="how-journey__eyebrow"><Sparkles size={14} /> HOW IT WORKS</span>
-          <h2 id="how-journey-title" ref={headingRef}>Simple, Fast &amp; <span>Reliable</span></h2>
+          <h2 id="how-journey-title" ref={headingRef}>Simple, Fast &amp; <span className="how-journey__title-highlight">Reliable<span className="how-journey__title-rays" aria-hidden="true"><i /><i /><i /></span></span></h2>
           <p ref={subtitleRef}>A clear, dependable journey from the first step to a job well done — for customers and professionals alike.</p>
         </header>
 
