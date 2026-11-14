@@ -169,7 +169,6 @@ const HowItWorks = () => {
         return;
       }
 
-      const isMobile = window.matchMedia("(max-width: 767px)").matches;
       const illustrations = timeline.querySelectorAll(".how-journey__illustration");
       const markers = timeline.querySelectorAll(".how-journey__step-marker");
       const arrows = timeline.querySelectorAll(".how-journey__connector-arrow");
@@ -178,11 +177,9 @@ const HowItWorks = () => {
       gsap.set(illustrations, { scale: 0.94, y: 12 });
       gsap.set(arrows, { opacity: 0.2, x: -5 });
       gsap.set(ctaRef.current, { opacity: 0, y: 18 });
-      const progressTarget = isMobile ? mobileProgressRef.current : progressRef.current;
-      const pathLength = isMobile ? 1 : progressTarget?.getTotalLength?.() || 1000;
-      gsap.set(progressTarget, isMobile
-        ? { scaleY: 0 }
-        : { strokeDasharray: pathLength, strokeDashoffset: pathLength });
+      const pathLength = progressRef.current?.getTotalLength?.() || 1000;
+      gsap.set(progressRef.current, { strokeDasharray: pathLength, strokeDashoffset: pathLength });
+      gsap.set(mobileProgressRef.current, { scaleY: 0 });
 
       const journey = gsap.timeline({
         scrollTrigger: {
@@ -197,7 +194,8 @@ const HowItWorks = () => {
       journey
         .to(headingRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0)
         .to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0.08)
-        .to(progressTarget, isMobile ? { scaleY: 1, duration: 1.45, ease: "none" } : { strokeDashoffset: 0, duration: 1.45, ease: "none" }, 0.12)
+        .to(progressRef.current, { strokeDashoffset: 0, duration: 1.45, ease: "none" }, 0.12)
+        .to(mobileProgressRef.current, { scaleY: 1, duration: 1.45, ease: "none" }, 0.12)
         .to(steps, { opacity: 1, y: 0, duration: 0.72, stagger: 0.19, ease: "none" }, 0.16)
         .to(illustrations, { scale: 1, y: 0, duration: 0.8, stagger: 0.19, ease: "none" }, 0.16)
         .to(markers, { borderColor: "rgba(16, 185, 129, 0.78)", boxShadow: "0 0 0 7px rgba(16, 185, 129, 0.1), 0 0 24px rgba(16, 185, 129, 0.2)", duration: 0.42, stagger: 0.19, ease: "none" }, 0.2)
