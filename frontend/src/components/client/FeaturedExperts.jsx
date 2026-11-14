@@ -1,312 +1,239 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
-  Star,
-  MapPin,
-  Briefcase,
+  ArrowRight,
   BadgeCheck,
+  Briefcase,
+  BriefcaseBusiness,
+  Hammer,
+  Headphones,
+  House,
+  MapPin,
+  PaintRoller,
+  Sparkles,
+  Wrench,
+  Zap,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { getFeaturedExperts } from "@/services/publicService";
 import { getImageUrl } from "@/utils/imageUrl";
+import "./FeaturedExperts.css";
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43d?w=500";
+const FEATURED_LIMIT = 4;
+const NEW_PROFILE_DAYS = 30;
+
+const getCategoryIcon = (category = "") => {
+  const value = category.toLowerCase();
+
+  if (/clean|housekeep/.test(value)) return Sparkles;
+  if (/electric/.test(value)) return Zap;
+  if (/paint/.test(value)) return PaintRoller;
+  if (/carpent|wood/.test(value)) return Hammer;
+  if (/plumb|repair|maint/.test(value)) return Wrench;
+  if (/home|interior/.test(value)) return House;
+  if (/support/.test(value)) return Headphones;
+
+  return BriefcaseBusiness;
+};
+
+const isNewProfessional = (createdAt) => {
+  if (!createdAt) return false;
+
+  const createdTime = new Date(createdAt).getTime();
+  if (!Number.isFinite(createdTime)) return false;
+
+  const age = Date.now() - createdTime;
+  return age >= 0 && age <= NEW_PROFILE_DAYS * 24 * 60 * 60 * 1000;
+};
+
+const getInitials = (name = "") =>
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase() || "K";
+
+const ExpertPhoto = ({ expert }) => {
+  const [imageFailed, setImageFailed] = useState(false);
+  const imageUrl = getImageUrl(expert.userId?.profileImage, "profile");
+
+  return (
+    <div className="featured-expert-card__photo">
+      {imageUrl && !imageFailed ? (
+        <img
+          src={imageUrl}
+          alt={expert.businessName || "Professional"}
+          loading="lazy"
+          decoding="async"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <div className="featured-expert-card__photo-fallback" aria-label="Profile photo unavailable">
+          <span>{getInitials(expert.businessName)}</span>
+        </div>
+      )}
+
+      <div className="featured-expert-card__photo-shade" aria-hidden="true" />
+      <div className="featured-expert-card__wave" aria-hidden="true" />
+    </div>
+  );
+};
 
 const FeaturedExperts = () => {
-
-  const navigate =useNavigate();
-
+  const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
   const [experts, setExperts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     const fetchExperts = async () => {
       try {
-        const response = await getFeaturedExperts();
+        setLoading(true);
+        setError("");
 
-        if (response.success) {
-          setExperts(response.data);
+        const response = await getFeaturedExperts({ limit: FEATURED_LIMIT });
+
+        if (!active) return;
+
+        if (response.success && Array.isArray(response.data)) {
+          setExperts(response.data.slice(0, FEATURED_LIMIT));
         } else {
-          setError(response.message || "Failed to load featured experts.");
+          setError(response.message || "Failed to load featured professionals.");
         }
-      } catch (err) {
-        setError("Failed to load featured experts.");
+      } catch {
+        if (active) setError("Failed to load featured professionals.");
+      } finally {
+        if (active) setLoading(false);
       }
     };
 
     fetchExperts();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
-    <section className="py-24 bg-card">
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-        
-        {/* Heading */}
+    <section className="featured-experts" aria-labelledby="featured-experts-title">
+      <div className="featured-experts__inner">
+        <header className="featured-experts__header">
+          <div className="featured-experts__eyebrow">
+            <span className="featured-experts__eyebrow-icon">
+              <BriefcaseBusiness size={17} strokeWidth={2.5} aria-hidden="true" />
+            </span>
+            <span>Top Professionals</span>
+          </div>
 
-        <div className="text-center max-w-3xl mx-auto">
-          <p
-            className="
-              uppercase
-              tracking-[0.25em]
-              text-xs
-              font-semibold
-              text-[#745A38]
-            "
-          >
-            Featured Experts
-          </p>
-
-          <h2
-            className="
-              mt-4
-              text-4xl
-              md:text-5xl
-              font-semibold
-              text-primary
-            "
-          >
-            Meet Our Top Professionals
+          <h2 id="featured-experts-title" className="featured-experts__title">
+            Meet Our <span>Top Professionals</span>
+            <i className="featured-experts__spark" aria-hidden="true"><b /><b /><b /></i>
           </h2>
 
-          <p
-            className="
-              mt-5
-              text-lg
-              text-muted
-              leading-8
-            "
-          >
-            Experienced and verified professionals trusted by
-            thousands of customers across India.
+          <p className="featured-experts__subtitle">
+            Experienced and verified professionals trusted by thousands of customers across India.
           </p>
-        </div>
-
-        {/* Error */}
+        </header>
 
         {error && (
-          <p className="text-center text-red-500 mt-10">{error}</p>
-        )}
-
-        {/* Empty State */}
-
-        {!error && experts.length === 0 && (
-          <p className="text-center text-muted mt-10">
-            No featured experts yet.
+          <p className="featured-experts__message featured-experts__message--error" role="alert">
+            {error}
           </p>
         )}
 
-        {/* Cards */}
+        {loading ? (
+          <div className="featured-experts__grid" aria-label="Loading professionals">
+            {Array.from({ length: FEATURED_LIMIT }).map((_, index) => (
+              <div className="featured-expert-skeleton" key={index} />
+            ))}
+          </div>
+        ) : experts.length > 0 ? (
+          <div className="featured-experts__grid">
+            {experts.map((expert, index) => {
+              const CategoryIcon = getCategoryIcon(expert.category);
+              const verified = expert.status === "approved";
 
-        <div
-          className="
-            mt-20
-            grid
-            md:grid-cols-2
-            lg:grid-cols-4
-            gap-6
-          "
-        >
-          {experts.map((expert, index) => (
-            <motion.div
-            onClick={() => navigate(`/expert/${expert._id}`)}
-              key={expert._id}
-              initial={{
-                opacity: 0,
-                y: 40,
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0,
-              }}
-              viewport={{
-                once: true,
-              }}
-              transition={{
-                duration: 0.5,
-                delay: index * 0.08,
-              }}
-              whileHover={{
-                y: -8,
-              }}
-              className="
-                bg-card
-                border
-                border-theme
-                rounded-3xl
-                overflow-hidden
-                group
-                cursor-pointer
-
-                hover:shadow-[0_15px_40px_rgba(9,20,38,0.08)]
-                transition-all
-              "
-            >
-              {/* Image */}
-
-              <div className="relative">
-                <img
-                  src={getImageUrl(expert.userId?.profileImage, "profile") || FALLBACK_IMAGE}
-                  alt={expert.businessName}
-                  className="
-                    h-[280px]
-                    w-full
-                    object-cover
-                  "
-                />
-
-                <div
-                  className="
-                    absolute
-                    top-4
-                    right-4
-
-                    flex
-                    items-center
-                    gap-1
-
-                    bg-card
-                    px-3
-                    py-1.5
-
-                    rounded-full
-
-                    text-sm
-                    font-semibold
-                  "
+              return (
+                <motion.article
+                  key={expert._id}
+                  className="featured-expert-card"
+                  initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+                  whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.12 }}
+                  transition={{ duration: 0.42, delay: index * 0.06 }}
                 >
-                  <Star
-                    size={15}
-                    className="text-yellow-500"
-                  />
-                  {expert.rating ? expert.rating.toFixed(1) : "New"}
-                </div>
-              </div>
+                  <ExpertPhoto expert={expert} />
 
-              {/* Content */}
+                  {isNewProfessional(expert.createdAt) && (
+                    <span className="featured-expert-card__new">
+                      <Sparkles size={14} fill="currentColor" aria-hidden="true" />
+                      New
+                    </span>
+                  )}
 
-              <div className="p-6">
-                <div
-                  className="
-                    flex
-                    items-center
-                    gap-2
-                  "
-                >
-                  <h3
-                    className="
-                      text-xl
-                      font-semibold
-                      text-primary
-                    "
-                  >
-                    {expert.businessName}
-                  </h3>
-
-                  <BadgeCheck
-                    size={18}
-                    className="
-                      text-[#745A38]
-                    "
-                  />
-                </div>
-
-                <p
-                  className="
-                    mt-2
-                    text-[#745A38]
-                    font-medium
-                  "
-                >
-                  {expert.category}
-                </p>
-
-                <div
-                  className="
-                    mt-5
-                    space-y-3
-                  "
-                >
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-2
-
-                      text-muted
-                    "
-                  >
-                    <MapPin size={16} />
-                    {expert.city}
+                  <div className="featured-expert-card__category-icon">
+                    <CategoryIcon size={28} strokeWidth={2.3} aria-hidden="true" />
                   </div>
 
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-2
+                  <div className="featured-expert-card__content">
+                    <div className="featured-expert-card__name-row">
+                      <h3>{expert.businessName}</h3>
+                      {verified && (
+                        <BadgeCheck
+                          className="featured-expert-card__verified"
+                          size={21}
+                          fill="currentColor"
+                          aria-label="Verified professional"
+                        />
+                      )}
+                    </div>
 
-                      text-muted
-                    "
-                  >
-                    <Briefcase size={16} />
-                    {expert.experience || 0} Years
+                    <span className="featured-expert-card__category">
+                      {expert.category || "Professional Services"}
+                    </span>
+
+                    <div className="featured-expert-card__meta">
+                      <span title={expert.city || "Location not provided"}>
+                        <MapPin size={17} aria-hidden="true" />
+                        <span>{expert.city || "Location not provided"}</span>
+                      </span>
+                      <span>
+                        <Briefcase size={17} aria-hidden="true" />
+                        <span>{Number(expert.experience) || 0} Years</span>
+                      </span>
+                      <span>
+                        <BriefcaseBusiness size={17} aria-hidden="true" />
+                        <span>{Number(expert.jobsCount) || 0}+ Jobs</span>
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="featured-expert-card__profile"
+                      onClick={() => navigate(`/expert/${expert._id}`)}
+                      aria-label={`View ${expert.businessName} profile`}
+                    >
+                      View Profile <ArrowRight size={19} strokeWidth={2.6} aria-hidden="true" />
+                    </button>
                   </div>
-                </div>
+                </motion.article>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="featured-experts__message">No featured professionals available right now.</p>
+        )}
 
-                <div
-                  className="
-                    mt-5
-                    flex
-                    items-center
-                    justify-between
-                  "
-                >
-                  <span
-                    className="
-                      text-sm
-                      text-muted
-                    "
-                  >
-                    {expert.jobsCount || 0}+ Jobs
-                  </span>
-
-                  <button
-                    className="
-                      text-[#745A38]
-                      font-medium
-                    "
-                  >
-                    View →
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Bottom CTA */}
-
-        <div className="text-center mt-16">
-          <button
-          onClick={() => navigate('/experts')}
-            className="
-              px-8
-              py-4
-
-              rounded-xl
-
-              bg-[#091426]
-              text-white
-
-              hover:-translate-y-1
-              transition-all
-
-              shadow-lg
-            "
-          >
+        <div className="featured-experts__footer">
+          <button type="button" onClick={() => navigate("/experts")}>
             Explore All Experts
+            <ArrowRight size={21} strokeWidth={2.6} aria-hidden="true" />
           </button>
         </div>
       </div>
