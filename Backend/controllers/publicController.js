@@ -344,32 +344,16 @@ const getVendorPublicProfile = async (req, res) => {
 // ==========================================
 const getFeaturedExperts = async (req, res) => {
   try {
-    // Rank only active services offered by approved vendors. This prevents
-    // pending/rejected vendors from occupying the featured limit.
-    const approvedVendorIds = await Vendor.find({ status: "approved" }).distinct("_id");
-
-    if (approvedVendorIds.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: "Featured experts fetched successfully.",
-        data: [],
-      });
-    }
-
-    // Keep the existing default response size for other consumers while
-    // allowing the homepage to request exactly four professionals.
+    // Keep the original, known-working aggregation shape: rank vendors from
+    // their active services, then filter to approved vendors in the Vendor
+    // query. This avoids changing the aggregation match semantics.
     const requestedLimit = Math.min(
       Math.max(Number.parseInt(req.query.limit, 10) || 8, 1),
       8,
     );
 
     const services = await Service.aggregate([
-      {
-        $match: {
-          isActive: true,
-          vendorId: { $in: approvedVendorIds },
-        },
-      },
+      { $match: { isActive: true } },
       {
         $group: {
           _id: "$vendorId",
@@ -378,10 +362,17 @@ const getFeaturedExperts = async (req, res) => {
         },
       },
       { $sort: { avgRating: -1, totalBookings: -1 } },
-      { $limit: requestedLimit },
     ]);
 
     const vendorIds = services.map((service) => service._id);
+
+    if (vendorIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Featured experts fetched successfully.",
+        data: [],
+      });
+    }
 
     const vendors = await Vendor.find({
       _id: { $in: vendorIds },
@@ -390,11 +381,13 @@ const getFeaturedExperts = async (req, res) => {
       .select("businessName city bio skills experience userId status createdAt")
       .populate("userId", "fullName profileImage");
 
-    // Preserve aggregation ranking and attach existing booking/category data.
+    // Preserve service ranking, but apply the requested limit only after
+    // pending/rejected vendors have been filtered out.
     const orderedVendors = await Promise.all(
       vendorIds
         .map((id) => vendors.find((vendor) => vendor._id.toString() === id.toString()))
         .filter(Boolean)
+        .slice(0, requestedLimit)
         .map(async (vendor) => {
           const stats = services.find(
             (service) => service._id.toString() === vendor._id.toString(),
