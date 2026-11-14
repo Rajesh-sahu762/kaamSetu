@@ -11,15 +11,12 @@ import {
   Check,
   CheckCircle2,
   Clock3,
-  FileCheck2,
   MessageCircle,
   Search,
   ShieldCheck,
   Sparkles,
   Star,
-  TrendingUp,
   UserRound,
-  Wallet,
 } from "lucide-react";
 import "./HowItWorks.css";
 
@@ -50,23 +47,23 @@ const customerSteps = [
 
 const professionalSteps = [
   {
-    title: "Create Your Profile",
-    desc: "Register on KaamSetu and submit your professional and business details to get started.",
+    title: "Create Profile",
+    desc: "Register and submit your professional details.",
     visual: "search",
   },
   {
     title: "Get Verified",
-    desc: "Our team reviews your documents and verifies your details before approving your profile.",
+    desc: "Our team verifies your documents and approves your profile.",
     visual: "expert",
   },
   {
     title: "Receive Leads",
-    desc: "Start receiving relevant service requests from customers looking for experts in your area.",
+    desc: "Start receiving service requests from nearby customers.",
     visual: "booking",
   },
   {
-    title: "Grow & Earn More",
-    desc: "Deliver great work, build your reputation and grow your service business with every booking.",
+    title: "Earn More",
+    desc: "Grow your business and increase your monthly income.",
     visual: "review",
   },
 ];
@@ -75,14 +72,14 @@ const tracks = {
   customer: {
     label: "For Customers",
     note: "From finding the right help to sharing your experience — every step stays simple.",
-    cta: "Explore Services",
+    cta: "Get Started Today",
     to: "/services",
     steps: customerSteps,
   },
   professional: {
     label: "For Professionals",
     note: "Set up your profile, get verified and turn your skills into new opportunities.",
-    cta: "Join as a Professional",
+    cta: "Get Started Today",
     to: "/register/vendor/Profile",
     steps: professionalSteps,
   },
@@ -172,8 +169,13 @@ const HowItWorks = () => {
       }
 
       const isMobile = window.matchMedia("(max-width: 767px)").matches;
+      const illustrations = timeline.querySelectorAll(".how-journey__illustration");
+      const markers = timeline.querySelectorAll(".how-journey__step-marker");
+      const arrows = timeline.querySelectorAll(".how-journey__connector-arrow");
       gsap.set([headingRef.current, subtitleRef.current], { opacity: 0, y: 22 });
       gsap.set(steps, { opacity: 0.38, y: 28 });
+      gsap.set(illustrations, { scale: 0.94, y: 12 });
+      gsap.set(arrows, { opacity: 0.2, x: -5 });
       gsap.set(ctaRef.current, { opacity: 0, y: 18 });
       gsap.set(progressRef.current, { [isMobile ? "scaleY" : "scaleX"]: 0 });
 
@@ -192,6 +194,9 @@ const HowItWorks = () => {
         .to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0.08)
         .to(progressRef.current, { [isMobile ? "scaleY" : "scaleX"]: 1, duration: 1.45, ease: "none" }, 0.12)
         .to(steps, { opacity: 1, y: 0, duration: 0.72, stagger: 0.19, ease: "none" }, 0.16)
+        .to(illustrations, { scale: 1, y: 0, duration: 0.8, stagger: 0.19, ease: "none" }, 0.16)
+        .to(markers, { borderColor: "rgba(16, 185, 129, 0.78)", boxShadow: "0 0 0 7px rgba(16, 185, 129, 0.1), 0 0 24px rgba(16, 185, 129, 0.2)", duration: 0.42, stagger: 0.19, ease: "none" }, 0.2)
+        .to(arrows, { opacity: 1, x: 0, duration: 0.32, stagger: 0.19, ease: "none" }, 0.34)
         .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.25, ease: "none" }, 1.18);
     }, section);
 
