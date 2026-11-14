@@ -119,7 +119,7 @@ const JourneyIllustration = ({ type }) => {
       <div className="how-visual how-visual--booking" aria-hidden="true">
         <div className="how-calendar-card">
           <div className="how-calendar-head"><CalendarDays size={18} /><b>Your booking</b><span>•••</span></div>
-          <div className="how-calendar-month">Available slots <span>June 2026</span></div>
+          <div className="how-calendar-month">Available slots <span>This week</span></div>
           <div className="how-calendar-grid">{["M", "T", "W", "T", "F", "S", "S", "8", "9", "10", "11", "12", "13", "14"].map((day, index) => <span className={index === 10 ? "is-selected" : ""} key={index}>{day}</span>)}</div>
         </div>
         <div className="how-booking-confirm"><CheckCircle2 size={17} /><span>Booking confirmed</span></div>
@@ -150,6 +150,7 @@ const HowItWorks = () => {
   const subtitleRef = useRef(null);
   const timelineRef = useRef(null);
   const progressRef = useRef(null);
+  const mobileProgressRef = useRef(null);
   const ctaRef = useRef(null);
 
   const activeJourney = tracks[activeTrack];
@@ -164,7 +165,7 @@ const HowItWorks = () => {
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduceMotion) {
         gsap.set([headingRef.current, subtitleRef.current, ...steps, ctaRef.current], { clearProps: "all" });
-        gsap.set(progressRef.current, { scaleX: 1, scaleY: 1 });
+        gsap.set([progressRef.current, mobileProgressRef.current], { clearProps: "all" });
         return;
       }
 
@@ -177,7 +178,11 @@ const HowItWorks = () => {
       gsap.set(illustrations, { scale: 0.94, y: 12 });
       gsap.set(arrows, { opacity: 0.2, x: -5 });
       gsap.set(ctaRef.current, { opacity: 0, y: 18 });
-      gsap.set(progressRef.current, { [isMobile ? "scaleY" : "scaleX"]: 0 });
+      const progressTarget = isMobile ? mobileProgressRef.current : progressRef.current;
+      const pathLength = isMobile ? 1 : progressTarget?.getTotalLength?.() || 1000;
+      gsap.set(progressTarget, isMobile
+        ? { scaleY: 0 }
+        : { strokeDasharray: pathLength, strokeDashoffset: pathLength });
 
       const journey = gsap.timeline({
         scrollTrigger: {
@@ -192,7 +197,7 @@ const HowItWorks = () => {
       journey
         .to(headingRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0)
         .to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0.08)
-        .to(progressRef.current, { [isMobile ? "scaleY" : "scaleX"]: 1, duration: 1.45, ease: "none" }, 0.12)
+        .to(progressTarget, isMobile ? { scaleY: 1, duration: 1.45, ease: "none" } : { strokeDashoffset: 0, duration: 1.45, ease: "none" }, 0.12)
         .to(steps, { opacity: 1, y: 0, duration: 0.72, stagger: 0.19, ease: "none" }, 0.16)
         .to(illustrations, { scale: 1, y: 0, duration: 0.8, stagger: 0.19, ease: "none" }, 0.16)
         .to(markers, { borderColor: "rgba(16, 185, 129, 0.78)", boxShadow: "0 0 0 7px rgba(16, 185, 129, 0.1), 0 0 24px rgba(16, 185, 129, 0.2)", duration: 0.42, stagger: 0.19, ease: "none" }, 0.2)
