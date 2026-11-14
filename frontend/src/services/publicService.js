@@ -116,3 +116,21 @@ export const getVendorPublicProfile = async (vendorId) => {
     );
   }
 };
+
+
+// =======================================
+// Public Testimonials
+// =======================================
+export const getPublicTestimonials = async (params = {}) => {
+  try {
+    const response = await api.get("/public/testimonials", { params });
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
+};
