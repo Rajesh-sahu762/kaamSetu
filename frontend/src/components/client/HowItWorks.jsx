@@ -30,7 +30,7 @@ const customerSteps = [
   },
   {
     title: "Connect with Experts",
-    desc: "Explore verified professionals, compare their experience and reviews, and connect with the right expert.",
+    desc: "Explore verified professionals, compare ratings, reviews and experience, and connect with the right expert.",
     visual: "expert",
   },
   {
