@@ -405,6 +405,10 @@ const getFeaturedExperts = async (req, res) => {
             rating: stats?.avgRating || 0,
             jobsCount: stats?.totalBookings || 0,
             category: primaryService?.categoryId?.name || "Service Provider",
+            // Reuse existing vendor service media when a professional has
+            // not uploaded a separate profile photo.
+            coverImage: primaryService?.coverImage || "",
+            images: primaryService?.images || [],
           };
         }),
     );
