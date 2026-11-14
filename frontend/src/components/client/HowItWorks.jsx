@@ -239,8 +239,12 @@ const HowItWorks = () => {
 
         <div className="how-journey__timeline" ref={timelineRef}>
           <div className="how-journey__rail" aria-hidden="true">
-            <span className="how-journey__rail-base" />
-            <span className="how-journey__rail-progress" ref={progressRef} />
+            <svg className="how-journey__rail-curve" viewBox="0 0 1000 56" preserveAspectRatio="none">
+              <path className="how-journey__rail-base" d="M125 28 C205 0 295 56 375 28 S545 0 625 28 S795 56 875 28" />
+              <path className="how-journey__rail-progress" ref={progressRef} d="M125 28 C205 0 295 56 375 28 S545 0 625 28 S795 56 875 28" />
+            </svg>
+            <span className="how-journey__rail-mobile-base" />
+            <span className="how-journey__rail-mobile-progress" ref={mobileProgressRef} />
           </div>
 
           {activeJourney.steps.map((step, index) => {
