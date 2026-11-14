@@ -620,7 +620,7 @@ const getPublicTestimonials = async (req, res) => {
         })
         .populate("bookingId", "status")
         .sort({ createdAt: -1 })
-        .limit(limit),
+        .limit(limit * 3),
     ]);
 
     const aggregate = ratingStats[0] || {
@@ -635,6 +635,7 @@ const getPublicTestimonials = async (req, res) => {
 
     const testimonials = recentReviews
       .filter((item) => item.customerId && item.serviceId && item.bookingId?.status === "completed")
+      .slice(0, limit)
       .map((item) => ({
         id: item._id,
         name: item.customerId.fullName,
