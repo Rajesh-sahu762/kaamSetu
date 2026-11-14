@@ -57,21 +57,30 @@ const getInitials = (name = "") =>
     .toUpperCase() || "K";
 
 const ExpertPhoto = ({ expert }) => {
-  const [imageFailed, setImageFailed] = useState(false);
-  const imageUrl = getImageUrl(expert.userId?.profileImage, "profile");
+  // Prefer the professional's own photo. If they have not uploaded one,
+  // use their real service cover/portfolio image returned by the same API.
+  const imageSources = [
+    getImageUrl(expert.userId?.profileImage, "profile"),
+    getImageUrl(expert.coverImage, "services"),
+    ...(Array.isArray(expert.images)
+      ? expert.images.map((image) => getImageUrl(image, "services"))
+      : []),
+  ].filter((url, index, sources) => url && sources.indexOf(url) === index);
+  const [imageIndex, setImageIndex] = useState(0);
+  const imageUrl = imageSources[imageIndex];
 
   return (
     <div className="featured-expert-card__photo">
-      {imageUrl && !imageFailed ? (
+      {imageUrl ? (
         <img
           src={imageUrl}
           alt={expert.businessName || "Professional"}
           loading="lazy"
           decoding="async"
-          onError={() => setImageFailed(true)}
+          onError={() => setImageIndex((current) => current + 1)}
         />
       ) : (
-        <div className="featured-expert-card__photo-fallback" aria-label="Profile photo unavailable">
+        <div className="featured-expert-card__photo-fallback" aria-label="Professional photo unavailable">
           <span>{getInitials(expert.businessName)}</span>
         </div>
       )}
