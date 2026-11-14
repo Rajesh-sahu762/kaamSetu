@@ -159,6 +159,9 @@ const HowItWorks = () => {
     const section = sectionRef.current;
     const timeline = timelineRef.current;
     const steps = timeline?.querySelectorAll(".how-journey__step");
+    const eyebrow = section?.querySelector(".how-journey__eyebrow");
+    const switcher = section?.querySelector(".how-journey__switcher");
+    const trackNote = section?.querySelector(".how-journey__track-note");
     if (!section || !timeline || !steps?.length) return undefined;
 
     const context = gsap.context(() => {
@@ -172,7 +175,7 @@ const HowItWorks = () => {
       const illustrations = timeline.querySelectorAll(".how-journey__illustration");
       const markers = timeline.querySelectorAll(".how-journey__step-marker");
       const arrows = timeline.querySelectorAll(".how-journey__connector-arrow");
-      gsap.set([headingRef.current, subtitleRef.current], { opacity: 0, y: 22 });
+      gsap.set([eyebrow, headingRef.current, subtitleRef.current, switcher, trackNote], { opacity: 0, y: 22 });
       gsap.set(steps, { opacity: 0.38, y: 28 });
       gsap.set(illustrations, { scale: 0.94, y: 12 });
       gsap.set(arrows, { opacity: 0.2, x: -5 });
@@ -192,8 +195,11 @@ const HowItWorks = () => {
       });
 
       journey
-        .to(headingRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0)
-        .to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0.08)
+        .to(eyebrow, { opacity: 1, y: 0, duration: 0.2, ease: "none" }, 0)
+        .to(headingRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0.04)
+        .to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.28, ease: "none" }, 0.1)
+        .to(switcher, { opacity: 1, y: 0, duration: 0.24, ease: "none" }, 0.12)
+        .to(trackNote, { opacity: 1, y: 0, duration: 0.22, ease: "none" }, 0.16)
         .to(progressRef.current, { strokeDashoffset: 0, duration: 1.45, ease: "none" }, 0.12)
         .to(mobileProgressRef.current, { scaleY: 1, duration: 1.45, ease: "none" }, 0.12)
         .to(steps, { opacity: 1, y: 0, duration: 0.72, stagger: 0.19, ease: "none" }, 0.16)
