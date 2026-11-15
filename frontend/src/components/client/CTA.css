@@ -21,7 +21,7 @@
 .ks-final-cta__button--bright{background:linear-gradient(120deg,#10c96c,#08a94e)}
 .ks-final-cta__button:focus-visible{outline:3px solid var(--kscta-secondary);outline-offset:4px}
 .ks-final-cta__illustration{position:relative;display:grid;place-items:center;width:min(100%,245px);aspect-ratio:1.15;margin:auto;color:#087b4c}
-.ks-final-cta__illustration-orbit{position:absolute;width:82%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#6bed a754,#6beda71f 62%,transparent 63%)}
+.ks-final-cta__illustration-orbit{position:absolute;width:82%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#6beda754,#6beda71f 62%,transparent 63%)}
 .ks-final-cta__illustration-platform{position:absolute;bottom:8%;width:100%;height:22%;border-radius:50%;background:radial-gradient(ellipse,#10b9813b,#10b98112 60%,transparent 72%);filter:blur(2px)}
 .ks-final-cta__main-illustration{position:relative;z-index:1;width:68%;height:68%;padding:10%;overflow:visible;color:#08764b;fill:#e4f9ec;stroke:#08764b;filter:drop-shadow(0 12px 5px #00523038) drop-shadow(0 2px 1px #fff)}
 .ks-final-cta__illustration--work .ks-final-cta__main-illustration{width:75%;height:65%;fill:#145c45;stroke:#b7f1d0;filter:drop-shadow(0 13px 5px #0032224d)}
