@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 390" fill="none">
+<defs>
+ <linearGradient id="palace" x1="0" y1="80" x2="0" y2="390" gradientUnits="userSpaceOnUse"><stop stop-color="#0b6b43"/><stop offset=".48" stop-color="#032d1c"/><stop offset="1" stop-color="#00170e"/></linearGradient>
+ <linearGradient id="windows" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#aaffc9"/><stop offset="1" stop-color="#17b96b"/></linearGradient>
+ <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<!-- distant hills and tree line -->
+<path d="M0 310Q80 270 160 298T320 286T490 304T650 282T810 302T980 275T1160 294T1330 266T1600 292V390H0Z" fill="#031d12"/>
+<g fill="#042819">
+ <path d="M0 322l18-45 13 23 17-38 20 37 19-21 21 44v68H0zM115 324l22-56 20 35 16-24 25 45v66H115zM1430 320l22-56 18 33 17-23 20 46v70h-77zM1510 316l22-48 18 30 18-24 32 45v71h-90z"/>
+ <path d="M230 340l17-44 16 28 13-22 25 38v50h-71zM1250 340l18-47 16 29 17-22 24 40v50h-75z"/>
+</g>
+<!-- palace body -->
+<path d="M410 330V240h38v-48h45v-42h38v42h36v-66h45v-45h43v45h38v66h35v-32h47v32h34v-74h42v-50h48v50h38v74h35v-42h48v42h38v-70h42v-44h44v44h38v70h42v-35h46v35h35v-58h40v-37h40v37h40v58h30v90H410Z" fill="url(#palace)" stroke="#087e4e" stroke-width="3"/>
+<!-- grand central facade -->
+<path d="M700 330V174h70v-36h55v36h65v-62h62v-49h56v49h62v62h65v-36h55v36h72v156H700Z" fill="#063a25" stroke="#14975c" stroke-width="3"/>
+<path d="M735 178h400v12H735zM735 224h400v7H735zM735 280h400v7H735z" fill="#0b8a53" opacity=".8"/>
+<!-- domes and chhatris -->
+<g fill="#075337" stroke="#19a968" stroke-width="3">
+ <path d="M760 140q0-53 35-70 35 17 35 70z"/><path d="M750 140h90v9h-90z"/>
+ <path d="M890 105q0-72 44-94 44 22 44 94z"/><path d="M878 105h112v10H878z"/>
+ <path d="M1050 140q0-55 36-75 36 20 36 75z"/><path d="M1038 140h96v9h-96z"/>
+ <path d="M1210 175q0-45 30-62 30 17 30 62z"/><path d="M1200 175h80v8h-80z"/>
+ <path d="M580 196q0-43 29-59 29 16 29 59z"/><path d="M570 196h78v8h-78z"/>
+ <path d="M460 232q0-31 22-44 22 13 22 44z"/><path d="M452 232h60v7h-60z"/>
+ <path d="M1370 210q0-38 26-52 26 14 26 52z"/><path d="M1362 210h68v7h-68z"/>
+</g>
+<!-- finials -->
+<g stroke="#26d985" stroke-width="3" stroke-linecap="round"><path d="M795 70V49m0 0-7 9m7-9 7 9M934 11V0m0 0-7 8m7-8 7 8M1086 75V55m0 0-7 8m7-8 7 8M1400 158v-16"/></g>
+<!-- arched windows -->
+<g fill="url(#windows)" filter="url(#glow)" opacity=".95">
+ <path d="M757 240q0-19 12-19t12 19v22h-24zM803 240q0-19 12-19t12 19v22h-24zM849 240q0-19 12-19t12 19v22h-24zM895 240q0-19 12-19t12 19v22h-24zM941 240q0-19 12-19t12 19v22h-24zM987 240q0-19 12-19t12 19v22h-24zM1033 240q0-19 12-19t12 19v22h-24zM1079 240q0-19 12-19t12 19v22h-24z"/>
+ <path d="M779 157q0-15 10-15t10 15v15h-20zM920 111q0-17 12-17t12 17v18h-24zM1064 157q0-15 10-15t10 15v15h-20zM1230 191q0-13 9-13t9 13v15h-18zM596 211q0-12 8-12t8 12v13h-16z"/>
+</g>
+<!-- balconies, arches and side wings -->
+<g stroke="#128c56" stroke-width="4" fill="none">
+ <path d="M715 286h440M715 296h440M730 286v-18m30 18v-18m30 18v-18m30 18v-18m30 18v-18m30 18v-18m30 18v-18m30 18v-18m30 18v-18m30 18v-18m30 18v-18m30 18v-18"/>
+ <path d="M490 290v-38q0-22 20-22t20 22v38m58 0v-38q0-22 20-22t20 22v38m560 0v-38q0-22 20-22t20 22v38m58 0v-38q0-22 20-22t20 22v38"/>
+</g>
+<!-- foreground trees and garden -->
+<g fill="#021c11">
+ <path d="M290 340q-10-55 18-78 4-38 34-44 26 6 25 36 30 18 18 86zM355 343q-8-42 20-61 5-35 31-37 25 8 20 34 28 21 14 64zM1280 344q-8-51 22-74 5-37 34-42 29 8 24 37 30 22 14 79zM1350 343q-8-42 20-60 5-33 31-37 25 8 20 33 28 20 14 64z"/>
+</g>
+<g fill="#0b7e4d" opacity=".8"><circle cx="342" cy="223" r="4"/><circle cx="400" cy="244" r="3"/><circle cx="1325" cy="236" r="4"/><circle cx="1405" cy="249" r="3"/></g>
+<!-- lake and embankment -->
+<path d="M0 347H1600V390H0z" fill="#00160e"/>
+<path d="M0 349Q400 344 800 351T1600 347" stroke="#27e58b" stroke-width="3" opacity=".75" filter="url(#glow)"/>
+<path d="M0 366Q300 360 600 369T1200 365T1600 368" stroke="#0c7849" stroke-width="2" opacity=".65"/>
+</svg>
