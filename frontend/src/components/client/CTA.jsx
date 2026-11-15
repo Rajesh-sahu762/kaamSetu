@@ -2,11 +2,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   BriefcaseBusiness,
-  Headset,
-  Heart,
   House,
   Search,
-  ShieldCheck,
   UserRound,
   Zap,
 } from "lucide-react";
@@ -110,27 +107,6 @@ const FinalCTA = () => {
           </motion.article>
         </div>
 
-        <motion.div className="ks-final-cta__trust" {...entrance} transition={{ duration: 0.5, delay: 0.22 }}>
-          <div className="ks-final-cta__trust-item">
-            <span><ShieldCheck size={31} strokeWidth={2.1} /></span>
-            <p><strong>100% Verified</strong><small>Professionals</small></p>
-          </div>
-          <i aria-hidden="true" />
-          <div className="ks-final-cta__trust-item">
-            <span><Zap size={31} strokeWidth={2.1} /></span>
-            <p><strong>Quick &amp; Easy</strong><small>Booking</small></p>
-          </div>
-          <i aria-hidden="true" />
-          <div className="ks-final-cta__trust-item">
-            <span><Headset size={31} strokeWidth={2.1} /></span>
-            <p><strong>24/7 Support</strong><small>Always Here</small></p>
-          </div>
-          <i aria-hidden="true" />
-          <div className="ks-final-cta__trust-item">
-            <span><Heart size={31} strokeWidth={2.1} /></span>
-            <p><strong>Trusted by</strong><small>Thousands</small></p>
-          </div>
-        </motion.div>
       </div>
     </section>
   );
