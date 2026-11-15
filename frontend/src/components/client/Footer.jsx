@@ -5,7 +5,7 @@ import {
   Headset, House, Mail, Send, ShieldCheck,
 } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
-import palaceLandscape from "../../assets/kaamsetu-footer-palace.svg";
+import palaceLandscape from "../../assets/Emerald Palace Landscape Cutout.png";
 import "./Footer.css";
 
 const footerGroups = [
@@ -51,6 +51,7 @@ const Footer = () => {
       <div className="ks-footer__dots ks-footer__dots--bl" aria-hidden="true" />
       <div className="ks-footer__dots ks-footer__dots--br" aria-hidden="true" />
 
+      <div className="ks-footer__palace-background" style={{ backgroundImage: "url(" + palaceLandscape + ")" }} aria-hidden="true" />
       <div className="ks-footer__container">
         <div className="ks-footer__main">
           <motion.div className="ks-footer__brand" initial={reduceMotion ? false : { opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .15 }} transition={{ duration: .55 }}>
@@ -100,7 +101,6 @@ const Footer = () => {
         </div>
 
         <div className="ks-footer__scene" aria-hidden="true">
-          <img className="ks-footer__palace" src={palaceLandscape} alt="" />
           <FooterEmblem />
         </div>
 
