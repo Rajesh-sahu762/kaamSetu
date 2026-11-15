@@ -446,3 +446,134 @@
   .ks-testimonials__controls > button,
   .ks-testimonials__dots button { transition: none; }
 }
+
+
+/* Carousel layout refinement: compact cards with side-mounted navigation. */
+.ks-testimonials__carousel {
+  position: relative;
+  padding: 0 56px 62px;
+}
+
+.ks-testimonials__cards {
+  width: 100%;
+  max-width: 1000px;
+  margin-inline: auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.05rem;
+  min-height: 0;
+}
+
+.ks-testimonials__cards.has-one {
+  max-width: 560px;
+}
+
+.ks-testimonials__cards.has-two {
+  max-width: 680px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ks-testimonials__controls {
+  position: absolute;
+  inset: 0;
+  display: block;
+  height: auto;
+  margin: 0;
+  pointer-events: none;
+}
+
+.ks-testimonials__controls > button {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  box-shadow: 0 8px 22px rgba(10, 45, 28, .10);
+}
+
+.ks-testimonials__controls > button:first-child {
+  left: 0;
+}
+
+.ks-testimonials__controls > button:last-child {
+  right: 0;
+}
+
+.ks-testimonials__controls > button:hover {
+  transform: translateY(calc(-50% - 2px));
+}
+
+.ks-testimonials__dots {
+  position: absolute;
+  left: 50%;
+  bottom: 17px;
+  transform: translateX(-50%);
+}
+
+.ks-testimonial-card {
+  min-height: 292px;
+  padding: 1.35rem;
+}
+
+.ks-testimonial-card.is-side {
+  transform: scale(.985);
+}
+
+.ks-testimonial-card.is-active {
+  transform: translateY(-6px);
+}
+
+@media (max-width: 900px) {
+  .ks-testimonials__carousel {
+    padding-inline: 48px;
+  }
+
+  .ks-testimonials__cards {
+    max-width: 720px;
+    gap: .75rem;
+  }
+
+  .ks-testimonial-card {
+    padding: 1.05rem;
+  }
+
+  .ks-testimonial-card__review {
+    font-size: .86rem;
+    line-height: 1.68;
+  }
+}
+
+@media (max-width: 640px) {
+  .ks-testimonials__carousel {
+    padding: 0 38px 58px;
+  }
+
+  .ks-testimonials__cards,
+  .ks-testimonials__cards.has-two {
+    max-width: 420px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ks-testimonial-card {
+    min-height: 270px;
+    padding: 1.15rem;
+  }
+
+  .ks-testimonials__controls > button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ks-testimonials__dots {
+    bottom: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ks-testimonial-card.is-active,
+  .ks-testimonial-card.is-side,
+  .ks-testimonials__controls > button:hover {
+    transform: none;
+  }
+}
