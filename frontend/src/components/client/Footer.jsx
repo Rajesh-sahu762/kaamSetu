@@ -5,6 +5,7 @@ import {
   Headset, House, Mail, Send, ShieldCheck, Sparkles, Zap,
 } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
+import palaceLandscape from "../../assets/kaamsetu-footer-palace.svg";
 import "./Footer.css";
 
 const footerGroups = [
@@ -20,34 +21,6 @@ const socials = [
   { label: "X", Icon: FaXTwitter },
 ];
 
-function FooterLandscape() {
-  return (
-    <svg className="ks-footer__landscape" viewBox="0 0 1600 300" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="ksFooterLand" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#18d879" stopOpacity=".08" />
-          <stop offset="1" stopColor="#03170f" stopOpacity=".98" />
-        </linearGradient>
-        <linearGradient id="ksFooterGlow" x1="0" y1="0" x2="1" y2="0">
-          <stop stopColor="#0b7a50" stopOpacity="0" />
-          <stop offset=".48" stopColor="#32f59a" stopOpacity=".65" />
-          <stop offset="1" stopColor="#0b7a50" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d="M0 190 C170 105 255 235 420 180 S690 110 850 170 1090 215 1250 120 1460 70 1600 0 V300 H0Z" fill="url(#ksFooterLand)" />
-      <path d="M0 205 C170 120 250 250 420 194 S690 130 850 184 1090 228 1250 138 1460 86 1600 18" fill="none" stroke="url(#ksFooterGlow)" strokeWidth="3" />
-      <path d="M0 255 Q230 230 410 270 T800 252 T1200 262 T1600 228" fill="none" stroke="#21df83" strokeOpacity=".48" strokeWidth="2" />
-      <g fill="#02150d" stroke="#0b603e" strokeWidth="1.2">
-        <path d="M1050 220h26v-42l18-16 18 16v42h18v-61l22-19 22 19v61h20v-80l28-24 28 24v80h18v-55l20-17 20 17v55h22v-38l16-13 16 13v38h22v-67l25-20 25 20v67h24v-42l19-15 19 15v42h28v-28l18-15 18 15v28h32v80h-480z" />
-        <path d="M1185 140h18v-34h18v34h18v-50l20-17 20 17v50h18v-34h18v34h18v-63l20-17 20 17v63h18v-37h18v37" />
-        <path d="M0 265h1600v35H0z" />
-      </g>
-      <g fill="#03190f">
-        {Array.from({ length: 28 }, (_, i) => <circle key={i} cx={1080 + (i % 14) * 36} cy={225 + Math.floor(i / 14) * 15} r="3" />)}
-      </g>
-    </svg>
-  );
-}
 
 function FooterEmblem() {
   return (
@@ -126,8 +99,10 @@ const Footer = () => {
           </aside>
         </div>
 
-        <FooterEmblem />
-        <FooterLandscape />
+        <div className="ks-footer__scene" aria-hidden="true">
+          <img className="ks-footer__palace" src={palaceLandscape} alt="" />
+          <FooterEmblem />
+        </div>
 
         <div className="ks-footer__bottom">
           <p>© {new Date().getFullYear()} KaamSetu. All rights reserved.</p>
