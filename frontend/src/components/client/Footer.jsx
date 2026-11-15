@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight, ArrowUp, BriefcaseBusiness, Building2, ChevronDown,
-  Headset, House, Mail, Send, ShieldCheck, Sparkles, Zap,
+  Headset, House, Mail, Send, ShieldCheck,
 } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import palaceLandscape from "../../assets/kaamsetu-footer-palace.svg";
