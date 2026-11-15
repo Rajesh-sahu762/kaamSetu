@@ -577,3 +577,11 @@
     transform: none;
   }
 }
+
+/* Keep side arrows vertically aligned with the card area, not the pagination gutter. */
+.ks-testimonials__controls > button {
+  top: calc(50% - 31px);
+}
+.ks-testimonials__controls > button:hover {
+  transform: translateY(calc(-50% - 2px));
+}
