@@ -48,3 +48,169 @@
 @media(max-width:760px){.ks-final-cta{padding:4rem 0 3.5rem}.ks-final-cta__inner{width:min(100% - 2rem,560px)}.ks-final-cta__header{margin-bottom:2rem}.ks-final-cta__header h2{font-size:clamp(2rem,8vw,3.2rem)}.ks-final-cta__header p{font-size:.95rem}.ks-final-cta__desktop-break{display:none}.ks-final-cta__choices{grid-template-columns:1fr;gap:.8rem}.ks-final-cta__choice{grid-template-columns:minmax(115px,.85fr) minmax(0,1.15fr);min-height:205px;gap:.7rem;padding:1.1rem;border-radius:25px}.ks-final-cta__illustration{width:min(100%,180px)}.ks-final-cta__choice-copy h3{font-size:clamp(1.15rem,4vw,1.5rem)}.ks-final-cta__choice-copy p{margin:.45rem 0 .8rem;font-size:.87rem}.ks-final-cta__button{min-height:44px;padding:.65rem 1rem;font-size:.86rem}.ks-final-cta__or{flex-direction:row;gap:.8rem;height:34px}.ks-final-cta__or span{width:min(25%,90px);height:1px}.ks-final-cta__or b{width:40px;height:40px;font-size:.9rem}.ks-final-cta__trust{grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem .4rem;margin-top:2.4rem}.ks-final-cta__trust>i{display:none}.ks-final-cta__trust-item{justify-content:flex-start;padding:0}.ks-final-cta__trust-item>span{width:46px;height:46px;flex-basis:46px}.ks-final-cta__trust-item>span svg{width:25px;height:25px}.ks-final-cta__trust-item strong{font-size:.83rem}.ks-final-cta__trust-item small{font-size:.76rem}}
 @media(max-width:420px){.ks-final-cta__choice{grid-template-columns:100px minmax(0,1fr);gap:.5rem;padding:.9rem}.ks-final-cta__illustration{width:110px}.ks-final-cta__search-bubble,.ks-final-cta__user-bubble{width:48px;height:48px;border-width:3px}.ks-final-cta__search-bubble svg{width:30px;height:30px}.ks-final-cta__user-bubble svg{width:25px;height:25px}.ks-final-cta__choice-copy h3{font-size:1.08rem}.ks-final-cta__choice-copy p{font-size:.82rem}.ks-final-cta__button{gap:.4rem;padding:.6rem .8rem;font-size:.8rem}}
 @media(prefers-reduced-motion:reduce){.ks-final-cta__choice,.ks-final-cta__button{transition:none}.ks-final-cta__choice:hover{transform:none}}
+
+/* Compact sizing pass: keep this CTA visually balanced with surrounding sections. */
+.ks-final-cta {
+  padding: clamp(3.25rem, 5vw, 4.5rem) 0 clamp(2.75rem, 4vw, 3.5rem);
+}
+.ks-final-cta__inner {
+  width: min(100% - 3rem, 1220px);
+}
+.ks-final-cta__header {
+  margin-bottom: 1.8rem;
+}
+.ks-final-cta__eyebrow {
+  gap: .45rem;
+  padding: .35rem .8rem .35rem .4rem;
+  font-size: .7rem;
+}
+.ks-final-cta__eyebrow-icon {
+  width: 28px;
+  height: 28px;
+}
+.ks-final-cta__eyebrow-icon svg { width: 15px; height: 15px; }
+.ks-final-cta__header h2 {
+  margin-top: .8rem;
+  font-size: clamp(2rem, 3.8vw, 3.25rem);
+  line-height: 1.12;
+}
+.ks-final-cta__header h2 span:after {
+  bottom: -5px;
+  height: 3px;
+}
+.ks-final-cta__header p {
+  margin-top: .85rem;
+  font-size: clamp(.9rem, 1.25vw, 1.08rem);
+  line-height: 1.5;
+}
+.ks-final-cta__choices {
+  grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr);
+  gap: 1rem;
+  max-width: 1120px;
+  margin-inline: auto;
+}
+.ks-final-cta__choice {
+  grid-template-columns: minmax(125px, .82fr) minmax(0, 1.18fr);
+  min-height: 184px;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 24px;
+}
+.ks-final-cta__choice-copy h3 {
+  font-size: clamp(1.08rem, 1.55vw, 1.4rem);
+}
+.ks-final-cta__choice-copy p {
+  margin: .4rem 0 .8rem;
+  font-size: .88rem;
+  line-height: 1.45;
+}
+.ks-final-cta__button {
+  min-height: 42px;
+  gap: .5rem;
+  padding: .62rem 1rem;
+  font-size: .85rem;
+}
+.ks-final-cta__button svg { width: 16px; height: 16px; }
+.ks-final-cta__illustration {
+  width: min(100%, 175px);
+}
+.ks-final-cta__main-illustration {
+  width: 62%;
+  height: 62%;
+}
+.ks-final-cta__search-bubble,
+.ks-final-cta__user-bubble {
+  width: 52px;
+  height: 52px;
+  border-width: 4px;
+}
+.ks-final-cta__search-bubble svg { width: 32px; height: 32px; }
+.ks-final-cta__user-bubble svg { width: 27px; height: 27px; }
+.ks-final-cta__or { gap: .5rem; }
+.ks-final-cta__or span { height: 42px; }
+.ks-final-cta__or b {
+  width: 48px;
+  height: 48px;
+  font-size: 1rem;
+}
+.ks-final-cta__trust {
+  max-width: 1050px;
+  margin-top: 2.25rem;
+}
+.ks-final-cta__trust-item { gap: .65rem; padding-inline: .85rem; }
+.ks-final-cta__trust-item > span {
+  width: 48px;
+  height: 48px;
+  flex-basis: 48px;
+}
+.ks-final-cta__trust-item > span svg { width: 25px; height: 25px; }
+.ks-final-cta__trust-item strong { font-size: .9rem; }
+.ks-final-cta__trust-item small { font-size: .82rem; }
+
+@media (max-width: 900px) {
+  .ks-final-cta__inner { width: min(100% - 2.5rem, 700px); }
+  .ks-final-cta__choices {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .55rem;
+    max-width: 620px;
+  }
+  .ks-final-cta__choice {
+    grid-template-columns: 150px minmax(0, 1fr);
+    min-height: 168px;
+    padding: 1rem 1.25rem;
+  }
+  .ks-final-cta__illustration { width: 145px; }
+  .ks-final-cta__or {
+    flex-direction: row;
+    height: 30px;
+    gap: .6rem;
+  }
+  .ks-final-cta__or span {
+    width: min(18%, 70px);
+    height: 1px;
+  }
+  .ks-final-cta__or b { width: 34px; height: 34px; font-size: .75rem; }
+  .ks-final-cta__trust { margin-top: 1.8rem; }
+}
+@media (max-width: 600px) {
+  .ks-final-cta { padding: 3rem 0 2.7rem; }
+  .ks-final-cta__inner { width: min(100% - 2rem, 480px); }
+  .ks-final-cta__header { margin-bottom: 1.5rem; }
+  .ks-final-cta__header h2 { font-size: clamp(1.85rem, 7.5vw, 2.6rem); }
+  .ks-final-cta__header p { max-width: 390px; font-size: .88rem; }
+  .ks-final-cta__choice {
+    grid-template-columns: 112px minmax(0, 1fr);
+    min-height: 150px;
+    gap: .75rem;
+    padding: .85rem;
+    border-radius: 19px;
+  }
+  .ks-final-cta__illustration { width: 108px; }
+  .ks-final-cta__illustration-orbit { width: 88%; }
+  .ks-final-cta__main-illustration { width: 68%; height: 68%; }
+  .ks-final-cta__search-bubble,
+  .ks-final-cta__user-bubble { width: 42px; height: 42px; border-width: 3px; }
+  .ks-final-cta__search-bubble svg { width: 25px; height: 25px; }
+  .ks-final-cta__user-bubble svg { width: 23px; height: 23px; }
+  .ks-final-cta__choice-copy h3 { font-size: 1.08rem; }
+  .ks-final-cta__choice-copy p { margin: .3rem 0 .6rem; font-size: .8rem; line-height: 1.4; }
+  .ks-final-cta__button { min-height: 38px; padding: .5rem .75rem; font-size: .78rem; }
+  .ks-final-cta__trust { gap: .8rem .4rem; margin-top: 1.6rem; }
+  .ks-final-cta__trust-item { gap: .5rem; }
+  .ks-final-cta__trust-item > span { width: 39px; height: 39px; flex-basis: 39px; }
+  .ks-final-cta__trust-item > span svg { width: 21px; height: 21px; }
+  .ks-final-cta__trust-item strong { font-size: .76rem; }
+  .ks-final-cta__trust-item small { font-size: .7rem; }
+  .ks-final-cta__dots { opacity: .2; }
+}
+@media (max-width: 360px) {
+  .ks-final-cta__inner { width: calc(100% - 1.25rem); }
+  .ks-final-cta__choice { grid-template-columns: 88px minmax(0, 1fr); gap: .55rem; }
+  .ks-final-cta__illustration { width: 88px; }
+  .ks-final-cta__choice-copy h3 { font-size: 1rem; }
+  .ks-final-cta__choice-copy p { font-size: .75rem; }
+  .ks-final-cta__button { font-size: .73rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ks-final-cta__choice:hover { transform: none; }
+}
