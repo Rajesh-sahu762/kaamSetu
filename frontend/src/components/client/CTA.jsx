@@ -1,14 +1,12 @@
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
-  BadgeCheck,
   BriefcaseBusiness,
   Headset,
   Heart,
   House,
   Search,
   ShieldCheck,
-  Sparkles,
   UserRound,
   Zap,
 } from "lucide-react";
