@@ -153,12 +153,11 @@ const HeroSection = ({ stats, categories = [], loading = false }) => {
           </div>
 
           <div className="ks-hero__scene ks-hero__scene--room" aria-hidden="true">
-            <div className="ks-hero__scene-window" />
-            <Sofa size={38} strokeWidth={1.2} />
+            <img src="/assets/services/home-cleaning.webp" alt="" loading="lazy" />
             <span>Comfortable spaces</span>
           </div>
           <div className="ks-hero__scene ks-hero__scene--workshop" aria-hidden="true">
-            <div className="ks-hero__tool-rack"><Hammer /><Wrench /><Paintbrush /></div>
+            <img src="/assets/services/carpentry.webp" alt="" loading="lazy" />
             <span>Skilled hands. Better homes.</span>
           </div>
 
@@ -188,7 +187,6 @@ const HeroSection = ({ stats, categories = [], loading = false }) => {
             <Wrench size={21} /><span>Plumbing</span>
           </motion.div>
 
-          <div className="ks-hero__visual-dots" aria-hidden="true"><i /><i /><i /></div>
         </motion.div>
       </div>
     </section>
