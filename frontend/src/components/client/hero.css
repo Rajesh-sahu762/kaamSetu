@@ -426,6 +426,102 @@
 }
 
 
+/* Showcase composition — layered side photos, centered artisan and close-floating labels */
+@media (min-width: 1024px) {
+  .ks-hero__visual { height: clamp(540px, 43vw, 690px); }
+  .ks-hero__scene {
+    width: 35%;
+    height: 38%;
+    border: 2px solid rgba(197,243,107,0.72);
+    border-radius: 28px;
+    box-shadow: 0 18px 42px rgba(0,0,0,0.24), 0 0 20px rgba(57,245,138,0.08);
+  }
+  .ks-hero__scene::before {
+    background: linear-gradient(180deg, rgba(3,18,10,0.02) 45%, rgba(3,18,10,0.62) 100%);
+  }
+  .ks-hero__scene--room {
+    top: 22%;
+    left: 5%;
+    width: 34%;
+    height: 38%;
+    padding: 14px;
+    transform: rotate(-5deg);
+  }
+  .ks-hero__scene--workshop {
+    top: 34%;
+    right: 4%;
+    width: 34%;
+    height: 37%;
+    padding: 14px;
+    transform: rotate(5deg);
+  }
+  .ks-hero__artisan-card {
+    top: 10%;
+    left: 22%;
+    width: 56%;
+    height: 76%;
+    border: 2px solid rgba(157,244,133,0.72);
+    border-radius: 34px;
+    box-shadow: 0 24px 65px rgba(0,0,0,0.34), 0 0 24px rgba(57,245,138,0.14);
+  }
+  .ks-hero__service-chip {
+    min-height: 56px;
+    gap: 10px;
+    padding: 0 18px;
+    border-radius: 17px;
+    font-size: 14px;
+  }
+  .ks-hero__service-chip--carpentry { top: 4%; right: 9%; }
+  .ks-hero__service-chip--painting { bottom: 4%; left: 7%; }
+  .ks-hero__service-chip--plumbing { right: 1%; bottom: 22%; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .ks-hero__visual { height: 570px; }
+  .ks-hero__artisan-card { top: 12%; left: 22%; width: 56%; height: 75%; }
+  .ks-hero__scene--room { top: 23%; left: 4%; width: 34%; height: 37%; }
+  .ks-hero__scene--workshop { top: 34%; right: 4%; width: 34%; height: 37%; }
+  .ks-hero__service-chip--carpentry { top: 5%; right: 8%; }
+  .ks-hero__service-chip--painting { bottom: 4%; left: 7%; }
+  .ks-hero__service-chip--plumbing { right: 1%; bottom: 21%; }
+}
+.dark .ks-hero__artisan-card {
+  border-color: rgba(157,244,133,0.78);
+  background: linear-gradient(145deg, rgba(5,63,38,0.96), rgba(3,27,17,0.98) 68%, rgba(8,75,42,0.96));
+  box-shadow: 0 24px 65px rgba(0,0,0,0.42), 0 0 28px rgba(139,255,92,0.2), inset 0 1px 0 rgba(220,255,220,0.22);
+}
+.dark .ks-hero__artisan-info {
+  border-top-color: rgba(157,244,133,0.3);
+  background: linear-gradient(180deg, rgba(3,30,18,0.92), rgba(2,20,12,0.98));
+}
+.dark .ks-hero__service-chip {
+  border: 1.5px solid #b8f76b;
+  background: linear-gradient(135deg, rgba(3,35,21,0.97), rgba(1,18,11,0.98));
+  color: #f5fff2;
+  box-shadow: 0 0 10px rgba(184,247,107,0.42), 0 0 24px rgba(184,247,107,0.2), inset 0 0 12px rgba(184,247,107,0.08);
+}
+.dark .ks-hero__service-chip svg { color: #c5f36b; }
+.dark .ks-hero__scene {
+  border-color: rgba(197,243,107,0.78);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.38), 0 0 14px rgba(197,243,107,0.12);
+}
+.dark .ks-hero__scene::before {
+  background: linear-gradient(180deg, rgba(2,18,10,0.02) 42%, rgba(2,18,10,0.66) 100%);
+}
+:root:not(.dark) .ks-hero__scene {
+  border-color: rgba(11,122,80,0.34);
+  box-shadow: 0 18px 42px rgba(23,74,46,0.16);
+}
+:root:not(.dark) .ks-hero__scene::before {
+  background: linear-gradient(180deg, rgba(255,255,255,0.01) 42%, rgba(11,54,32,0.58) 100%);
+}
+:root:not(.dark) .ks-hero__artisan-card {
+  border-color: rgba(11,122,80,0.28);
+  box-shadow: 0 24px 65px rgba(23,74,46,0.2), 0 0 22px rgba(16,185,129,0.1);
+}
+:root:not(.dark) .ks-hero__service-chip--carpentry { top: 4%; right: 9%; }
+:root:not(.dark) .ks-hero__service-chip--painting { bottom: 4%; left: 7%; }
+:root:not(.dark) .ks-hero__service-chip--plumbing { right: 1%; bottom: 22%; }
+
 /* Mobile: keep the hero focused on its message; hide the showcase artwork. */
 @media (max-width: 639px) {
   .ks-hero__visual {
