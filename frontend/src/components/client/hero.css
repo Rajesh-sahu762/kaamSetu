@@ -528,3 +528,54 @@
     display: none;
   }
 }
+
+
+/* Final hero composition tuning: slightly smaller center card, labels hugging its corners */
+@media (min-width: 640px) {
+  .ks-hero__artisan-card {
+    top: 14%;
+    left: 24%;
+    width: 52%;
+    height: 72%;
+  }
+
+  .ks-hero__service-chip--carpentry {
+    top: 7%;
+    right: auto;
+    left: 17%;
+  }
+
+  .ks-hero__service-chip--painting {
+    bottom: 7%;
+    left: 17%;
+  }
+
+  .ks-hero__service-chip--plumbing {
+    right: 17%;
+    bottom: 15%;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .ks-hero__artisan-card {
+    top: 14%;
+    left: 24%;
+    width: 52%;
+    height: 72%;
+  }
+
+  .ks-hero__service-chip--carpentry {
+    top: 7%;
+    left: 17%;
+  }
+
+  .ks-hero__service-chip--painting {
+    bottom: 7%;
+    left: 17%;
+  }
+
+  .ks-hero__service-chip--plumbing {
+    right: 17%;
+    bottom: 15%;
+  }
+}
