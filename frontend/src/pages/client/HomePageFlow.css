@@ -1,34 +1,15 @@
-/* Homepage section flow — soft curved transitions for both themes.
-   Scoped to the homepage only; individual section layouts and components stay intact. */
+/* Homepage wrapper only.
+   Keep each section's own theme-aware gradient; do not add artificial seams,
+   overlaps, borders, rounded section edges or shadows between sections. */
 .ks-homepage-flow {
   position: relative;
-  isolation: isolate;
-  overflow: clip;
+  width: 100%;
   background: var(--color-bg);
 }
-.ks-homepage-flow > section { position: relative; border-radius: 0; }
-.ks-homepage-flow > section + section {
-  z-index: 1;
-  margin-top: -30px;
-  border-radius: 34px 34px 0 0;
-  border-top: 1px solid color-mix(in srgb, var(--color-primary) 13%, transparent);
-  box-shadow: 0 -14px 34px color-mix(in srgb, var(--color-primary) 5%, transparent),
-              inset 0 1px 0 color-mix(in srgb, #fff 42%, transparent);
-}
-.ks-homepage-flow > section:first-child { z-index: 0; }
-.dark .ks-homepage-flow { background: var(--color-bg); }
-.dark .ks-homepage-flow > section + section {
-  border-top-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
-  box-shadow: 0 -18px 42px rgba(0,0,0,.22),
-              0 -5px 26px color-mix(in srgb, var(--color-primary) 7%, transparent),
-              inset 0 1px 0 rgba(255,255,255,.035);
-}
-@media (max-width: 700px) {
-  .ks-homepage-flow > section + section {
-    margin-top: -18px;
-    border-radius: 24px 24px 0 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ks-homepage-flow > section + section { scroll-behavior: auto; }
+.ks-homepage-flow > section {
+  position: relative;
+  margin-block: 0;
+  border-radius: 0;
+  border-top: 0;
+  box-shadow: none;
 }
