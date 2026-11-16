@@ -153,11 +153,11 @@ const HeroSection = ({ stats, categories = [], loading = false }) => {
           </div>
 
           <div className="ks-hero__scene ks-hero__scene--room" aria-hidden="true">
-            <img src="/assets/services/home-cleaning.webp" alt="" loading="lazy" />
+            <img src={categories.find((item) => /clean|housekeep/i.test(item.name || ""))?.image || "/assets/services/home-cleaning.webp"} alt="" loading="lazy" />
             <span>Comfortable spaces</span>
           </div>
           <div className="ks-hero__scene ks-hero__scene--workshop" aria-hidden="true">
-            <img src="/assets/services/carpentry.webp" alt="" loading="lazy" />
+            <img src={categories.find((item) => /carpent|wood/i.test(item.name || ""))?.image || "/assets/services/carpentry.webp"} alt="" loading="lazy" />
             <span>Skilled hands. Better homes.</span>
           </div>
 
