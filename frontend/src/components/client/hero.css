@@ -579,3 +579,62 @@
     bottom: 15%;
   }
 }
+
+
+/* Floating service tags: fixed compact width and edge-aligned to the artisan card */
+@media (min-width: 640px) {
+  .ks-hero__service-chip {
+    box-sizing: border-box;
+    width: 148px;
+    min-width: 148px;
+    max-width: 148px;
+    min-height: 52px;
+    justify-content: center;
+    gap: 9px;
+    padding: 0 12px;
+    white-space: nowrap;
+  }
+
+  /* Top-left: sit beside the card, not over the artisan photo */
+  .ks-hero__service-chip--carpentry {
+    top: 14%;
+    right: auto;
+    left: calc(24% - 148px);
+  }
+
+  /* Bottom-left: lifted from the visual bottom and flush with card edge */
+  .ks-hero__service-chip--painting {
+    bottom: 14%;
+    left: calc(24% - 148px);
+  }
+
+  /* Bottom-right: start exactly at the card's right edge */
+  .ks-hero__service-chip--plumbing {
+    right: calc(24% - 148px);
+    bottom: 14%;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .ks-hero__service-chip {
+    width: 136px;
+    min-width: 136px;
+    max-width: 136px;
+    min-height: 48px;
+  }
+
+  .ks-hero__service-chip--carpentry {
+    top: 14%;
+    left: calc(24% - 136px);
+  }
+
+  .ks-hero__service-chip--painting {
+    bottom: 14%;
+    left: calc(24% - 136px);
+  }
+
+  .ks-hero__service-chip--plumbing {
+    right: calc(24% - 136px);
+    bottom: 14%;
+  }
+}
