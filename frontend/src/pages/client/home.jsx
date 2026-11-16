@@ -1,6 +1,7 @@
 import FinalCTA from "@/components/client/CTA";
 import FeaturedExperts from "@/components/client/FeaturedExperts";
 import HeroSection from "@/components/client/hero";
+import HomeFAQ from "@/components/client/HomeFAQ";
 import HowItWorks from "@/components/client/HowItWorks";
 import PopularServices from "@/components/client/PopularServices";
 import Testimonials from "@/components/client/Testimonials";
@@ -12,10 +13,11 @@ const Home = () => {
     <HomeIntro>
       <HeroSection />
       <PopularServices />
+      <HowItWorks />
       <WhyChooseKaamSetu />
       <FeaturedExperts />
-      <HowItWorks />
       <Testimonials />
+      <HomeFAQ />
       <FinalCTA />
     </HomeIntro>
   );
