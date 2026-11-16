@@ -153,11 +153,11 @@ const HeroSection = ({ stats, categories = [], loading = false }) => {
           </div>
 
           <div className="ks-hero__scene ks-hero__scene--room" aria-hidden="true">
-            <img src={categories.find((item) => /clean|housekeep/i.test(item.name || ""))?.image || "/assets/services/home-cleaning.webp"} alt="" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1630699144035-c0f6311ec482?auto=format&fit=crop&w=1400&q=90" alt="" loading="lazy" />
             <span>Comfortable spaces</span>
           </div>
           <div className="ks-hero__scene ks-hero__scene--workshop" aria-hidden="true">
-            <img src={categories.find((item) => /carpent|wood/i.test(item.name || ""))?.image || "/assets/services/carpentry.webp"} alt="" loading="lazy" />
+            <img src="https://assets.gippslandia-stg.coolwebsite.today/%24AWS_S3_BUCKET_SUBFOLDER/From-wood-to-wedge.jpg?focal=none&mtime=20200617173939" alt="" loading="lazy" />
             <span>Skilled hands. Better homes.</span>
           </div>
 
