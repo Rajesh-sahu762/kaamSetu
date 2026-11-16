@@ -7,18 +7,21 @@ import PopularServices from "@/components/client/PopularServices";
 import Testimonials from "@/components/client/Testimonials";
 import WhyChooseKaamSetu from "@/components/client/WhyChooseUs";
 import HomeIntro from "@/components/client/HomeIntro";
+import "./HomePageFlow.css";
 
 const Home = () => {
   return (
     <HomeIntro>
-      <HeroSection />
-      <PopularServices />
-      <HowItWorks />
-      <WhyChooseKaamSetu />
-      <FeaturedExperts />
-      <Testimonials />
-      <HomeFAQ />
-      <FinalCTA />
+      <div className="ks-homepage-flow">
+        <HeroSection />
+        <PopularServices />
+        <HowItWorks />
+        <WhyChooseKaamSetu />
+        <FeaturedExperts />
+        <Testimonials />
+        <HomeFAQ />
+        <FinalCTA />
+      </div>
     </HomeIntro>
   );
 };
