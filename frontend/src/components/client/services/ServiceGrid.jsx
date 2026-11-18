@@ -6,6 +6,7 @@ import {
   Star,
   Users,
   ArrowRight,
+  BriefcaseBusiness,
 } from "lucide-react";
 
 import { getCategories } from "@/services/publicService";
@@ -48,7 +49,7 @@ const ServiceGrid = () => {
   const hasMore = visibleCount < categories.length;
 
   return (
-    <section className="py-20 bg-theme">
+    <section className="ks-services-grid-section py-20">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
 
         {/* Header */}
@@ -135,7 +136,7 @@ const ServiceGrid = () => {
           "
         >
           {visibleCategories.map((category, index) => (
-            <motion.div
+            <motion.article
               key={category._id}
               initial={{
                 opacity: 0,
@@ -172,178 +173,51 @@ const ServiceGrid = () => {
                 cursor-pointer
               "
             >
-              {/* Image */}
-
-              <div
-                className="
-                  h-[240px]
-                  overflow-hidden
-                "
-              >
+              <div className="ks-service-card__photo">
                 <img
                   src={category.image || FALLBACK_IMAGE}
                   alt={category.name}
-                  className="
-                    w-full
-                    h-full
-
-                    object-cover
-
-                    group-hover:scale-110
-
-                    transition-all
-                    duration-700
-                  "
+                  loading="lazy"
+                  decoding="async"
                 />
+                <div className="ks-service-card__photo-shade" aria-hidden="true" />
+                <div className="ks-service-card__wave" aria-hidden="true" />
+                <span className="ks-service-card__photo-label">Popular service</span>
               </div>
 
-              {/* Content */}
+              <div className="ks-service-card__icon" aria-hidden="true">
+                <BriefcaseBusiness size={27} strokeWidth={2.2} />
+              </div>
 
-              <div className="p-6">
-
-                <h3
-                  className="
-                    text-2xl
-                    font-semibold
-
-                    text-primary
-                  "
-                >
-                  {category.name}
-                </h3>
-
-                {/* Stats */}
-
-                <div
-                  className="
-                    flex
-                    items-center
-                    gap-5
-
-                    mt-4
-                  "
-                >
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                    "
-                  >
-                    <Users
-                      size={16}
-                      className="
-                        text-accent
-                      "
-                    />
-
-                    <span
-                      className="
-                        text-muted
-                        text-sm
-                      "
-                    >
-                      {category.expertsCount}
-                    </span>
-                  </div>
-
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                    "
-                  >
-                    <Star
-                      size={16}
-                      fill="currentColor"
-                      className="
-                        text-yellow-500
-                      "
-                    />
-
-                    <span
-                      className="
-                        text-muted
-                        text-sm
-                      "
-                    >
-                      {category.rating ? category.rating.toFixed(1) : "New"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Price */}
-
-                <div
-                  className="
-                    mt-6
-
-                    flex
-                    items-end
-                    gap-2
-                  "
-                >
-                  <span
-                    className="
-                      text-3xl
-                      font-bold
-
-                      text-primary
-                    "
-                  >
-                    ₹{category.startingPrice}
-                  </span>
-
-                  <span
-                    className="
-                      text-muted
-                    "
-                  >
-                    starting
+              <div className="ks-service-card__content">
+                <div className="ks-service-card__title-row">
+                  <h3>{category.name}</h3>
+                  <span className="ks-service-card__rating">
+                    <Star size={15} fill="currentColor" />
+                    {category.rating ? category.rating.toFixed(1) : "New"}
                   </span>
                 </div>
 
-                {/* CTA */}
+                <div className="ks-service-card__meta">
+                  <span><Users size={16} /> {category.expertsCount} Professionals</span>
+                  <span className="ks-service-card__price">
+                    <strong>₹{category.startingPrice}</strong>
+                    <small>starting</small>
+                  </span>
+                </div>
 
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/experts?category=${category._id}`);
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    navigate("/experts?category=" + category._id);
                   }}
-                  className="
-                    mt-8
-
-                    w-full
-
-                    flex
-                    items-center
-                    justify-center
-                    gap-2
-
-                    py-4
-
-                    rounded-2xl
-
-                    bg-[#745A38]
-
-                    text-white
-
-                    font-medium
-
-                    hover:opacity-90
-
-                    transition
-                  "
+                  className="ks-service-card__cta"
                 >
-                  View Experts
-
-                  <ArrowRight
-                    size={18}
-                  />
+                  Explore Professionals <ArrowRight size={18} />
                 </button>
               </div>
-            </motion.div>
+            </motion.article>
           ))}
         </div>
 
