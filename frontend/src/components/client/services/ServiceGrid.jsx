@@ -156,22 +156,7 @@ const ServiceGrid = () => {
                 y: -8,
               }}
               onClick={() => navigate(`/experts?category=${category._id}`)}
-              className="
-                bg-card
-
-                border
-                border-theme
-
-                rounded-3xl
-
-                overflow-hidden
-
-                shadow-theme
-
-                group
-
-                cursor-pointer
-              "
+              className="ks-service-card group"
             >
               <div className="ks-service-card__photo">
                 <img
