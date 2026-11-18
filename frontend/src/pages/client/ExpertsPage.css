@@ -1,0 +1,35 @@
+/* Experts listing — visual language aligned with the KaamSetu homepage */
+.ks-experts-page{position:relative;isolation:isolate;overflow:hidden;color:var(--color-text);background:radial-gradient(ellipse at 0% 2%,rgba(184,235,207,.38),transparent 27%),radial-gradient(ellipse at 100% 8%,rgba(198,240,214,.34),transparent 26%),radial-gradient(ellipse at 50% 75%,rgba(222,246,231,.36),transparent 52%),#fff}
+.dark .ks-experts-page{background:radial-gradient(ellipse at 0% 2%,rgba(0,112,55,.42),transparent 26%),radial-gradient(ellipse at 100% 5%,rgba(0,101,49,.34),transparent 25%),radial-gradient(ellipse at 50% 70%,rgba(0,69,35,.18),transparent 54%),#080b09}
+.ks-experts-page:before,.ks-experts-page:after{content:"";position:absolute;z-index:0;pointer-events:none}
+.ks-experts-page:before{top:100px;right:-100px;width:min(54vw,700px);height:290px;border-top:1px solid color-mix(in srgb,var(--color-primary) 24%,transparent);border-bottom:1px solid color-mix(in srgb,var(--color-primary) 13%,transparent);border-radius:0 0 0 68%;transform:rotate(-13deg) skewX(-12deg);opacity:.7}
+.ks-experts-page:after{top:190px;right:5%;width:210px;height:150px;background-image:radial-gradient(circle,color-mix(in srgb,var(--color-primary) 28%,transparent) 1px,transparent 1.5px);background-size:28px 28px;mask-image:linear-gradient(135deg,transparent,#000 42%,transparent);opacity:.28}
+.ks-experts-page>section{position:relative;z-index:1;background:transparent!important}
+.ks-experts-page .ks-expert-card{--ec-card:#111b14;--ec-bottom:#0d1b12;--ec-text:#f4fbf5;--ec-muted:#a8b8ad;--ec-primary:#39f58a;--ec-accent:#c5f36b;--ec-border:#2c583b;--ec-shadow:0 18px 44px rgba(0,0,0,.28),inset 0 1px 0 rgba(133,255,173,.07);display:flex;min-width:0;height:100%;flex-direction:column;overflow:hidden;border:1px solid var(--ec-border);border-radius:26px;color:var(--ec-text);background:linear-gradient(180deg,var(--ec-card),var(--ec-bottom));box-shadow:var(--ec-shadow);transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease}
+:root:not(.dark) .ks-experts-page .ks-expert-card{--ec-card:#fff;--ec-bottom:#f8fcf8;--ec-text:#101a14;--ec-muted:#64756a;--ec-primary:#0b7a50;--ec-accent:#0b7a50;--ec-border:#dce9df;--ec-shadow:0 16px 38px rgba(24,102,66,.10),0 3px 10px rgba(24,102,66,.035)}
+.ks-experts-page .ks-expert-card:hover{border-color:color-mix(in srgb,var(--ec-primary) 72%,var(--ec-border));box-shadow:0 24px 48px color-mix(in srgb,var(--ec-primary) 12%,transparent),var(--ec-shadow)}
+.ks-experts-page .ks-expert-card__photo{position:relative;flex:0 0 224px;height:224px;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--ec-primary) 22%,var(--ec-card)),var(--ec-bottom))}
+.ks-experts-page .ks-expert-card__photo:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.18));pointer-events:none}
+.ks-experts-page .ks-expert-card__image{display:block;width:100%;height:100%;object-fit:cover;object-position:center 34%;transition:transform .65s cubic-bezier(.2,.7,.2,1)}
+.ks-experts-page .ks-expert-card:hover .ks-expert-card__image{transform:scale(1.055)}
+.ks-experts-page .ks-expert-card__verified{position:absolute;z-index:2;top:15px;right:15px;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid rgba(255,255,255,.42);border-radius:999px;color:#f4fff6;background:rgba(5,25,14,.68);backdrop-filter:blur(12px);font-size:11px;font-weight:800}
+.ks-experts-page .ks-expert-card__verified svg{color:#7cf0a5}
+.ks-experts-page .ks-expert-card__content{display:flex;flex:1;flex-direction:column;padding:23px 22px 21px}
+.ks-experts-page .ks-expert-card__category{align-self:flex-start;max-width:100%;overflow:hidden;padding:6px 12px;border:1px solid color-mix(in srgb,var(--ec-primary) 24%,var(--ec-border));border-radius:999px;color:var(--ec-primary);background:color-mix(in srgb,var(--ec-primary) 9%,var(--ec-card));font-size:11px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.ks-experts-page .ks-expert-card__name{display:-webkit-box;min-height:54px;margin:14px 0 0;overflow:hidden;color:var(--ec-text);font-family:var(--font-heading);font-size:clamp(19px,1.55vw,23px);font-weight:800;letter-spacing:-.035em;line-height:1.22;overflow-wrap:anywhere;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.ks-experts-page .ks-expert-card__meta{display:flex;min-width:0;align-items:center;gap:9px;color:var(--ec-muted);font-size:13px;font-weight:600}
+.ks-experts-page .ks-expert-card__meta svg{flex:0 0 auto;color:var(--ec-primary)}
+.ks-experts-page .ks-expert-card__location{margin-top:15px}
+.ks-experts-page .ks-expert-card__experience{margin-top:10px}
+.ks-experts-page .ks-expert-card__rating{display:flex;min-height:25px;align-items:center;gap:7px;margin-top:15px;color:var(--ec-text);font-size:13px}
+.ks-experts-page .ks-expert-card__rating svg{color:#eab308}
+.ks-experts-page .ks-expert-card__rating span:last-child{color:var(--ec-muted)}
+.ks-experts-page .ks-expert-card__price{display:flex;align-items:baseline;gap:8px;margin-top:17px}
+.ks-experts-page .ks-expert-card__price span:first-child{color:var(--ec-text);font-family:var(--font-heading);font-size:27px;font-weight:800}
+.ks-experts-page .ks-expert-card__price span:last-child{color:var(--ec-muted);font-size:12px}
+.ks-experts-page .ks-expert-card__cta{display:flex;width:100%;min-height:49px;align-items:center;justify-content:center;gap:10px;margin-top:auto;padding:11px 16px;border:1px solid color-mix(in srgb,var(--ec-primary) 68%,var(--ec-border));border-radius:999px;color:var(--ec-accent);background:color-mix(in srgb,var(--ec-primary) 9%,transparent);font-size:14px;font-weight:800;transition:gap .25s ease,background .25s ease,transform .25s ease}
+.ks-experts-page .ks-expert-card__cta:hover{gap:15px;transform:translateY(-1px);background:color-mix(in srgb,var(--ec-primary) 17%,transparent)}
+.ks-experts-page .ks-experts-grid{align-items:stretch}
+@media(max-width:1023px){.ks-experts-page .ks-expert-card__photo{flex-basis:210px;height:210px}.ks-experts-page .ks-expert-card__content{padding:21px 19px 19px}}
+@media(max-width:639px){.ks-experts-page:before{top:140px;right:-220px;width:520px;height:220px}.ks-experts-page:after{top:210px;right:3%;opacity:.2}.ks-experts-page .ks-expert-card{border-radius:23px}.ks-experts-page .ks-expert-card__photo{flex-basis:205px;height:205px}.ks-experts-page .ks-expert-card__content{padding:20px 18px 18px}.ks-experts-page .ks-expert-card__name{min-height:48px;font-size:19px}}
+@media(prefers-reduced-motion:reduce){.ks-experts-page *,.ks-experts-page *:before,.ks-experts-page *:after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
