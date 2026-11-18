@@ -26,39 +26,35 @@
     #080b09;
 }
 
-/* One shared geometric system: concentric orbit rings, anchored to the content
-   column rather than independent decorative lines at unrelated offsets. */
-.ks-services-page::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  top: 104px;
-  right: clamp(-220px,-10vw,-90px);
-  width: min(76vw,940px);
-  aspect-ratio: 1;
-  border: 1px solid color-mix(in srgb,var(--color-primary) 24%,transparent);
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 44px color-mix(in srgb,var(--color-primary) 2.2%,transparent),
-    0 0 0 112px color-mix(in srgb,var(--color-primary) 1.5%,transparent),
-    inset 0 0 100px color-mix(in srgb,var(--color-primary) 3%,transparent);
-  transform: rotate(-12deg);
-  pointer-events: none;
-  opacity: .7;
-}
+/* Abstract orbit system: concentric rings share one center, with a restrained dot field. */
+.ks-services-page::before,
 .ks-services-page::after {
   content: "";
   position: absolute;
   z-index: 0;
-  inset: 0;
   pointer-events: none;
-  background-image:
-    radial-gradient(circle,color-mix(in srgb,var(--color-primary) 26%,transparent) 1px,transparent 1.5px),
-    linear-gradient(164deg,transparent 0 61.8%,color-mix(in srgb,var(--color-primary) 10%,transparent) 61.9%,transparent 62.05%);
-  background-size: 54px 54px,100% 100%;
-  background-position: 0 0,center;
-  mask-image: linear-gradient(115deg,transparent 0%,rgba(0,0,0,.34) 38%,rgba(0,0,0,.22) 72%,transparent 100%);
-  opacity: .42;
+}
+.ks-services-page::before {
+  top: 72px;
+  right: -205px;
+  width: min(78vw,960px);
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb,var(--color-primary) 25%,transparent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 43px color-mix(in srgb,var(--color-primary) 14%,transparent),
+    0 0 0 105px color-mix(in srgb,var(--color-primary) 9%,transparent),
+    inset 0 0 100px color-mix(in srgb,var(--color-primary) 3%,transparent);
+  transform: scaleY(.82) rotate(-14deg);
+  opacity: .72;
+}
+.ks-services-page::after {
+  inset: 0;
+  background-image: radial-gradient(circle,color-mix(in srgb,var(--color-primary) 28%,transparent) 1px,transparent 1.5px);
+  background-size: 52px 52px;
+  background-position: 10px 14px;
+  mask-image: radial-gradient(ellipse at 78% 34%,rgba(0,0,0,.5),transparent 68%);
+  opacity: .36;
 }
 .ks-services-page > section {
   position: relative;
@@ -128,27 +124,35 @@
 }
 .ks-services-grid-section h2 { color: var(--sp-text) !important; }
 .ks-service-card {
+  --sc-card: #111b14;
+  --sc-card-bottom: #0d1b12;
+  --sc-text: #f4fbf5;
+  --sc-muted: #a8b8ad;
+  --sc-primary: #39f58a;
+  --sc-accent: #c5f36b;
+  --sc-border: #2c583b;
+  --sc-shadow: 0 18px 44px rgba(0,0,0,.28),inset 0 1px 0 rgba(133,255,173,.07);
   position: relative;
   min-width: 0;
   overflow: hidden;
   isolation: isolate;
-  border: 1px solid var(--sp-border);
+  border: 1px solid var(--sc-border);
   border-radius: 26px;
-  color: var(--sp-text);
-  background: linear-gradient(180deg,var(--sp-card) 0%,color-mix(in srgb,var(--sp-primary) 4%,var(--sp-card)) 100%);
-  box-shadow: var(--sp-shadow);
+  color: var(--sc-text);
+  background: linear-gradient(180deg,var(--sc-card) 0%,var(--sc-card-bottom) 100%);
+  box-shadow: var(--sc-shadow);
   cursor: pointer;
   transition: transform .3s ease,border-color .3s ease,box-shadow .3s ease;
 }
 .ks-service-card:hover {
-  border-color: color-mix(in srgb,var(--sp-primary) 70%,var(--sp-border));
-  box-shadow: 0 24px 50px color-mix(in srgb,var(--sp-primary) 14%,transparent),var(--sp-shadow);
+  border-color: color-mix(in srgb,var(--sc-primary) 72%,var(--sc-border));
+  box-shadow: 0 24px 50px color-mix(in srgb,var(--sc-primary) 12%,transparent),var(--sc-shadow);
 }
 .ks-service-card__photo {
   position: relative;
   height: clamp(190px,18vw,238px);
   overflow: hidden;
-  background: linear-gradient(135deg,color-mix(in srgb,var(--sp-primary) 22%,var(--sp-card)),var(--sp-card));
+  background: linear-gradient(135deg,color-mix(in srgb,var(--sc-primary) 22%,var(--sc-card)),var(--sp-card));
 }
 .ks-service-card__photo img {
   display: block;
@@ -204,9 +208,9 @@
   width: 62px;
   height: 62px;
   place-items: center;
-  border: 1px solid color-mix(in srgb,var(--sp-primary) 72%,var(--sp-border));
+  border: 1px solid color-mix(in srgb,var(--sp-primary) 72%,var(--sc-border));
   border-radius: 18px;
-  color: var(--sp-accent);
+  color: var(--sc-accent);
   background: linear-gradient(145deg,color-mix(in srgb,var(--sp-primary) 25%,var(--sp-card)),var(--sp-card));
   box-shadow: 0 8px 22px color-mix(in srgb,var(--sp-primary) 18%,transparent),inset 0 1px 0 rgba(255,255,255,.12);
   transition: transform .28s ease;
@@ -223,7 +227,7 @@
 .ks-service-card__title-row h3 {
   min-width: 0;
   margin: 0;
-  color: var(--sp-text);
+  color: var(--sc-text);
   font-family: var(--font-heading);
   font-size: clamp(19px,1.5vw,23px);
   font-weight: 800;
@@ -250,7 +254,7 @@
   justify-content: space-between;
   gap: 12px;
   margin-top: 13px;
-  color: var(--sp-muted);
+  color: var(--sc-muted);
   font-size: 13px;
   font-weight: 600;
 }
@@ -283,6 +287,16 @@
   background: color-mix(in srgb,var(--sp-primary) 16%,transparent);
   box-shadow: 0 7px 18px color-mix(in srgb,var(--sp-primary) 12%,transparent);
 }
+:root:not(.dark) .ks-service-card {
+  --sc-card: #ffffff;
+  --sc-card-bottom: #f8fcf8;
+  --sc-text: #101a14;
+  --sc-muted: #64756a;
+  --sc-primary: #0b7a50;
+  --sc-accent: #0b7a50;
+  --sc-border: #dce9df;
+  --sc-shadow: 0 16px 38px rgba(24,102,66,.10),0 3px 10px rgba(24,102,66,.035);
+}
 .ks-services-grid-section .grid { gap: 24px !important; margin-top: 36px !important; }
 .ks-services-grid-section .grid > p { color: var(--sp-muted); }
 .ks-services-grid-section button:not(.ks-service-card__cta) { border-radius: 999px; }
@@ -309,7 +323,7 @@
   .ks-service-card__title-row h3 { font-size: 19px; }
   .ks-service-card__meta { font-size: 12px; }
   .ks-service-card__price strong { font-size: 20px; }
-  .ks-services-page::before { top: 150px; right: -280px; width: 760px; }
+  .ks-services-page::before { top: 150px; right: -330px; width: 720px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ks-services-page *, .ks-services-page *::before, .ks-services-page *::after {
