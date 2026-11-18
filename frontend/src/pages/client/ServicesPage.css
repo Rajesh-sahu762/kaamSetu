@@ -41,8 +41,8 @@
   right: -90px;
   width: min(52vw,680px);
   height: 300px;
-  border-top: 1px solid color-mix(in srgb,var(--sc-primary) 24%,transparent);
-  border-bottom: 1px solid color-mix(in srgb,var(--sc-primary) 13%,transparent);
+  border-top: 1px solid color-mix(in srgb,var(--sp-primary) 24%,transparent);
+  border-bottom: 1px solid color-mix(in srgb,var(--sp-primary) 13%,transparent);
   border-radius: 0 0 0 68%;
   transform: rotate(-13deg) skewX(-12deg);
   opacity: .72;
@@ -52,7 +52,7 @@
   right: 4%;
   width: 220px;
   height: 150px;
-  background-image: radial-gradient(circle,color-mix(in srgb,var(--sc-primary) 28%,transparent) 1px,transparent 1.5px);
+  background-image: radial-gradient(circle,color-mix(in srgb,var(--sp-primary) 28%,transparent) 1px,transparent 1.5px);
   background-size: 28px 28px;
   mask-image: linear-gradient(135deg,transparent 0%,#000 42%,transparent 100%);
   opacity: .32;
@@ -82,15 +82,15 @@
 .ks-services-hero__glow {
   width: min(700px,90vw) !important;
   height: min(500px,70vw) !important;
-  background: radial-gradient(ellipse, color-mix(in srgb,var(--sc-primary) 15%,transparent),transparent 68%) !important;
+  background: radial-gradient(ellipse, color-mix(in srgb,var(--sp-primary) 15%,transparent),transparent 68%) !important;
   filter: blur(72px) !important;
   opacity: .9;
   pointer-events: none;
 }
-.ks-services-hero h1 { color: var(--sc-text) !important; }
-.ks-services-hero h1 .text-accent { color: var(--sc-primary) !important; }
+.ks-services-hero h1 { color: var(--sp-text) !important; }
+.ks-services-hero h1 .text-accent { color: var(--sp-primary) !important; }
 .ks-services-hero form {
-  border-color: var(--sc-border) !important;
+  border-color: var(--sp-border) !important;
   border-radius: 24px !important;
   background: var(--sp-surface) !important;
   box-shadow: var(--sp-shadow) !important;
@@ -107,7 +107,7 @@
 }
 .ks-services-filters { padding-top: 12px !important; padding-bottom: 32px !important; }
 .ks-services-filters > div > div {
-  border-color: var(--sc-border) !important;
+  border-color: var(--sp-border) !important;
   border-radius: 24px !important;
   background: var(--sp-surface) !important;
   box-shadow: var(--sp-shadow) !important;
@@ -125,7 +125,7 @@
   position: relative;
   z-index: 1;
 }
-.ks-services-grid-section h2 { color: var(--sc-text) !important; }
+.ks-services-grid-section h2 { color: var(--sp-text) !important; }
 .ks-service-card {
   --sc-card: #111b14;
   --sc-card-bottom: #0d1b12;
