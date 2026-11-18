@@ -26,65 +26,23 @@ const ExpertCard = ({ expert }) => {
       transition={{
         duration: 0.25,
       }}
-      className="
-        bg-card
-
-        border
-        border-theme
-
-        rounded-3xl
-
-        overflow-hidden
-
-        shadow-theme
-
-        group
-      "
+      className="ks-expert-card group"
     >
       {/* Image */}
 
-      <div className="relative h-[260px] overflow-hidden">
+      <div className="ks-expert-card__photo">
 
         <img
           src={expert.image}
           alt={expert.name}
-          className="
-            w-full
-            h-full
-
-            object-cover
-
-            group-hover:scale-105
-
-            transition-all
-            duration-700
-          "
+          className="ks-expert-card__image"
         />
 
         {/* Verified Badge */}
 
         {expert.verified && (
           <div
-            className="
-              absolute
-              top-4
-              right-4
-
-              flex
-              items-center
-              gap-2
-
-              px-3
-              py-2
-
-              rounded-full
-
-              bg-white/90
-              backdrop-blur
-
-              text-xs
-              font-medium
-            "
+            className="ks-expert-card__verified"
           >
             <ShieldCheck
               size={14}
@@ -100,26 +58,12 @@ const ExpertCard = ({ expert }) => {
 
       {/* Content */}
 
-      <div className="p-6">
+      <div className="ks-expert-card__content">
 
         {/* Category */}
 
         <span
-          className="
-            inline-block
-
-            px-3
-            py-1
-
-            rounded-full
-
-            text-xs
-            font-medium
-
-            bg-[#745A38]/10
-
-            text-[#745A38]
-          "
+          className="ks-expert-card__category"
         >
           {expert.category}
         </span>
@@ -127,15 +71,7 @@ const ExpertCard = ({ expert }) => {
         {/* Name */}
 
         <h3
-          className="
-            mt-4
-
-            text-2xl
-
-            font-semibold
-
-            text-primary
-          "
+          className="ks-expert-card__name"
         >
           {expert.name}
         </h3>
@@ -143,16 +79,7 @@ const ExpertCard = ({ expert }) => {
         {/* Location */}
 
         <div
-          className="
-            mt-4
-
-            flex
-            items-center
-
-            gap-2
-
-            text-muted
-          "
+          className="ks-expert-card__meta ks-expert-card__location"
         >
           <MapPin size={16} />
 
@@ -164,16 +91,7 @@ const ExpertCard = ({ expert }) => {
         {/* Experience */}
 
         <div
-          className="
-            mt-3
-
-            flex
-            items-center
-
-            gap-2
-
-            text-muted
-          "
+          className="ks-expert-card__meta ks-expert-card__experience"
         >
           <Briefcase size={16} />
 
@@ -185,14 +103,7 @@ const ExpertCard = ({ expert }) => {
         {/* Rating */}
 
         <div
-          className="
-            mt-4
-
-            flex
-            items-center
-
-            gap-2
-          "
+          className="ks-expert-card__rating"
         >
           <Star
             size={18}
@@ -223,14 +134,7 @@ const ExpertCard = ({ expert }) => {
         {/* Price */}
 
         <div
-          className="
-            mt-6
-
-            flex
-            items-end
-
-            gap-2
-          "
+          className="ks-expert-card__price"
         >
           <span
             className="
@@ -256,31 +160,7 @@ const ExpertCard = ({ expert }) => {
 
         <button
           onClick={handleViewProfile}
-          className="
-            mt-8
-
-            w-full
-
-            flex
-            items-center
-            justify-center
-
-            gap-2
-
-            py-4
-
-            rounded-2xl
-
-            bg-[#745A38]
-
-            text-white
-
-            font-medium
-
-            hover:opacity-90
-
-            transition
-          "
+          className="ks-expert-card__cta"
         >
           View Profile
 
