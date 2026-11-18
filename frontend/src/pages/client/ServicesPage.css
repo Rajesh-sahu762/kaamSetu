@@ -140,7 +140,7 @@
   overflow: hidden;
   isolation: isolate;
   border: 1px solid var(--sc-border);
-  border-radius: 26px;
+  border-radius: 34px;
   color: var(--sc-text);
   background: linear-gradient(180deg,var(--sc-card) 0%,var(--sc-card-bottom) 100%);
   box-shadow: var(--sc-shadow);
@@ -153,7 +153,7 @@
 }
 .ks-service-card__photo {
   position: relative;
-  height: clamp(190px,18vw,238px);
+  height: clamp(250px,20vw,282px);
   overflow: hidden;
   background: linear-gradient(135deg,color-mix(in srgb,var(--sc-primary) 22%,var(--sc-card)),var(--sc-card));
 }
@@ -205,21 +205,21 @@
 .ks-service-card__icon {
   position: absolute;
   z-index: 3;
-  top: clamp(154px,15vw,194px);
-  left: 22px;
+  top: clamp(220px,17vw,260px);
+  left: 27px;
   display: grid;
-  width: 62px;
-  height: 62px;
+  width: 78px;
+  height: 78px;
   place-items: center;
   border: 1px solid color-mix(in srgb,var(--sc-primary) 72%,var(--sc-border));
-  border-radius: 18px;
+  border-radius: 24px;
   color: var(--sc-accent);
   background: linear-gradient(145deg,color-mix(in srgb,var(--sc-primary) 25%,var(--sc-card)),var(--sc-card));
   box-shadow: 0 8px 22px color-mix(in srgb,var(--sc-primary) 18%,transparent),inset 0 1px 0 rgba(255,255,255,.12);
   transition: transform .28s ease;
 }
 .ks-service-card:hover .ks-service-card__icon { transform: translateY(-3px) rotate(-3deg); }
-.ks-service-card__content { position: relative; z-index: 2; padding: 28px 22px 22px; }
+.ks-service-card__content { position: relative; z-index: 2; padding: 54px 28px 28px; }
 .ks-service-card__title-row {
   display: flex;
   min-height: 34px;
@@ -256,7 +256,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 13px;
+  margin-top: 22px;
   color: var(--sc-muted);
   font-size: 13px;
   font-weight: 600;
@@ -269,17 +269,17 @@
 .ks-service-card__cta {
   display: flex;
   width: 100%;
-  min-height: 48px;
+  min-height: 60px;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 18px;
-  padding: 10px 16px;
+  margin-top: 27px;
+  padding: 12px 18px;
   border: 1px solid color-mix(in srgb,var(--sc-primary) 65%,var(--sc-border));
   border-radius: 999px;
   color: var(--sc-accent);
   background: color-mix(in srgb,var(--sc-primary) 8%,transparent);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   transition: gap .25s ease,background .25s ease,transform .25s ease,box-shadow .25s ease;
   cursor: pointer;
@@ -305,8 +305,8 @@
 .ks-services-grid-section button:not(.ks-service-card__cta) { border-radius: 999px; }
 @media (max-width: 1023px) {
   .ks-services-hero { padding-top: 116px !important; padding-bottom: 48px !important; }
-  .ks-service-card__photo { height: 210px; }
-  .ks-service-card__icon { top: 170px; }
+  .ks-service-card__photo { height: 250px; }
+  .ks-service-card__icon { top: 218px; }
   .ks-services-grid-section { padding-top: 36px !important; }
 }
 @media (max-width: 639px) {
@@ -319,13 +319,13 @@
   .ks-services-filters > div > div { padding: 18px !important; }
   .ks-services-grid-section { padding-top: 30px !important; padding-bottom: 58px !important; }
   .ks-services-grid-section > div { padding-left: 18px; padding-right: 18px; }
-  .ks-service-card { border-radius: 22px; }
-  .ks-service-card__photo { height: 205px; }
-  .ks-service-card__icon { top: 164px; left: 18px; width: 58px; height: 58px; }
-  .ks-service-card__content { padding: 27px 18px 18px; }
-  .ks-service-card__title-row h3 { font-size: 19px; }
-  .ks-service-card__meta { font-size: 12px; }
-  .ks-service-card__price strong { font-size: 20px; }
+  .ks-service-card { border-radius: 30px; }
+  .ks-service-card__photo { height: clamp(250px,55vw,282px); }
+  .ks-service-card__icon { top: calc(clamp(250px,55vw,282px) - 42px); left: 27px; width: 78px; height: 78px; }
+  .ks-service-card__content { padding: 54px 28px 28px; }
+  .ks-service-card__title-row h3 { font-size: 24px; }
+  .ks-service-card__meta { font-size: 15px; }
+  .ks-service-card__price strong { font-size: 27px; }
   .ks-services-page::before { top: 150px; right: -330px; width: 720px; }
 }
 @media (prefers-reduced-motion: reduce) {
