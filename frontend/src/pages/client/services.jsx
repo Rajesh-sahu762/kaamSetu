@@ -6,6 +6,7 @@ import ServiceGrid from "@/components/client/services/ServiceGrid";
 import ServiceHero from "@/components/client/services/serviceHero";
 import KaamSetuLoader from "@/components/Loader/fullLoader";
 import { getServices, getCategories } from "@/services/publicService";
+import "./ServicesPage.css";
 
 const EMPTY_FILTERS = {
   category: "",
@@ -116,7 +117,7 @@ const Services = () => {
   }
 
   return (
-    <>
+    <main className="ks-services-page">
       <ServiceHero
         initialSearch={search}
         initialCity={filters.city}
@@ -142,7 +143,7 @@ const Services = () => {
         pagination={pagination}
         onLoadMore={handleLoadMore}
       />
-    </>
+    </main>
   );
 };
 

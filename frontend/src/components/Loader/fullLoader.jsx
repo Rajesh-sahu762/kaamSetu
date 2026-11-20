@@ -81,7 +81,7 @@ function IconBubble({ emoji, label, x, y, delay }) {
       </div>
       <span
         style={{
-          fontFamily: "Geist, sans-serif",
+          fontFamily: "Inter, sans-serif",
           fontSize: 10,
           fontWeight: 500,
           color: "rgba(168,138,100,0.7)",
@@ -104,7 +104,7 @@ function TravelDot({ delay, duration, top }) {
         width: 6,
         height: 6,
         borderRadius: "50%",
-        background: "#A88A64",
+        background: "#0B7A50",
         animation: `ks-dotTravel ${duration}s linear ${delay}s infinite`,
       }}
     />
@@ -168,7 +168,7 @@ const OUTER_RADIUS = isMobile ? 220 : 340;
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Inter:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter:wght@400;500&display=swap');
 
         @keyframes ks-expandRing {
           0%   { transform: translate(-50%,-50%) scale(0.85); opacity: 0.4; }
@@ -225,10 +225,10 @@ minHeight: "100dvh",
       >
         {/* Corner brackets */}
         {[
-          { top: 20, left: 20,  borderTop: "1px solid #A88A64", borderLeft: "1px solid #A88A64" },
-          { top: 20, right: 20, borderTop: "1px solid #A88A64", borderRight: "1px solid #A88A64" },
-          { bottom: 20, left: 20,  borderBottom: "1px solid #A88A64", borderLeft: "1px solid #A88A64" },
-          { bottom: 20, right: 20, borderBottom: "1px solid #A88A64", borderRight: "1px solid #A88A64" },
+          { top: 20, left: 20,  borderTop: "1px solid #0B7A50", borderLeft: "1px solid #0B7A50" },
+          { top: 20, right: 20, borderTop: "1px solid #0B7A50", borderRight: "1px solid #0B7A50" },
+          { bottom: 20, left: 20,  borderBottom: "1px solid #0B7A50", borderLeft: "1px solid #0B7A50" },
+          { bottom: 20, right: 20, borderBottom: "1px solid #0B7A50", borderRight: "1px solid #0B7A50" },
         ].map((s, i) => (
           <div key={i} style={{ position: "absolute", width: 36, height: 36, opacity: 0.3, ...s }} />
         ))}
@@ -318,7 +318,7 @@ minHeight: "100dvh",
                 position: "absolute",
                 inset: 0,
                 borderRadius: 20,
-                border: "2px solid #A88A64",
+                border: "2px solid #0B7A50",
                 transform: `rotate(${hexAngle1}deg)`,
               }}
             />
@@ -337,7 +337,7 @@ minHeight: "100dvh",
               style={{
                 position: "absolute",
                 inset: 14,
-                background: "#A88A64",
+                background: "#0B7A50",
                 borderRadius: 12,
                 display: "flex",
                 alignItems: "center",
@@ -362,7 +362,7 @@ minHeight: "100dvh",
           {/* Brand name */}
           <div
             style={{
-              fontFamily: "Geist, sans-serif",
+              fontFamily: "Inter, sans-serif",
               fontSize: 28,
               fontWeight: 600,
               color: "#fff",
@@ -370,7 +370,7 @@ minHeight: "100dvh",
               lineHeight: 1,
             }}
           >
-            Kaam<span style={{ color: "#A88A64" }}>Setu</span>
+            Kaam<span style={{ color: "#0B7A50" }}>Setu</span>
           </div>
 
           {/* Tagline */}
@@ -402,7 +402,7 @@ minHeight: "100dvh",
             <div
               style={{
                 height: "100%",
-                background: "#A88A64",
+                background: "#0B7A50",
                 borderRadius: 2,
                 position: "relative",
                 animation: "ks-progressFill 3.2s ease-in-out infinite",
@@ -425,7 +425,7 @@ minHeight: "100dvh",
           {/* Status text */}
           <div
             style={{
-              fontFamily: "Geist, sans-serif",
+              fontFamily: "Inter, sans-serif",
               fontSize: 11,
               fontWeight: 500,
               color: "rgba(168,138,100,0.6)",

@@ -138,16 +138,7 @@ const ExpertGrid = ({ filters = {} }) => {
         {/* Initial loading skeleton */}
 
         {loading && experts.length === 0 && !error && (
-          <div
-            className="
-              grid
-
-              md:grid-cols-2
-              xl:grid-cols-3
-
-              gap-8
-            "
-          >
+          <div className="ks-experts-grid grid md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-7">
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}

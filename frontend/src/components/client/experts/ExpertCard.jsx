@@ -1,293 +1,37 @@
 import { motion } from "framer-motion";
-
-import {
-  Star,
-  MapPin,
-  Briefcase,
-  ShieldCheck,
-  ArrowRight,
-} from "lucide-react";
-
+import { Star, MapPin, Briefcase, ShieldCheck, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const ExpertCard = ({ expert }) => {
-
   const navigate = useNavigate();
-
-  const handleViewProfile = () => {
-    navigate(`/expert/${expert.id}`);
-  };
+  const isNew = expert.rating === "New";
+  const handleViewProfile = () => navigate(`/expert/${expert.id}`);
 
   return (
-    <motion.div
-      whileHover={{
-        y: -8,
-      }}
-      transition={{
-        duration: 0.25,
-      }}
-      className="
-        bg-card
-
-        border
-        border-theme
-
-        rounded-3xl
-
-        overflow-hidden
-
-        shadow-theme
-
-        group
-      "
-    >
-      {/* Image */}
-
-      <div className="relative h-[260px] overflow-hidden">
-
-        <img
-          src={expert.image}
-          alt={expert.name}
-          className="
-            w-full
-            h-full
-
-            object-cover
-
-            group-hover:scale-105
-
-            transition-all
-            duration-700
-          "
-        />
-
-        {/* Verified Badge */}
-
-        {expert.verified && (
-          <div
-            className="
-              absolute
-              top-4
-              right-4
-
-              flex
-              items-center
-              gap-2
-
-              px-3
-              py-2
-
-              rounded-full
-
-              bg-white/90
-              backdrop-blur
-
-              text-xs
-              font-medium
-            "
-          >
-            <ShieldCheck
-              size={14}
-              className="
-                text-green-600
-              "
-            />
-
-            Verified
-          </div>
-        )}
+    <motion.article whileHover={{ y: -6 }} transition={{ duration: 0.25 }} className="ks-expert-card">
+      <div className="ks-expert-card__photo">
+        <img src={expert.image} alt={expert.name} className="ks-expert-card__image" />
+        <span className="ks-expert-card__popular"><ShieldCheck size={14} />POPULAR SERVICE</span>
+        <div className="ks-expert-card__wave" aria-hidden="true" />
       </div>
-
-      {/* Content */}
-
-      <div className="p-6">
-
-        {/* Category */}
-
-        <span
-          className="
-            inline-block
-
-            px-3
-            py-1
-
-            rounded-full
-
-            text-xs
-            font-medium
-
-            bg-[#745A38]/10
-
-            text-[#745A38]
-          "
-        >
-          {expert.category}
-        </span>
-
-        {/* Name */}
-
-        <h3
-          className="
-            mt-4
-
-            text-2xl
-
-            font-semibold
-
-            text-primary
-          "
-        >
-          {expert.name}
-        </h3>
-
-        {/* Location */}
-
-        <div
-          className="
-            mt-4
-
-            flex
-            items-center
-
-            gap-2
-
-            text-muted
-          "
-        >
-          <MapPin size={16} />
-
-          <span>
-            {expert.location}
-          </span>
+      <div className="ks-expert-card__icon" aria-hidden="true"><Briefcase size={32} strokeWidth={2.2} /></div>
+      <div className="ks-expert-card__content">
+        <div className="ks-expert-card__heading">
+          <h3 className="ks-expert-card__name">{expert.name}</h3>
+          {isNew ? (
+            <span className="ks-expert-card__new">★ <span>New</span></span>
+          ) : (
+            <span className="ks-expert-card__new ks-expert-card__rating"><Star size={15} fill="currentColor" /> <span>{expert.rating}</span></span>
+          )}
         </div>
-
-        {/* Experience */}
-
-        <div
-          className="
-            mt-3
-
-            flex
-            items-center
-
-            gap-2
-
-            text-muted
-          "
-        >
-          <Briefcase size={16} />
-
-          <span>
-            {expert.experience} Experience
-          </span>
+        <div className="ks-expert-card__details">
+          <div className="ks-expert-card__location"><MapPin size={18} /><span>{expert.location || "Location not specified"}</span></div>
+          <div className="ks-expert-card__price"><strong>₹{expert.visitCharge}</strong><span>starting</span></div>
         </div>
-
-        {/* Rating */}
-
-        <div
-          className="
-            mt-4
-
-            flex
-            items-center
-
-            gap-2
-          "
-        >
-          <Star
-            size={18}
-            fill="currentColor"
-            className="
-              text-yellow-500
-            "
-          />
-
-          <span
-            className="
-              font-semibold
-              text-primary
-            "
-          >
-            {expert.rating}
-          </span>
-
-          <span
-            className="
-              text-muted
-            "
-          >
-            ({expert.reviews} Reviews)
-          </span>
-        </div>
-
-        {/* Price */}
-
-        <div
-          className="
-            mt-6
-
-            flex
-            items-end
-
-            gap-2
-          "
-        >
-          <span
-            className="
-              text-3xl
-              font-bold
-
-              text-primary
-            "
-          >
-            ₹{expert.visitCharge}
-          </span>
-
-          <span
-            className="
-              text-muted
-            "
-          >
-            visit charge
-          </span>
-        </div>
-
-        {/* CTA */}
-
-        <button
-          onClick={handleViewProfile}
-          className="
-            mt-8
-
-            w-full
-
-            flex
-            items-center
-            justify-center
-
-            gap-2
-
-            py-4
-
-            rounded-2xl
-
-            bg-[#745A38]
-
-            text-white
-
-            font-medium
-
-            hover:opacity-90
-
-            transition
-          "
-        >
-          View Profile
-
-          <ArrowRight size={18} />
-        </button>
+        <div className="ks-expert-card__experience"><Briefcase size={15} /><span>{expert.experience} experience</span></div>
+        <button type="button" onClick={handleViewProfile} className="ks-expert-card__cta">Explore Professionals<ArrowRight size={20} /></button>
       </div>
-    </motion.div>
+    </motion.article>
   );
 };
 
