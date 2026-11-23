@@ -175,12 +175,12 @@ const Navbar = () => {
             ))}
           </nav>
 
-          <Link to="/" className="ks-navbar__brand" aria-label="KaamSetu home">
+          <div className="ks-navbar__brand" aria-label="KaamSetu">
             <span className="ks-navbar__wordmark">
               <span>Kaam</span><span>Setu</span>
             </span>
             <span className="ks-navbar__tagline">Trusted Services</span>
-          </Link>
+          </div>
 
           <div className="ks-navbar__actions">
             {isCustomer && notificationButton()}
@@ -261,10 +261,10 @@ const Navbar = () => {
             transition={{ duration: 0.2 }}
           >
             <div className="ks-mobile-menu__top">
-              <Link to="/" className="ks-navbar__brand" onClick={() => setMobileOpen(false)}>
+              <div className="ks-navbar__brand" aria-label="KaamSetu">
                 <span className="ks-navbar__wordmark"><span>Kaam</span><span>Setu</span></span>
                 <span className="ks-navbar__tagline">Trusted Services</span>
-              </Link>
+              </div>
               <button type="button" className="ks-mobile-menu__close" onClick={() => setMobileOpen(false)} aria-label="Close menu">
                 <X size={21} />
               </button>
