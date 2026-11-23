@@ -6,7 +6,7 @@ import "./HomeIntro.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const INTRO_SESSION_KEY = "kaamsetu-intro-seen";
+const INTRO_SESSION_KEY = "kaamsetu-intro-seen-v2";
 
 const HomeIntro = ({ children }) => {
   const hasSeenIntro = typeof window !== "undefined" && window.sessionStorage.getItem(INTRO_SESSION_KEY) === "true";
