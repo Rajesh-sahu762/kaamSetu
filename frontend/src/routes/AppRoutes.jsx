@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { useLayoutEffect } from 'react';
 
 import LoginView from '../pages/Auth/Login';
 import JoinKaamsetu from '../pages/Auth/Role';
@@ -29,66 +30,75 @@ import SupportPage from '@/pages/client/SupportPage';
 import NotFound from '@/pages/client/NotFound';
 import ProtectedRoute from './ProtectedRoute';
 import VendorRoutes from './VendorRoutes';
-import adminRoutes from './AdminRoutes'
+import adminRoutes from './AdminRoutes';
 
+// Route changes should always open the destination page from the top.
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useLayoutEffect(() => {
+    window.history.scrollRestoration = 'manual';
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
+};
 
 const AppRoutes = () => {
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
         {/* Client */}
-      <Route element={<ClientLayout />}>
+        <Route element={<ClientLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/experts" element={<Experts />} />
+          <Route path="/expert/:id" element={<ExpertProfile />} />
+          <Route path="/booking" element={<BookingPage />} />
+          <Route path="*" element={<NotFound />} />
+          <Route path="/support" element={<SupportPage />} />
 
-      <Route path="/" element={<Home />} />
-      <Route path='/services' element={<Services />} />
-      <Route path='/experts' element={<Experts />} />
-      <Route path='/expert/:id' element={<ExpertProfile />} />
-      <Route path='/booking' element={<BookingPage />}  />
-      <Route path='*' element={<NotFound />} />
-      <Route path='/support' element={<SupportPage />} />
+          {/* Protected */}
+          <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/booking-success" element={<BookingSuccess />} />
+            <Route path="/booking/:id" element={<TrackBookingPage />} />
+            <Route path="/my-booking" element={<MyBookingsPage />} />
+            <Route path="/profile" element={<CustomerProfilePage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/review/:bookingId" element={<WriteReviewPage />} />
+          </Route>
+        </Route>
 
-      {/* Protected */}
-      <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>
-      
-      <Route path='/checkout' element={<CheckoutPage />}  />
-      <Route path='/booking-success' element={<BookingSuccess />}  />
-      <Route path='/booking/:id' element={<TrackBookingPage />} />
-      <Route path='/my-booking' element={<MyBookingsPage />} />
-      <Route path='/profile' element={<CustomerProfilePage />} />
-      <Route path='/notifications' element={<NotificationsPage />} />
-      <Route path='/review/:bookingId' element={<WriteReviewPage />} />
+        {/* Vendor */}
+        {VendorRoutes()}
+        {adminRoutes()}
 
-      </Route>
-      </Route>
-
-          {/* Vendor */}
-      {VendorRoutes()}
-      {adminRoutes()}
-
-      {/* Auth Routes */}
-      <Route path="/login" element={<LoginView />} title="Login" />
-      <Route path="/join" element={<JoinKaamsetu />} title="Join KaamSetu" />
-      <Route path="/register/vendor/Profile" element={<VendorProfileStep1 />} title="Vendor Profile" />
-      <Route
-        path="/register/vendor/business"
-        element={<VendorBusinessDetails />}
-        title="Vendor Business Details"
-      />
-      <Route path="/register/vendor/documents" element={<VendorDocuments />} title="Vendor Documents" />
-      <Route path="/register/vendor/review" element={<VendorReview />} title="Vendor Review" />
-      <Route
-        path="/register/vendor/pending"
-        element={<VendorPendingApproval />}
-        title="Vendor Pending Approval"
-      />
-      <Route path="/forgot-password" element={<ForgotPassword />} title="Forgot Password" />
-      {/* <Route path="*" element={<LoginView /
-      >} /> */} 
-      <Route path="/verify-email" element={<VerifyOtp />} title="Verify Email" />
-      <Route path="/reset-password" element={<ResetPassword />} title="Reset Password" />
-      <Route path="/register/customer" element={<CustomerRegister />} title="Customer Register" />
-      <Route path="/register/success" element={<RegisterSuccess />} title="Registration Success" />
-
-    </Routes>
+        {/* Auth Routes */}
+        <Route path="/login" element={<LoginView />} title="Login" />
+        <Route path="/join" element={<JoinKaamsetu />} title="Join KaamSetu" />
+        <Route path="/register/vendor/Profile" element={<VendorProfileStep1 />} title="Vendor Profile" />
+        <Route
+          path="/register/vendor/business"
+          element={<VendorBusinessDetails />}
+          title="Vendor Business Details"
+        />
+        <Route path="/register/vendor/documents" element={<VendorDocuments />} title="Vendor Documents" />
+        <Route path="/register/vendor/review" element={<VendorReview />} title="Vendor Review" />
+        <Route
+          path="/register/vendor/pending"
+          element={<VendorPendingApproval />}
+          title="Vendor Pending Approval"
+        />
+        <Route path="/forgot-password" element={<ForgotPassword />} title="Forgot Password" />
+        {/* <Route path="*" element={<LoginView />} /> */}
+        <Route path="/verify-email" element={<VerifyOtp />} title="Verify Email" />
+        <Route path="/reset-password" element={<ResetPassword />} title="Reset Password" />
+        <Route path="/register/customer" element={<CustomerRegister />} title="Customer Register" />
+        <Route path="/register/success" element={<RegisterSuccess />} title="Registration Success" />
+      </Routes>
+    </>
   );
 };
 
