@@ -284,7 +284,16 @@ const HomeIntro = ({ children }) => {
     };
   }, []);
 
-  if (hasSeenIntro) return <>{children}</>;
+  if (hasSeenIntro) {
+    return (
+      <div className="ks-home-content" style={{ visibility: "visible", opacity: 1, pointerEvents: "auto" }}>
+        <div className="ks-home-content__inner">
+          {children}
+          <Footer />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={rootRef} className="ks-intro">
