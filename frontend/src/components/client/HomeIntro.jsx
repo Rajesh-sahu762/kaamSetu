@@ -6,16 +6,24 @@ import "./HomeIntro.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const INTRO_SESSION_KEY = "kaamsetu-intro-seen";
+
 const HomeIntro = ({ children }) => {
+  const hasSeenIntro = typeof window !== "undefined" && window.sessionStorage.getItem(INTRO_SESSION_KEY) === "true";
   const rootRef = useRef(null);
   const videoRef = useRef(null);
 
   useLayoutEffect(() => {
+    if (hasSeenIntro) return undefined;
+
+    // Run the cinematic intro only once per browser tab/session.
+    window.sessionStorage.setItem(INTRO_SESSION_KEY, "true");
+
     const root = rootRef.current;
     const track = root?.querySelector(".ks-intro__scroll-track");
     const stage = root?.querySelector(".ks-intro__stage");
     const navbar = document.querySelector(".ks-navbar");
-    const navbarLogo = navbar?.querySelector('a[href="/"]');
+    const navbarLogo = navbar?.querySelector(".ks-navbar__brand");
     const content = root?.querySelector(".ks-home-content");
 
     if (!root || !track || !stage || !navbar || !navbarLogo || !content) {
@@ -275,6 +283,8 @@ const HomeIntro = ({ children }) => {
       gsap.set(stage, { clearProps: "opacity,visibility,pointer-events" });
     };
   }, []);
+
+  if (hasSeenIntro) return <>{children}</>;
 
   return (
     <div ref={rootRef} className="ks-intro">
