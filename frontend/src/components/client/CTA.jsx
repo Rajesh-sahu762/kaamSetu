@@ -1,284 +1,114 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
-  Briefcase,
-  Wrench,
+  BriefcaseBusiness,
+  House,
+  Search,
+  UserRound,
+  Zap,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import "./CTA.css";
 
-const FinalCTA = ({
-    stats,
-    loading,
-}) => {
+const FinalCTA = () => {
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
+
+  const entrance = reduceMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 22 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, amount: 0.25 },
+        transition: { duration: 0.55, ease: "easeOut" },
+      };
+
   return (
-    <section className="py-15 bg-card">
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-        
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 30,
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
-          viewport={{
-            once: true,
-          }}
-          transition={{
-            duration: 0.6,
-          }}
-          className="
-            relative
-            overflow-hidden
+    <section className="ks-final-cta" aria-labelledby="ks-final-cta-title">
+      <div className="ks-final-cta__wave ks-final-cta__wave--top" aria-hidden="true" />
+      <div className="ks-final-cta__wave ks-final-cta__wave--bottom" aria-hidden="true" />
+      <div className="ks-final-cta__dots ks-final-cta__dots--left" aria-hidden="true" />
+      <div className="ks-final-cta__dots ks-final-cta__dots--right" aria-hidden="true" />
 
-            rounded-[32px]
+      <div className="ks-final-cta__inner">
+        <motion.header className="ks-final-cta__header" {...entrance}>
+          <span className="ks-final-cta__eyebrow">
+            <span className="ks-final-cta__eyebrow-icon"><Zap size={17} fill="currentColor" /></span>
+            Get Started
+          </span>
+          <h2 id="ks-final-cta-title">
+            Ready to Get <span>Started?</span>
+            <i aria-hidden="true" />
+          </h2>
+          <p>Join KaamSetu today and experience a smarter way to find services<br className="ks-final-cta__desktop-break" /> or grow your business.</p>
+        </motion.header>
 
-            bg-[#091426]
-
-            px-8
-            md:px-16
-
-            py-14
-            md:py-20
-          "
-        >
-          {/* Background Glow */}
-
-          <div
-            className="
-              absolute
-              top-0
-              right-0
-
-              w-[400px]
-              h-[400px]
-
-              rounded-full
-
-              bg-[#745A38]/20
-              blur-[120px]
-            "
-          />
-
-          <div
-            className="
-              relative
-              z-10
-
-              grid
-              lg:grid-cols-2
-              gap-12
-              items-center
-            "
+        <div className="ks-final-cta__choices">
+          <motion.article
+            className="ks-final-cta__choice"
+            {...entrance}
+            transition={{ duration: 0.55, delay: 0.08, ease: "easeOut" }}
           >
-            {/* Left */}
-
-            <div>
-              <span
-                className="
-                  inline-block
-
-                  px-4
-                  py-2
-
-                  rounded-full
-
-                  bg-[#1b2b43]
-
-                  text-[#C59A6A]
-                  text-sm
-                "
-              >
-                Join India's Growing Service Network
-              </span>
-
-              <h2
-                className="
-                  mt-6
-
-                  text-4xl
-                  md:text-5xl
-
-                  font-semibold
-                  text-white
-
-                  leading-tight
-                "
-              >
-                Need a Professional
-                <br />
-                For Your Next Job?
-              </h2>
-
-              <p
-                className="
-                  mt-6
-
-                  text-lg
-                  text-[#d3e4fe]
-
-                  leading-8
-                "
-              >
-                Connect with trusted electricians,
-                plumbers, carpenters and hundreds of
-                verified experts in your city.
-              </p>
-
-              <div
-                className="
-                  mt-8
-                  flex
-                  flex-wrap
-                  gap-4
-                "
-              >
-                {/* Customer CTA */}
-
-                <motion.button
-                  whileHover={{
-                    y: -3,
-                    scale: 1.03,
-                  }}
-                  whileTap={{
-                    scale: 0.98,
-                  }}
-                  onClick={() => navigate('/services')}
-                  className="
-                    flex
-                    items-center
-                    gap-2
-
-                    px-6
-                    py-4
-
-                    rounded-xl
-
-                    bg-card
-                    text-primary
-
-                    font-semibold
-                  "
-                >
-                  <Wrench size={18} />
-
-                  Book a Service
-
-                  <ArrowRight size={18} />
-                </motion.button>
-
-                {/* Vendor CTA */}
-
-                <motion.button
-                onClick={() => navigate('/register/vendor/Profile')}
-                  whileHover={{
-                    y: -3,
-                    scale: 1.03,
-                  }}
-                  whileTap={{
-                    scale: 0.98,
-                  }}
-                  className="
-                    flex
-                    items-center
-                    gap-2
-
-                    px-6
-                    py-4
-
-                    rounded-xl
-
-                    border
-                    border-[#2b3c56]
-
-                    text-white
-
-                    hover:bg-[#132033]
-                    transition-all
-                  "
-                >
-                  <Briefcase size={18} />
-
-                  Find Work
-                </motion.button>
-              </div>
+            <div className="ks-final-cta__illustration ks-final-cta__illustration--home" aria-hidden="true">
+              <span className="ks-final-cta__illustration-orbit" />
+              <span className="ks-final-cta__illustration-platform" />
+              <House className="ks-final-cta__main-illustration" strokeWidth={1.7} />
+              <span className="ks-final-cta__search-bubble"><Search size={42} strokeWidth={2.4} /></span>
+              <span className="ks-final-cta__spark ks-final-cta__spark--one" />
+              <span className="ks-final-cta__spark ks-final-cta__spark--two" />
             </div>
-
-            {/* Right Stats */}
-
-            <div
-              className="
-                grid
-                grid-cols-2
-                gap-5
-              "
-            >
-              <StatCard
-                value={stats?.verifiedExperts}
-                label="Happy Customers"
-              />
-
-              <StatCard
-                value={stats?.satisfactionRate}
-                label="Verified Experts"
-              />
-
-              <StatCard
-                value={stats?.customerReviews}
-                label="Service Categories"
-              />
-
-              <StatCard
-                value="4.9★"
-                label="Average Rating"
-              />
+            <div className="ks-final-cta__choice-copy">
+              <h3>Find a Service</h3>
+              <p>Get verified professionals for your home and business needs.</p>
+              <motion.button
+                type="button"
+                className="ks-final-cta__button ks-final-cta__button--primary"
+                whileHover={reduceMotion ? undefined : { y: -3, scale: 1.025 }}
+                whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+                onClick={() => navigate("/services")}
+              >
+                Book a Service <ArrowRight size={19} />
+              </motion.button>
             </div>
+          </motion.article>
+
+          <div className="ks-final-cta__or" aria-hidden="true">
+            <span />
+            <b>OR</b>
+            <span />
           </div>
-        </motion.div>
+
+          <motion.article
+            className="ks-final-cta__choice"
+            {...entrance}
+            transition={{ duration: 0.55, delay: 0.16, ease: "easeOut" }}
+          >
+            <div className="ks-final-cta__illustration ks-final-cta__illustration--work" aria-hidden="true">
+              <span className="ks-final-cta__illustration-orbit" />
+              <span className="ks-final-cta__illustration-platform" />
+              <BriefcaseBusiness className="ks-final-cta__main-illustration" strokeWidth={1.7} />
+              <span className="ks-final-cta__user-bubble"><UserRound size={34} fill="currentColor" /></span>
+              <span className="ks-final-cta__spark ks-final-cta__spark--one" />
+              <span className="ks-final-cta__spark ks-final-cta__spark--two" />
+            </div>
+            <div className="ks-final-cta__choice-copy">
+              <h3>Offer Your Services</h3>
+              <p>Showcase your skills and grow your business.</p>
+              <motion.button
+                type="button"
+                className="ks-final-cta__button ks-final-cta__button--bright"
+                whileHover={reduceMotion ? undefined : { y: -3, scale: 1.025 }}
+                whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+                onClick={() => navigate("/register/vendor/Profile")}
+              >
+                Find Work <ArrowRight size={19} />
+              </motion.button>
+            </div>
+          </motion.article>
+        </div>
+
       </div>
     </section>
-  );
-};
-
-const StatCard = ({
-  value,
-  label,
-}) => {
-  return (
-    <div
-      className="
-        bg-[#132033]
-
-        border
-        border-[#22324a]
-
-        rounded-2xl
-
-        p-6
-      "
-    >
-      <h3
-        className="
-          text-3xl
-          font-bold
-          text-white
-        "
-      >
-        {value}
-      </h3>
-
-      <p
-        className="
-          mt-2
-          text-[#d3e4fe]
-        "
-      >
-        {label}
-      </p>
-    </div>
   );
 };
 

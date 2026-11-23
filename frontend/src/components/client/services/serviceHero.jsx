@@ -20,14 +20,14 @@ const ServiceHero = ({ initialSearch = "", initialCity = "", onSearch }) => {
       className="
         relative
         overflow-hidden
+        ks-services-hero
 
         pt-36
         pb-20
 
-        bg-theme
       "
     >
-      {/* Background Glow */}
+      {/* Soft emerald ambient glow */}
 
       <div
         className="
@@ -41,7 +41,7 @@ const ServiceHero = ({ initialSearch = "", initialCity = "", onSearch }) => {
 
           rounded-full
 
-          bg-[#745A38]/10
+          ks-services-hero__glow
 
           blur-[120px]
         "

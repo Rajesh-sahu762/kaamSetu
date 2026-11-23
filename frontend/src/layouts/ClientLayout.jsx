@@ -1,8 +1,11 @@
 import Footer from "@/components/client/Footer";
 import Navbar from "@/components/client/navbar";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 const ClientLayout = () => {
+  const { pathname } = useLocation();
+  const isHomePage = pathname === "/";
+
   return (
     <>
       <Navbar />
@@ -11,7 +14,7 @@ const ClientLayout = () => {
         <Outlet />
       </main>
 
-      <Footer />
+      {!isHomePage && <Footer />}
     </>
   );
 };

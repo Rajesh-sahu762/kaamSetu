@@ -60,7 +60,7 @@ const ServiceFilters = ({ categories = [], filters = EMPTY_FILTERS, onApply, onC
   };
 
   return (
-    <section className="py-8 bg-theme">
+    <section className="ks-services-filters py-8">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
 
         {/* Filter Card */}

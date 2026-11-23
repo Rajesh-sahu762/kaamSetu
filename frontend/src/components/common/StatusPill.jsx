@@ -47,7 +47,7 @@ const StatusPill = ({ status }) => {
         background: cfg.bg,
         color: cfg.color,
 
-        fontFamily: "Geist,sans-serif",
+        fontFamily: "Inter,sans-serif",
         fontSize: 11,
         fontWeight: 600,
 

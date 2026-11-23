@@ -22,7 +22,7 @@ const Avatar = ({
         alignItems: "center",
         justifyContent: "center",
 
-        fontFamily: "Geist,sans-serif",
+        fontFamily: "Inter,sans-serif",
         fontSize: size * 0.33,
         fontWeight: 600,
 

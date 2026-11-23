@@ -344,6 +344,14 @@ const getVendorPublicProfile = async (req, res) => {
 // ==========================================
 const getFeaturedExperts = async (req, res) => {
   try {
+    // Keep the original, known-working aggregation shape: rank vendors from
+    // their active services, then filter to approved vendors in the Vendor
+    // query. This avoids changing the aggregation match semantics.
+    const requestedLimit = Math.min(
+      Math.max(Number.parseInt(req.query.limit, 10) || 8, 1),
+      8,
+    );
+
     const services = await Service.aggregate([
       { $match: { isActive: true } },
       {
@@ -354,28 +362,35 @@ const getFeaturedExperts = async (req, res) => {
         },
       },
       { $sort: { avgRating: -1, totalBookings: -1 } },
-      { $limit: 8 },
     ]);
 
-    const vendorIds = services.map((s) => s._id);
+    const vendorIds = services.map((service) => service._id);
+
+    if (vendorIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Featured experts fetched successfully.",
+        data: [],
+      });
+    }
 
     const vendors = await Vendor.find({
       _id: { $in: vendorIds },
       status: "approved",
     })
-      .select("businessName city bio skills experience userId")
+      .select("businessName city bio skills experience userId status createdAt")
       .populate("userId", "fullName profileImage");
 
-    // Preserve the ranking order from the aggregation above, and attach the
-    // rating/jobs-count already computed per vendor plus one representative
-    // category (cheapest active service) for the card's category label.
+    // Preserve service ranking, but apply the requested limit only after
+    // pending/rejected vendors have been filtered out.
     const orderedVendors = await Promise.all(
       vendorIds
-        .map((id) => vendors.find((v) => v._id.toString() === id.toString()))
+        .map((id) => vendors.find((vendor) => vendor._id.toString() === id.toString()))
         .filter(Boolean)
+        .slice(0, requestedLimit)
         .map(async (vendor) => {
           const stats = services.find(
-            (s) => s._id.toString() === vendor._id.toString(),
+            (service) => service._id.toString() === vendor._id.toString(),
           );
 
           const primaryService = await Service.findOne({
@@ -390,6 +405,10 @@ const getFeaturedExperts = async (req, res) => {
             rating: stats?.avgRating || 0,
             jobsCount: stats?.totalBookings || 0,
             category: primaryService?.categoryId?.name || "Service Provider",
+            // Reuse existing vendor service media when a professional has
+            // not uploaded a separate profile photo.
+            coverImage: primaryService?.coverImage || "",
+            images: primaryService?.images || [],
           };
         }),
     );
@@ -400,6 +419,7 @@ const getFeaturedExperts = async (req, res) => {
       data: orderedVendors,
     });
   } catch (error) {
+    console.error("Featured experts fetch failed:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error.",
@@ -554,6 +574,103 @@ const getVendors = async (req, res) => {
   }
 };
 
+
+// ==========================================
+// Get public customer testimonials + aggregate review stats
+// GET /api/public/testimonials?limit=12
+// Only non-reported reviews from completed bookings are eligible.
+// Satisfaction is the share of 4- and 5-star reviews.
+// Happy customers are distinct customers who left a 4- or 5-star review.
+// ==========================================
+const getPublicTestimonials = async (req, res) => {
+  try {
+    const requestedLimit = Number.parseInt(req.query.limit, 10) || 12;
+    const limit = Math.min(Math.max(requestedLimit, 3), 12);
+    const match = { isReported: { $ne: true } };
+
+    const [ratingStats, happyCustomerStats, recentReviews] = await Promise.all([
+      Review.aggregate([
+        { $match: match },
+        {
+          $group: {
+            _id: null,
+            averageRating: { $avg: "$rating" },
+            totalReviews: { $sum: 1 },
+            satisfiedReviews: {
+              $sum: { $cond: [{ $gte: ["$rating", 4] }, 1, 0] },
+            },
+          },
+        },
+      ]),
+      Review.aggregate([
+        { $match: { ...match, rating: { $gte: 4 } } },
+        { $group: { _id: "$customerId" } },
+        { $count: "happyCustomers" },
+      ]),
+      Review.find({
+        ...match,
+        review: { $type: "string", $nin: ["", null] },
+      })
+        .populate("customerId", "fullName profileImage")
+        .populate("vendorId", "city")
+        .populate({
+          path: "serviceId",
+          select: "serviceName categoryId",
+          populate: { path: "categoryId", select: "name" },
+        })
+        .populate("bookingId", "status")
+        .sort({ createdAt: -1 })
+        .limit(limit * 3),
+    ]);
+
+    const aggregate = ratingStats[0] || {
+      averageRating: 0,
+      totalReviews: 0,
+      satisfiedReviews: 0,
+    };
+    const totalReviews = aggregate.totalReviews || 0;
+    const satisfactionRate = totalReviews
+      ? Math.round((aggregate.satisfiedReviews / totalReviews) * 100)
+      : 0;
+
+    const testimonials = recentReviews
+      .filter((item) => item.customerId && item.serviceId && item.bookingId?.status === "completed")
+      .slice(0, limit)
+      .map((item) => ({
+        id: item._id,
+        name: item.customerId.fullName,
+        profileImage: item.customerId.profileImage || "",
+        serviceArea: item.vendorId?.city || "",
+        service: item.serviceId.serviceName || "",
+        category: item.serviceId.categoryId?.name || "",
+        rating: item.rating,
+        review: item.review,
+        verified: true,
+        createdAt: item.createdAt,
+      }));
+
+    return res.status(200).json({
+      success: true,
+      message: "Public testimonials fetched successfully.",
+      data: {
+        testimonials,
+        stats: {
+          averageRating: Number((aggregate.averageRating || 0).toFixed(1)),
+          totalReviews,
+          happyCustomers: happyCustomerStats[0]?.happyCustomers || 0,
+          satisfactionRate,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Public testimonials fetch failed:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to load testimonials right now.",
+    });
+  }
+};
+
 module.exports = {
   getCategories,
   getServices,
@@ -562,4 +679,5 @@ module.exports = {
   getVendorPublicProfile,
   getFeaturedExperts,
   getVendors,
+  getPublicTestimonials,
 };

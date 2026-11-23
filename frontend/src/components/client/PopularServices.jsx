@@ -1,271 +1,143 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Zap,
-  Wrench,
+  ArrowRight,
+  Grid2X2,
   Hammer,
-  Paintbrush,
-  Wind,
-  Home,
-  Sparkles,
-  ShieldCheck,
+  House,
+  PaintRoller,
+  Zap,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { getCategories } from "@/services/publicService";
+import "./PopularServices.css";
 
-// Category collection has no icon field, only a name/description/image —
-// this keeps the existing curated-icon look by matching on name, and
-// falls back to a generic icon for anything not in the list.
-const ICON_BY_CATEGORY_NAME = {
-  Electrician: Zap,
-  Plumber: Wrench,
-  Carpenter: Hammer,
-  Painter: Paintbrush,
-  "AC Repair": Wind,
-  "Interior Design": Home,
-  "Home Cleaning": Sparkles,
-  "Appliance Repair": ShieldCheck,
-};
+const SERVICE_CARDS = [
+  { key: "Carpentry", aliases: ["carpentry", "carpenter"], Icon: Hammer, image: "/assets/services/carpentry.webp" },
+  { key: "Electrical", aliases: ["electrical", "electrician"], Icon: Zap, image: "/assets/services/electrical.webp" },
+  { key: "Home Cleaning", aliases: ["home cleaning", "cleaning"], Icon: House, image: "/assets/services/home-cleaning.webp" },
+  { key: "Painting", aliases: ["painting", "painter"], Icon: PaintRoller, image: "/assets/services/painting.webp" },
+];
+
+const normalize = (value = "") => value.trim().toLowerCase();
 
 const PopularServices = () => {
-
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     const fetchCategories = async () => {
       try {
         setLoading(true);
         setError("");
-
         const response = await getCategories();
 
-        if (response.success) {
-          setCategories(response.data.slice(0, 8));
+        if (!active) return;
+
+        if (response.success && Array.isArray(response.data)) {
+          // Keep the homepage curated without changing the shared categories API.
+          const selected = SERVICE_CARDS.map((item) =>
+            response.data.find((category) => item.aliases.includes(normalize(category.name)))
+          ).filter(Boolean);
+          setCategories(selected);
         } else {
           setError(response.message || "Failed to load services.");
         }
-      } catch (err) {
-        setError("Failed to load services.");
+      } catch {
+        if (active) setError("Failed to load services.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchCategories();
+    return () => { active = false; };
   }, []);
 
-
   return (
-    <section className="py-22 bg-card">
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-        
-        {/* Header */}
+    <section className="popular-services" aria-labelledby="popular-services-title">
+      <div className="popular-services__inner">
+        <header className="popular-services__header">
+          <div className="popular-services__eyebrow">
+            <Grid2X2 size={16} strokeWidth={3} aria-hidden="true" />
+            <span>Popular Services</span>
+          </div>
 
-        <div className="text-center max-w-3xl mx-auto">
-          <p
-            className="
-              uppercase
-              tracking-[0.25em]
-              text-xs
-              font-semibold
-              text-[#745A38]
-            "
-          >
-            Popular Services
-          </p>
-
-          <h2
-            className="
-              mt-4
-              text-4xl
-              md:text-5xl
-              font-semibold
-              text-primary
-            "
-          >
-            Services Trusted By Thousands
+          <h2 id="popular-services-title" className="popular-services__title">
+            Services Trusted By <span>Thousands</span>
+            <i className="popular-services__spark" aria-hidden="true"><b /><b /><b /></i>
           </h2>
 
-          <p
-            className="
-              mt-5
-              text-lg
-              text-muted
-              leading-8
-            "
-          >
-            Find verified professionals for every home and
-            business need, all in one place.
+          <p className="popular-services__subtitle">
+            Find verified professionals for every home and business need, all in one place.
           </p>
-        </div>
+        </header>
 
-        {/* Error */}
+        {error && <p className="popular-services__error" role="alert">{error}</p>}
 
-        {error && (
-          <p className="text-center text-red-500 mt-10">{error}</p>
+        {loading ? (
+          <div className="popular-services__grid" aria-label="Loading popular services">
+            {SERVICE_CARDS.map((item) => (
+              <div className="popular-services__skeleton" key={item.key} />
+            ))}
+          </div>
+        ) : (
+          <div className="popular-services__grid">
+            {SERVICE_CARDS.map((item, index) => {
+              const category = categories.find((entry) => item.aliases.includes(normalize(entry.name)));
+              if (!category) return null;
+              const Icon = item.Icon;
+              const description = category.description || `${item.key} services by verified professionals.`;
+
+              return (
+                <motion.article
+                  key={category._id}
+                  className="popular-service-card"
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Explore ${item.key} services`}
+                  onClick={() => navigate(`/experts?category=${category._id}`)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      navigate(`/experts?category=${category._id}`);
+                    }
+                  }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.15 }}
+                  transition={{ duration: 0.45, delay: index * 0.07 }}
+                  whileHover={{ y: -7 }}
+                >
+                  <div className="popular-service-card__photo" aria-hidden="true">
+                    <img src={item.image} alt="" loading="lazy" />
+                  </div>
+
+                  <div className="popular-service-card__icon">
+                    <Icon size={34} strokeWidth={2.5} aria-hidden="true" />
+                  </div>
+
+                  <div className="popular-service-card__content">
+                    <h3>{item.key}</h3>
+                    <p>{description}</p>
+                    <span className="popular-service-card__explore">
+                      Explore <ArrowRight size={22} strokeWidth={2.8} />
+                    </span>
+                  </div>
+                </motion.article>
+              );
+            })}
+          </div>
         )}
 
-        {/* Services Grid */}
-
-        <div
-          className="
-            mt-16
-            grid
-            sm:grid-cols-2
-            lg:grid-cols-4
-            gap-6
-          "
-        >
-          {categories.map((category, index) => {
-            const Icon = ICON_BY_CATEGORY_NAME[category.name] || Sparkles;
-
-            return (
-              <motion.div
-              onClick={() =>
-  navigate(
-    `/experts?category=${category._id}`
-  )
-}
-                key={category._id}
-                initial={{
-                  opacity: 0,
-                  y: 40,
-                }}
-                whileInView={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                viewport={{
-                  once: true,
-                }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.05,
-                }}
-                whileHover={{
-                  y: -8,
-                }}
-                className="
-                  group
-                  bg-card
-                  border
-                  border-theme
-                  rounded-2xl
-                  p-7
-                  cursor-pointer
-                  transition-all
-                  duration-300
-                  hover:shadow-[0_15px_40px_rgba(9,20,38,0.08)]
-                "
-              >
-                {/* Icon */}
-
-             <div
-  className="
-    w-14
-    h-14
-
-    rounded-xl
-
-    bg-[#745A38]/10
-
-    flex
-    items-center
-    justify-center
-
-    transition-all
-    duration-300
-
-    group-hover:bg-[#745A38]
-  "
->
-                  <Icon
-                    size={24}
-                    className="
-                      text-[#745A38]
-                      group-hover:text-white
-                      transition-all
-                    "
-                  />
-                </div>
-
-                {/* Content */}
-
-                <h3
-                  className="
-                    mt-6
-                    text-xl
-                    font-semibold
-                    text-primary
-                  "
-                >
-                  {category.name}
-                </h3>
-
-                <p
-                  className="
-                    mt-3
-                    text-muted
-                    leading-7
-                    text-sm
-                  "
-                >
-                  {category.description || "Verified professionals ready to help."}
-                </p>
-
-                {/* Link */}
-
-                <div
-                  className="
-                    mt-6
-                    text-[#745A38]
-                    font-medium
-                    flex
-                    items-center
-                    gap-2
-                  "
-                >
-                  Explore
-                  <span
-                    className="
-                      transition-transform
-                      group-hover:translate-x-1
-                    "
-                  >
-                    →
-                  </span>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Bottom CTA */}
-
-        <div className="text-center mt-16">
-          <button
-           onClick={() => navigate('/services') }
-           className="
-              px-8
-              py-4
-              rounded-xl
-
-              bg-[#091426]
-              text-white
-
-              hover:-translate-y-1
-              transition-all
-              duration-300
-
-              shadow-lg
-            "
-          >
-            View All Services
+        <div className="popular-services__footer">
+          <button type="button" onClick={() => navigate("/services")}>
+            View All Services <ArrowRight size={22} strokeWidth={2.5} />
           </button>
         </div>
       </div>

@@ -5,6 +5,7 @@ import ExpertFilters from "@/components/client/experts/ExpertFilters"
 import ExpertGrid from "@/components/client/experts/ExpertGrid"
 import ExpertHero from "@/components/client/experts/ExpertHero"
 import { getCategories } from "@/services/publicService";
+import "./ExpertsPage.css";
 
 const paramsToFilters = (searchParams) => ({
   category: searchParams.get("category") || "",
@@ -55,7 +56,7 @@ const Experts = () => {
   };
 
   return (
-    <>
+    <main className="ks-experts-page">
       <ExpertHero />
       <ExpertFilters
         categories={categories}
@@ -64,7 +65,7 @@ const Experts = () => {
         onReset={handleReset}
       />
       <ExpertGrid filters={appliedFilters} />
-    </>
+    </main>
   )
 }
 

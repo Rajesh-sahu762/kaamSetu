@@ -72,9 +72,9 @@ export const getServiceById = async (serviceId) => {
 // Vendors
 // =======================================
 
-export const getFeaturedExperts = async () => {
+export const getFeaturedExperts = async (params = {}) => {
   try {
-    const response = await api.get("/public/vendors/featured");
+    const response = await api.get("/public/vendors/featured", { params });
 
     return response.data;
   } catch (error) {
@@ -106,6 +106,24 @@ export const getVendorPublicProfile = async (vendorId) => {
   try {
     const response = await api.get(`/public/vendors/${vendorId}`);
 
+    return response.data;
+  } catch (error) {
+    return (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
+  }
+};
+
+
+// =======================================
+// Public Testimonials
+// =======================================
+export const getPublicTestimonials = async (params = {}) => {
+  try {
+    const response = await api.get("/public/testimonials", { params });
     return response.data;
   } catch (error) {
     return (

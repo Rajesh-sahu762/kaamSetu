@@ -1,425 +1,118 @@
-import {
-  ArrowUp,
-  ChevronDown,
-} from "lucide-react";
-
 import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import {
+  ArrowRight, ArrowUp, BriefcaseBusiness, Building2, ChevronDown,
+  Headset, House, Mail, Send, ShieldCheck,
+} from "lucide-react";
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
+import palaceLandscape from "../../assets/Emerald Palace Landscape Cutout.png";
+import "./Footer.css";
 
-import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
+const footerGroups = [
+  { title: "Services", icon: BriefcaseBusiness, links: ["Electrician", "Plumber", "Carpenter", "Painter", "AC Repair"] },
+  { title: "Company", icon: Building2, links: ["About Us", "How It Works", "Careers", "Contact", "Blog"] },
+  { title: "Support", icon: Headset, links: ["Help Center", "Privacy Policy", "Terms", "Refund Policy", "FAQ"] },
+];
 
-import { motion } from 'framer-motion';
+const socials = [
+  { label: "Facebook", Icon: FaFacebookF },
+  { label: "Instagram", Icon: FaInstagram },
+  { label: "LinkedIn", Icon: FaLinkedinIn },
+  { label: "X", Icon: FaXTwitter },
+];
+
+
+function FooterEmblem() {
+  return (
+    <div className="ks-footer__emblem" aria-hidden="true">
+      <div className="ks-footer__emblem-orbit ks-footer__emblem-orbit--one" />
+      <div className="ks-footer__emblem-orbit ks-footer__emblem-orbit--two" />
+      <div className="ks-footer__emblem-backplate"><House size={82} strokeWidth={1.8} /></div>
+      <div className="ks-footer__emblem-shield"><ShieldCheck size={100} strokeWidth={1.7} /></div>
+      <div className="ks-footer__emblem-platform"><span /></div>
+    </div>
+  );
+}
 
 const Footer = () => {
+  const [openGroup, setOpenGroup] = useState(null);
+  const reduceMotion = useReducedMotion();
+
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+
   return (
-    <footer className="relative bg-[#091426] overflow-hidden">
-      {/* Top Glow */}
+    <footer className="ks-footer">
+      <div className="ks-footer__ambient ks-footer__ambient--top" aria-hidden="true" />
+      <div className="ks-footer__ambient ks-footer__ambient--right" aria-hidden="true" />
+      <div className="ks-footer__curve ks-footer__curve--top" aria-hidden="true" />
+      <div className="ks-footer__curve ks-footer__curve--bottom" aria-hidden="true" />
+      <div className="ks-footer__dots ks-footer__dots--tl" aria-hidden="true" />
+      <div className="ks-footer__dots ks-footer__dots--tr" aria-hidden="true" />
+      <div className="ks-footer__dots ks-footer__dots--bl" aria-hidden="true" />
+      <div className="ks-footer__dots ks-footer__dots--br" aria-hidden="true" />
 
-      <div
-        className="
-          absolute
-          top-0
-          left-1/2
-          -translate-x-1/2
-
-          w-[500px]
-          h-[500px]
-
-          rounded-full
-
-          bg-[#745A38]/10
-          blur-[120px]
-        "
-      />
-
-      <div className="relative max-w-[1280px] mx-auto px-6 lg:px-8">
-
-
-        {/* Main Footer */}
-
-        <div
-  className="
-    hidden lg:grid
-
-    py-20
-
-    lg:grid-cols-5
-
-    gap-10
-  "
->
-          {/* Brand */}
-
-          <div className="lg:col-span-2">
-            <h2
-              className="
-                text-2xl
-                font-bold
-                tracking-[0.25em]
-              "
-            >
-              <span className="text-white">KAAM</span>
-
-              <span className="text-[#C59A6A]">SETU</span>
-            </h2>
-
-            <p
-              className="
-                mt-6
-
-                text-[#d3e4fe]
-                leading-8
-
-                max-w-md
-              "
-            >
-              Connecting customers with trusted professionals across India. Find
-              verified experts for every service you need.
-            </p>
-
-            {/* Social */}
-
-            <div
-              className="
-                flex
-                gap-4
-                mt-8
-              "
-            >
-              <SocialIcon>
-                <FaFacebook size={18} />
-              </SocialIcon>
-
-              <SocialIcon>
-                <FaInstagram size={18} />
-              </SocialIcon>
-
-              <SocialIcon>
-                <FaLinkedin size={18} />
-              </SocialIcon>
-
-              <SocialIcon>
-                <FaTwitter size={18} />
-              </SocialIcon>
+      <div className="ks-footer__palace-background" style={{ backgroundImage: "url(" + palaceLandscape + ")" }} aria-hidden="true" />
+      <div className="ks-footer__container">
+        <div className="ks-footer__main">
+          <motion.div className="ks-footer__brand" initial={reduceMotion ? false : { opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .15 }} transition={{ duration: .55 }}>
+            <a className="ks-footer__wordmark" href="/" aria-label="KaamSetu home">
+              <span>Kaam</span><strong>Setu</strong><i aria-hidden="true">✦</i>
+            </a>
+            <span className="ks-footer__tagline">TRUSTED SERVICES</span>
+            <p>Connecting customers with trusted professionals across India. Find verified experts for every service you need.</p>
+            <div className="ks-footer__socials" aria-label="Social media">
+              {socials.map(({ label, Icon }) => (
+                <span className="ks-footer__social" key={label} aria-label={label} title={label}>
+                  <Icon size={19} />
+                </span>
+              ))}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Services */}
+          <nav className="ks-footer__navigation" aria-label="Footer navigation">
+            {footerGroups.map(({ title, icon: Icon, links }, index) => (
+              <div className="ks-footer__nav-column" key={title}>
+                <button className="ks-footer__nav-heading" type="button" aria-expanded={openGroup === title} onClick={() => setOpenGroup(openGroup === title ? null : title)}>
+                  <span className="ks-footer__nav-icon"><Icon size={25} strokeWidth={2.3} /></span>
+                  <span>{title}</span>
+                  <ChevronDown className="ks-footer__nav-chevron" size={17} />
+                </button>
+                <ul className={openGroup === title ? "ks-footer__links is-open" : "ks-footer__links"}>
+                  {links.map((link) => (
+                    <li key={link}><a href="#" onClick={(event) => event.preventDefault()}><ArrowRight size={16} />{link}</a></li>
+                  ))}
+                </ul>
+                {index < footerGroups.length - 1 && <span className="ks-footer__column-rule" aria-hidden="true" />}
+              </div>
+            ))}
+          </nav>
 
-          <FooterColumn
-            title="Services"
-            links={[
-              'Electrician',
-              'Plumber',
-              'Carpenter',
-              'Painter',
-              'AC Repair',
-            ]}
-          />
-
-          {/* Company */}
-
-          <FooterColumn
-            title="Company"
-            links={['About Us', 'How It Works', 'Careers', 'Contact', 'Blog']}
-          />
-
-          {/* Support */}
-
-          <FooterColumn
-            title="Support"
-            links={[
-              'Help Center',
-              'Privacy Policy',
-              'Terms',
-              'Refund Policy',
-              'FAQ',
-            ]}
-          />
+          <aside className="ks-footer__newsletter" aria-label="Newsletter">
+            <div className="ks-footer__paper-plane"><Send size={42} fill="currentColor" strokeWidth={1.4} /></div>
+            <h3>Subscribe to Our Newsletter</h3>
+            <p>Get the latest updates and exclusive offers.</p>
+            <div className="ks-footer__newsletter-field" aria-disabled="true">
+              <Mail size={19} />
+              <input type="email" placeholder="Newsletter signup coming soon" disabled aria-label="Newsletter signup unavailable" />
+              <button type="button" disabled aria-label="Newsletter signup unavailable"><ArrowRight size={22} /></button>
+            </div>
+            <small>Newsletter subscriptions are not enabled yet.</small>
+          </aside>
         </div>
 
-        {/* Mobile Footer */}
+        <div className="ks-footer__scene" aria-hidden="true">
+          <FooterEmblem />
+        </div>
 
-<div className="lg:hidden py-12">
-  
-  <div className="text-center">
-    
-    <h2
-      className="
-        text-3xl
-        font-bold
-        tracking-[0.25em]
-      "
-    >
-      <span className="text-white">KAAM</span>
-      <span className="text-[#C59A6A]">SETU</span>
-    </h2>
-
-    <p
-      className="
-        mt-4
-        text-[#9cb4d8]
-        leading-7
-      "
-    >
-      Trusted local services at your fingertips.
-    </p>
-
-    <div
-      className="
-        flex
-        justify-center
-        gap-4
-        mt-8
-      "
-    >
-      <SocialIcon>
-        <FaFacebook size={18} />
-      </SocialIcon>
-
-      <SocialIcon>
-        <FaInstagram size={18} />
-      </SocialIcon>
-
-      <SocialIcon>
-        <FaLinkedin size={18} />
-      </SocialIcon>
-
-      <SocialIcon>
-        <FaTwitter size={18} />
-      </SocialIcon>
-    </div>
-  </div>
-
-  <div className="mt-10">
-
-    <MobileFooterSection
-      title="Services"
-      links={[
-        "Electrician",
-        "Plumber",
-        "Carpenter",
-        "Painter",
-        "AC Repair",
-      ]}
-    />
-
-    <MobileFooterSection
-      title="Company"
-      links={[
-        "About Us",
-        "How It Works",
-        "Careers",
-        "Contact",
-        "Blog",
-      ]}
-    />
-
-    <MobileFooterSection
-      title="Support"
-      links={[
-        "Help Center",
-        "Privacy Policy",
-        "Terms",
-        "Refund Policy",
-        "FAQ",
-      ]}
-    />
-
-  </div>
-
-</div>
-
-        {/* Bottom */}
-
-        <div
-          className="
-            py-8
-
-            border-t
-            border-[#22324a]
-
-            flex
-            flex-col
-            md:flex-row
-
-            gap-4
-
-            items-center
-            justify-between
-          "
-        >
-          <p
-            className="
-              text-[#d3e4fe]
-            "
-          >
-            © {new Date().getFullYear()} KaamSetu. All rights reserved.
-          </p>
-
-          <motion.button
-            whileHover={{
-              y: -4,
-            }}
-            onClick={() =>
-              window.scrollTo({
-                top: 0,
-                behavior: 'smooth',
-              })
-            }
-            className="
-              flex
-              items-center
-              gap-2
-
-              text-white
-
-              hover:text-[#C59A6A]
-              transition-all
-            "
-          >
-            Back To Top
-            <ArrowUp size={16} />
-          </motion.button>
+        <div className="ks-footer__bottom">
+          <p>© {new Date().getFullYear()} KaamSetu. All rights reserved.</p>
+          <div className="ks-footer__trust"><span><ShieldCheck size={32} /></span><b>Your Trust, Our Priority</b></div>
+          <button className="ks-footer__back-top" type="button" onClick={scrollTop}>
+            <span>Back To Top</span><i><ArrowUp size={22} /></i>
+          </button>
         </div>
       </div>
     </footer>
-  );
-};
-
-const FooterColumn = ({ title, links }) => {
-  return (
-    <div>
-      <h3
-        className="
-          text-white
-          font-semibold
-          text-lg
-          mb-6
-        "
-      >
-        {title}
-      </h3>
-
-      <ul className="space-y-4">
-        {links.map((link) => (
-          <li key={link}>
-            <a
-              href="#"
-              className="
-                text-[#d3e4fe]
-
-                hover:text-[#C59A6A]
-
-                transition-all
-              "
-            >
-              {link}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-const MobileFooterSection = ({ title, links }) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="border-b border-[#22324a] py-4">
-      
-      <button
-        onClick={() => setOpen(!open)}
-        className="
-          w-full
-          flex
-          justify-between
-          items-center
-          text-white
-          font-medium
-        "
-      >
-        {title}
-
-        <motion.div
-          animate={{
-            rotate: open ? 180 : 0,
-          }}
-        >
-          <ChevronDown size={18} />
-        </motion.div>
-      </button>
-
-      <motion.div
-        initial={false}
-        animate={{
-          height: open ? "auto" : 0,
-          opacity: open ? 1 : 0,
-        }}
-        className="overflow-hidden"
-      >
-        <div className="pt-4 space-y-3">
-
-          {links.map((item) => (
-            <a
-              key={item}
-              href="#"
-              className="
-                block
-                text-[#d3e4fe]
-                hover:text-[#C59A6A]
-              "
-            >
-              {item}
-            </a>
-          ))}
-
-        </div>
-      </motion.div>
-
-    </div>
-  );
-};
-
-const SocialIcon = ({ children }) => {
-  return (
-    <motion.a
-      whileHover={{
-  y: -3,
-  scale: 1.08,
-}}
-
-whileTap={{
-  scale: 0.95,
-}}
-      href="#"
-     className="
-  w-12
-  h-12
-
-  rounded-2xl
-
-  bg-white/5
-
-  backdrop-blur-md
-
-  border
-  border-white/10
-
-  flex
-  items-center
-  justify-center
-
-  text-white
-
-  hover:border-[#C59A6A]
-  hover:bg-[#C59A6A]/10
-
-  transition-all
-"
-    >
-      {children}
-    </motion.a>
   );
 };
 
